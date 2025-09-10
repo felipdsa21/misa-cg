@@ -1,9 +1,11 @@
+#include "draw.h"
+
 #include <stdbool.h>
 
 #include <GL/freeglut_std.h>
 #include <GL/gl.h>
 
-#include "defs.h"
+#include "util.h"
 
 static int year = 0, day = 0;
 
