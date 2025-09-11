@@ -2,7 +2,7 @@
 
 #include <math.h>
 
-GLdouble clamp(GLdouble x, GLdouble upper, GLdouble lower) {
+GLdouble clamp(GLdouble x, GLdouble lower, GLdouble upper) {
   return x < lower ? lower : (x > upper ? upper : x);
 }
 

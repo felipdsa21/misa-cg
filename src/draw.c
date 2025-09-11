@@ -9,6 +9,10 @@
 
 static int year = 0, day = 0;
 
+void init(void) {
+  glClearColor(0.53f, 0.81f, 0.98f, 1);
+}
+
 static void drawStar(void) {
   glPushMatrix();
 
