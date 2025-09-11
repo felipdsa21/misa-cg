@@ -5,7 +5,7 @@ TARGET_LDLIBS := $(if $(WINDOWS),-lglu32 -lopengl32,-lGLU -lOpenGL)
 
 ERROR_CFLAGS := -Wall -Wc++-compat -Wconversion -Wextra -Wpedantic -Wvla
 CFLAGS := $(ERROR_CFLAGS) $(shell pkgconf --cflags freeglut) -Iinclude/ $(CFLAGS)
-LDLIBS := $(TARGET_LDLIBS) $(shell pkgconf --libs freeglut)
+LDLIBS := -lm $(TARGET_LDLIBS) $(shell pkgconf --libs freeglut)
 
 NAME := misa
 SRC := include/*.h src/*.c

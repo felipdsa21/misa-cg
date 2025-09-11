@@ -16,7 +16,7 @@ static bool keyState[256] = {};
 static bool specialKeyState[256] = {};
 
 // https://learnopengl.com/Getting-started/Camera
-static Vec3d cameraPos = {.x = 0, .y = 0.1, .z = 5};
+static Vec3d cameraPos = {.x = 0, .y = 1.8, .z = 5};
 static const Vec3d cameraUp = {.x = 0, .y = 1, .z = 0};
 static GLdouble pitch = 0, yaw = -90;
 
@@ -169,7 +169,7 @@ static void handleMotion(int x, int y) {
 int main(int argc, char *argv[]) {
   glutInit(&argc, argv);
 
-  glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
+  glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH | GLUT_MULTISAMPLE);
   glutInitWindowSize(windowSize.x, windowSize.y);
   glutCreateWindow("MISA");
   glutIgnoreKeyRepeat(1);

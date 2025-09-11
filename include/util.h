@@ -8,6 +8,8 @@ typedef struct {
   GLdouble x, y, z;
 } Vec3d;
 
+static const GLdouble PI = 3.14159;
+
 GLdouble clamp(GLdouble x, GLdouble upper, GLdouble lower);
 GLdouble radians(GLdouble degrees);
 Vec3d calcDirectionVec(GLdouble pitch, GLdouble yaw);

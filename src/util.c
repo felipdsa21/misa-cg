@@ -7,7 +7,7 @@ GLdouble clamp(GLdouble x, GLdouble lower, GLdouble upper) {
 }
 
 GLdouble radians(GLdouble degrees) {
-  return degrees * 3.14 / 180.0;
+  return degrees * PI / 180.0;
 }
 
 Vec3d calcDirectionVec(GLdouble pitch, GLdouble yaw) {
