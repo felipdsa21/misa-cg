@@ -12,6 +12,7 @@ static const GLdouble PI = 3.14159;
 
 GLdouble clamp(GLdouble x, GLdouble upper, GLdouble lower);
 GLdouble radians(GLdouble degrees);
+Vec3d copyY3d(Vec3d u, Vec3d v);
 Vec3d calcDirectionVec(GLdouble pitch, GLdouble yaw);
 Vec3d sum3d(Vec3d u, Vec3d v);
 Vec3d scalarMult3d(GLdouble a, Vec3d u);

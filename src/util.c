@@ -10,6 +10,10 @@ GLdouble radians(GLdouble degrees) {
   return degrees * PI / 180.0;
 }
 
+Vec3d copyY3d(Vec3d u, Vec3d v) {
+  return (Vec3d){.x = u.x, .y = v.y, .z = u.z};
+}
+
 Vec3d calcDirectionVec(GLdouble pitch, GLdouble yaw) {
   return (Vec3d){.x = cos(pitch) * cos(yaw), .y = sin(pitch), .z = cos(pitch) * sin(yaw)};
 }

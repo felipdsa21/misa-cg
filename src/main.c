@@ -16,12 +16,12 @@ static bool keyState[256] = {};
 static bool specialKeyState[256] = {};
 
 // https://learnopengl.com/Getting-started/Camera
-static Vec3d cameraPos = {.x = 0, .y = 1.8, .z = 5};
+static Vec3d cameraPos = {.x = 0, .y = 1.8, .z = -5};
 static const Vec3d cameraUp = {.x = 0, .y = 1, .z = 0};
-static GLdouble pitch = 0, yaw = -90;
+static GLdouble pitch = 0, yaw = 90;
 
 static const GLdouble mouseSensitivity = 0.1;
-static const GLdouble walkSpeed = 0.025;
+static const GLdouble walkSpeed = 0.07195;
 
 static void handleDisplay(void) {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -47,7 +47,7 @@ static void handleReshape(int w, int h) {
 
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
-  gluPerspective(60, (GLdouble)windowSize.x / (GLdouble)windowSize.y, 0.1, 20);
+  gluPerspective(70, (GLdouble)windowSize.x / (GLdouble)windowSize.y, 0.1, 50);
 
   setupCamera();
 }
