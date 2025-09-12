@@ -9,8 +9,8 @@
 #include "draw.h"
 #include "util.h"
 
-static Vec2sizei windowSize = {.x = 800, .y = 600};
-static Vec2sizei lastMousePos = {};
+static Vec2i windowSize = {.x = 800, .y = 600};
+static Vec2i lastMousePos = {};
 static bool firstMouse = true;
 static bool keyState[256] = {};
 static bool specialKeyState[256] = {};
@@ -18,10 +18,10 @@ static bool specialKeyState[256] = {};
 // https://learnopengl.com/Getting-started/Camera
 static Vec3d cameraPos = {.x = 0, .y = 1.8, .z = -5};
 static const Vec3d cameraUp = {.x = 0, .y = 1, .z = 0};
-static GLdouble pitch = 0, yaw = 90;
+static double pitch = 0, yaw = 90;
 
-static const GLdouble mouseSensitivity = 0.1;
-static const GLdouble walkSpeed = 0.07195;
+static const double mouseSensitivity = 0.1;
+static const double walkSpeed = 0.07195;
 
 static void handleDisplay(void) {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -42,12 +42,12 @@ static void setupCamera(void) {
 
 static void handleReshape(int w, int h) {
   firstMouse = true;
-  windowSize = (Vec2sizei){.x = w, .y = h};
+  windowSize = (Vec2i){.x = w, .y = h};
   glViewport(0, 0, windowSize.x, windowSize.y);
 
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
-  gluPerspective(70, (GLdouble)windowSize.x / (GLdouble)windowSize.y, 0.1, 50);
+  gluPerspective(70, (double)windowSize.x / (double)windowSize.y, 0.1, 50);
 
   setupCamera();
 }
@@ -63,7 +63,7 @@ static void moveCamera(bool perpendicular, bool negative) {
     directionVec = normalize3d(directionVec);
   }
 
-  GLdouble speed = negative ? -walkSpeed : walkSpeed;
+  double speed = negative ? -walkSpeed : walkSpeed;
   directionVec = scalarMult3d(speed, directionVec);
   cameraPos = sum3d(cameraPos, directionVec);
 }
@@ -142,7 +142,7 @@ static void handleSpecialUp(int key, int x, int y) {
 
 static void handleMotion(int x, int y) {
   if (firstMouse) {
-    lastMousePos = (Vec2sizei){x, y};
+    lastMousePos = (Vec2i){x, y};
     firstMouse = false;
     return;
   }
@@ -155,11 +155,11 @@ static void handleMotion(int x, int y) {
 
   // https://gamedev.stackexchange.com/a/98024
   if (x < 100 || x > windowSize.x - 100 || y < 100 || y > windowSize.y - 100) {
-    GLsizei newX = windowSize.x / 2, newY = windowSize.y / 2;
+    int newX = windowSize.x / 2, newY = windowSize.y / 2;
     glutWarpPointer(newX, newY);
-    lastMousePos = (Vec2sizei){newX, newY};
+    lastMousePos = (Vec2i){newX, newY};
   } else {
-    lastMousePos = (Vec2sizei){x, y};
+    lastMousePos = (Vec2i){x, y};
   }
 
   setupCamera();

@@ -1,20 +1,20 @@
 #include <GL/gl.h>
 
 typedef struct {
-  GLsizei x, y;
-} Vec2sizei;
+  int x, y;
+} Vec2i;
 
 typedef struct {
-  GLdouble x, y, z;
+  double x, y, z;
 } Vec3d;
 
-static const GLdouble PI = 3.14159;
+static const double PI = 3.14159;
 
-GLdouble clamp(GLdouble x, GLdouble upper, GLdouble lower);
-GLdouble radians(GLdouble degrees);
+double clamp(double x, double upper, double lower);
+double radians(double degrees);
 Vec3d copyY3d(Vec3d u, Vec3d v);
-Vec3d calcDirectionVec(GLdouble pitch, GLdouble yaw);
+Vec3d calcDirectionVec(double pitch, double yaw);
 Vec3d sum3d(Vec3d u, Vec3d v);
-Vec3d scalarMult3d(GLdouble a, Vec3d u);
+Vec3d scalarMult3d(double a, Vec3d u);
 Vec3d normalize3d(Vec3d u);
 Vec3d crossProduct3d(Vec3d u, Vec3d v);

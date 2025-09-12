@@ -2,11 +2,11 @@
 
 #include <math.h>
 
-GLdouble clamp(GLdouble x, GLdouble lower, GLdouble upper) {
+double clamp(double x, double lower, double upper) {
   return x < lower ? lower : (x > upper ? upper : x);
 }
 
-GLdouble radians(GLdouble degrees) {
+double radians(double degrees) {
   return degrees * PI / 180.0;
 }
 
@@ -14,7 +14,7 @@ Vec3d copyY3d(Vec3d u, Vec3d v) {
   return (Vec3d){.x = u.x, .y = v.y, .z = u.z};
 }
 
-Vec3d calcDirectionVec(GLdouble pitch, GLdouble yaw) {
+Vec3d calcDirectionVec(double pitch, double yaw) {
   return (Vec3d){.x = cos(pitch) * cos(yaw), .y = sin(pitch), .z = cos(pitch) * sin(yaw)};
 }
 
@@ -22,12 +22,12 @@ Vec3d sum3d(Vec3d u, Vec3d v) {
   return (Vec3d){.x = u.x + v.x, .y = u.y + v.y, .z = u.z + v.z};
 }
 
-Vec3d scalarMult3d(GLdouble a, Vec3d u) {
+Vec3d scalarMult3d(double a, Vec3d u) {
   return (Vec3d){.x = a * u.x, .y = a * u.y, .z = a * u.z};
 }
 
 Vec3d normalize3d(Vec3d u) {
-  GLdouble norm = sqrt(u.x * u.x + u.y * u.y + u.z * u.z);
+  double norm = sqrt(u.x * u.x + u.y * u.y + u.z * u.z);
   return (Vec3d){.x = u.x / norm, .y = u.y / norm, .z = u.z / norm};
 }
 

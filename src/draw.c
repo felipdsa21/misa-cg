@@ -12,7 +12,7 @@ void init(void) {
 }
 
 static void colorRgb(int r, int g, int b) {
-  glColor3d((GLdouble)r / 255, (GLdouble)g / 255, (GLdouble)b / 255);
+  glColor3d((double)r / 255, (double)g / 255, (double)b / 255);
 }
 
 static void drawGround(void) {
@@ -26,7 +26,7 @@ static void drawGround(void) {
 }
 
 static void drawGroundGrid(void) {
-  const GLdouble groundGridY = 0.001;
+  const double groundGridY = 0.001;
 
   colorRgb(153, 153, 153);
   glBegin(GL_LINES);
@@ -41,7 +41,7 @@ static void drawGroundGrid(void) {
 
 static void drawFloor(void) {
   const int floorWidth = 48, floorDepth = 40;
-  const GLdouble floorY = 0.001;
+  const double floorY = 0.001;
 
   colorRgb(123, 107, 99);
   glBegin(GL_QUADS);
