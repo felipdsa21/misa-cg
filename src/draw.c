@@ -1,7 +1,23 @@
 #include <stddef.h>
+#include <math.h> /* cos / sin usados nas máscaras de arco */
 
 #include <GL/gl.h>
 #include <GL/glu.h>
+
+/*
+  Definições de controle de compilação:
+  - ENABLE_STENCIL_WINDOWS: quando definido (default aqui), usa stencil buffer para recortar
+    exatamente o formato das janelas (incluindo arco). Se desabilitado, cai no modo de
+    segmentação simples que apenas abre retângulos envolventes (mais rápido, menos preciso).
+
+  Para desativar stencil ao compilar:
+    gcc -UENABLE_STENCIL_WINDOWS ...
+*/
+#ifndef DISABLE_STENCIL_WINDOWS
+#ifndef ENABLE_STENCIL_WINDOWS
+#define ENABLE_STENCIL_WINDOWS 1
+#endif
+#endif
 
 #include "draw.h"
 #include "obj.h"
@@ -16,7 +32,7 @@ static const int groundSize = 50;
 static const float luzAmbiente[] = {0.15f, 0.15f, 0.15f, 1};
 static const float luzDifusa[] = {0.8f, 0.8f, 0.8f, 1};
 static const float luzEspecular[] = {0.1f, 0.1f, 0.1f, 1};
-static const float posicaoLuz[] = {0, 1.7, -5, 0};
+static const float posicaoLuz[] = {0.0f, 1.7f, -5.0f, 0.0f};
 
 static const double pisoY = 1;
 static const double segundoAndarY = 7;
@@ -31,8 +47,10 @@ static const Vec2d espacoPortaSize = {3, 3};
 
 static const Vec3d janelaComArco = {1.2, 2.6, 0.3};
 static const Vec3d janelaRetangularSize = {1.2, 2, 0.3};
-static const double janelaBaixoYOffset = 1.4;
-static const double janelaCimaYOffset = janelaBaixoYOffset + 1.2 + 3.2;
+#define JANELA_BAIXO_Y_OFFSET 1.4
+#define JANELA_CIMA_Y_OFFSET (JANELA_BAIXO_Y_OFFSET + 1.2 + 3.2)
+static const double janelaBaixoYOffset = JANELA_BAIXO_Y_OFFSET;
+static const double janelaCimaYOffset = JANELA_CIMA_Y_OFFSET;
 
 void init(void) {
   glClearColor(0.53f, 0.81f, 0.98f, 1);
@@ -50,6 +68,11 @@ void init(void) {
 
   q = gluNewQuadric();
   gluQuadricNormals(q, GLU_SMOOTH);
+
+#if ENABLE_STENCIL_WINDOWS
+  glClearStencil(0);
+  glEnable(GL_STENCIL_TEST);
+#endif
 }
 
 void onSetupCamera(void) {
@@ -121,10 +144,75 @@ static void drawPisos(void) {
   glPopMatrix();
 }
 
+/* --------------------------------------------------------------------------
+   Helpers para stencil
+*/
+#if ENABLE_STENCIL_WINDOWS
+/* Desenha um retângulo cheio no plano Z=0 para máscara */
+static inline void maskRect(double x1,double y1,double w,double h){
+  glBegin(GL_QUADS);
+  glVertex3d(x1, y1, 0); glVertex3d(x1+w, y1, 0); glVertex3d(x1+w, y1+h, 0); glVertex3d(x1, y1+h, 0);
+  glEnd();
+}
+
+/* Desenha retângulo + semicirculo topo (janela arco) para máscara */
+static void maskJanelaArco(double x, double yBase, double totalW, double totalH, int seg){
+  double radius = totalW * 0.5;         // raio = metade da largura
+  double rectH  = totalH - radius;      // altura da parte reta
+  maskRect(x, yBase, totalW, rectH);    // parte reta
+  double cx = x + radius, cy = yBase + rectH;
+  glBegin(GL_TRIANGLE_FAN);
+  glVertex3d(cx, cy, 0);
+  for(int i=0;i<=seg;i++){ double a = PI * (double)i / (double)seg; glVertex3d(cx + cos(a)*radius, cy + sin(a)*radius, 0);} 
+  glEnd();
+}
+#endif
+
 static void drawAsa(void) {
-  // Frente
-  glNormal3i(0, 0, -1);
-  glRectd(0, 0, asaSize.x, asaSize.y);
+  // Calcula posições das 3 janelas retangulares na asa (distribuição uniforme pelo distBase)
+  double winW = janelaRetangularSize.x;
+  double winH = janelaRetangularSize.y;
+  double baseY = janelaBaixoYOffset;
+  double topY = baseY + winH;
+  int distBase = 3; // distância progressiva usada já no desenho das janelas
+  double winX[3];
+  double cursor = -winW;
+  for(int i=0;i<3;i++){ cursor += distBase; winX[i]=cursor; }
+
+#if ENABLE_STENCIL_WINDOWS
+  // Modo preciso: usa stencil para recortar exatamente os retângulos das janelas
+  glNormal3i(0,0,-1);
+  // Preparar stencil: marcamos 1 onde haverá janela
+  glColorMask(GL_FALSE,GL_FALSE,GL_FALSE,GL_FALSE);
+  glDepthMask(GL_FALSE);
+  glStencilMask(0xFF);
+  glClear(GL_STENCIL_BUFFER_BIT);
+  glStencilFunc(GL_ALWAYS,1,0xFF);
+  glStencilOp(GL_KEEP,GL_KEEP,GL_REPLACE);
+  glBegin(GL_QUADS);
+  for(int i=0;i<3;i++){ // máscara cada janela
+    glVertex3d(winX[i], baseY, 0);
+    glVertex3d(winX[i]+winW, baseY, 0);
+    glVertex3d(winX[i]+winW, topY, 0);
+    glVertex3d(winX[i], topY, 0);
+  }
+  glEnd();
+  // Desenha parede exceto onde stencil == 1
+  glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
+  glDepthMask(GL_TRUE);
+  glStencilFunc(GL_EQUAL,0,0xFF);
+  glStencilOp(GL_KEEP,GL_KEEP,GL_KEEP);
+  glRectd(0,0,asaSize.x,asaSize.y);
+  glStencilFunc(GL_ALWAYS,0,0xFF); // libera
+#else
+  // Modo simples: subtrai retângulos manualmente (menos preciso, mas rápido e sem stencil)
+  glNormal3i(0,0,-1);
+  glRectd(0,0,asaSize.x,baseY);          // faixa inferior
+  glRectd(0,topY,asaSize.x,asaSize.y);   // faixa superior
+  double segStart[] = {0, winX[0]+winW, winX[1]+winW, winX[2]+winW};
+  double segEnd[]   = {winX[0], winX[1], winX[2], asaSize.x};
+  for(int i=0;i<4;i++) if(segEnd[i]-segStart[i]>EPSILON) glRectd(segStart[i], baseY, segEnd[i], topY);
+#endif
 
   // Atrás
   glNormal3i(0, 0, 1);
@@ -143,14 +231,70 @@ static void drawAsa(void) {
 }
 
 static void drawParteCentral() {
-  // Frente
-  double xAntesPorta = (parteCentralSize.x - portaSize.x) / 2;
+  double xAntesPorta = (parteCentralSize.x - portaSize.x) / 2.0; // início da porta na fachada frontal
+  // Parâmetros das janelas com arco
+  double jw = janelaComArco.x;          // largura total
+  double jh = janelaComArco.y;          // altura total (reta + arco)
+  double yLow = janelaBaixoYOffset;     // base das janelas inferiores
+  double yTopBase = janelaCimaYOffset;  // base das janelas superiores
+  double distLado = (xAntesPorta - jw) / 2.0; // deslocamento lateral entre borda e primeira janela
+  double distCentro = xAntesPorta + (portaSize.x - jw) / 2.0; // janela central superior
+  double rightStart = xAntesPorta + portaSize.x + distLado;   // primeira janela lado direito
 
-  glNormal3i(0, 0, -1);
-  glRectd(0, 0, xAntesPorta, parteCentralSize.y);
-  glRectd(xAntesPorta, portaSize.y, xAntesPorta + portaSize.x, parteCentralSize.y);
-  glRectd(xAntesPorta + portaSize.x, 0, parteCentralSize.x, parteCentralSize.y);
+#if ENABLE_STENCIL_WINDOWS
+  // --- STENCIL (modo preciso) ---
+  glNormal3i(0,0,-1);
+  glColorMask(GL_FALSE,GL_FALSE,GL_FALSE,GL_FALSE);
+  glDepthMask(GL_FALSE);
+  glStencilMask(0xFF);
+  glClear(GL_STENCIL_BUFFER_BIT);
+  glStencilFunc(GL_ALWAYS,1,0xFF);
+  glStencilOp(GL_KEEP,GL_KEEP,GL_REPLACE);
+  // Porta (retângulo)
+  maskRect(xAntesPorta, 0, portaSize.x, portaSize.y);
+  // Janelas arco (5): esquerda baixa/alta, central alta, direita baixa/alta
+  int seg = 48;
+  maskJanelaArco(distLado, yLow, jw, jh, seg);
+  maskJanelaArco(distLado, yTopBase, jw, jh, seg);
+  maskJanelaArco(distCentro, yTopBase, jw, jh, seg);
+  maskJanelaArco(rightStart, yLow, jw, jh, seg);
+  maskJanelaArco(rightStart, yTopBase, jw, jh, seg);
 
+  // Desenha parede exceto onde máscara = 1
+  glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
+  glDepthMask(GL_TRUE);
+  glStencilFunc(GL_EQUAL,0,0xFF);
+  glStencilOp(GL_KEEP,GL_KEEP,GL_KEEP);
+  glRectd(0,0,parteCentralSize.x,parteCentralSize.y);
+  glStencilFunc(GL_ALWAYS,0,0xFF);
+#else
+  // --- SEGMENTAÇÃO (modo simples) ---
+  glNormal3i(0,0,-1);
+  double jh2Low = yLow + jh;     // topo janela inferior
+  double jh2Top = yTopBase + jh; // topo janela superior
+  struct Open {double x1,y1,x2,y2;} opens[] = {
+    {xAntesPorta,0,xAntesPorta+portaSize.x,portaSize.y},
+    {distLado,yLow,distLado+jw,jh2Low},
+    {distLado,yTopBase,distLado+jw,jh2Top},
+    {distCentro,yTopBase,distCentro+jw,jh2Top},
+    {rightStart,yLow,rightStart+jw,jh2Low},
+    {rightStart,yTopBase,rightStart+jw,jh2Top}
+  };
+  double yMarks[] = {0, portaSize.y, yLow, jh2Low, yTopBase, jh2Top, parteCentralSize.y};
+  int yCount = (int)(sizeof(yMarks)/sizeof(yMarks[0]));
+  for(int i=1;i<yCount;i++){ double v=yMarks[i]; int j=i-1; while(j>=0 && yMarks[j]>v){ yMarks[j+1]=yMarks[j]; j--; } yMarks[j+1]=v; }
+  for(int yi=0; yi<yCount-1; yi++){
+    double ya=yMarks[yi], yb=yMarks[yi+1]; if(yb-ya<=EPSILON) continue;
+    struct Seg {double a,b;} segs[8]; int sc=0;
+    for(unsigned o=0;o<sizeof(opens)/sizeof(opens[0]);o++) if(opens[o].y1<=ya+EPSILON && opens[o].y2>=yb-EPSILON) segs[sc++]=(struct Seg){opens[o].x1,opens[o].x2};
+    for(int i=1;i<sc;i++){ struct Seg v=segs[i]; int j=i-1; while(j>=0 && segs[j].a>v.a){segs[j+1]=segs[j]; j--; } segs[j+1]=v; }
+    int m=0; for(int i=0;i<sc;i++){ if(m==0 || segs[i].a>segs[m-1].b+EPSILON) segs[m++]=segs[i]; else if(segs[i].b>segs[m-1].b) segs[m-1].b=segs[i].b; }
+    double cursor=0; for(int i=0;i<m;i++){ if(segs[i].a-cursor>EPSILON) glRectd(cursor,ya,segs[i].a,yb); cursor=segs[i].b; }
+    if(parteCentralSize.x-cursor>EPSILON) glRectd(cursor,ya,parteCentralSize.x,yb);
+  }
+#endif
+
+  // Porta (folhas) desenhada depois da parede para aparecer no vão
   glPushAttrib(GL_CURRENT_BIT);
   drawPorta(xAntesPorta);
   glPopAttrib();
