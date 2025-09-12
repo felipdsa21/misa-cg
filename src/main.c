@@ -186,10 +186,7 @@ int main(int argc, char *argv[]) {
   glutPassiveMotionFunc(handleMotion);
 
   glEnable(GL_DEPTH_TEST);
-  handleReshape(windowSize.x, windowSize.y);
-  setupCamera();
   init();
-
   glutMainLoop();
 
   return EXIT_SUCCESS;
