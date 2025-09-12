@@ -16,7 +16,7 @@ typedef struct {
 
 static const double PI = 3.14159265358979323846;
 
-double clamp(double x, double upper, double lower);
+double clamp(double x, double lower, double upper);
 double radians(double degrees);
 Vec3d copyY3d(Vec3d u, Vec3d v);
 Vec3d calcDirectionVec(double pitch, double yaw);

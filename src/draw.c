@@ -3,6 +3,7 @@
 #include "draw.h"
 #include "obj.h"
 #include "objImporter.h"
+#include "porta.h"
 #include "primitives.h"
 #include "util.h"
 
@@ -123,6 +124,8 @@ static void drawParteCentral() {
   glRectd(0, 0, xAntesPorta, parteCentralSize.y);
   glRectd(xAntesPorta, portaSize.y, xAntesPorta + portaSize.x, parteCentralSize.y);
   glRectd(xAntesPorta + portaSize.x, 0, parteCentralSize.x, parteCentralSize.y);
+
+  drawPorta(xAntesPorta);
 
   // Atrás
   glNormal3i(0, 0, 1);

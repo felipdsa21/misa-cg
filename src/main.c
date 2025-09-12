@@ -108,6 +108,10 @@ static void handleTimer(int value) {
     changed = true;
   }
 
+  if (updateSceneAnimation()) {
+    changed = true;
+  }
+
   if (changed) {
     setupCamera();
     glutPostRedisplay();
@@ -120,6 +124,8 @@ static void handleKeyboard(unsigned char key, int x, int y) {
   (void)x;
   (void)y;
   keyState[key] = true;
+
+  onKey(key, x, y);
 }
 
 static void handleKeyboardUp(unsigned char key, int x, int y) {
