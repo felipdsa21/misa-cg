@@ -1,10 +1,13 @@
 #include <math.h>
 
 #include <GL/gl.h>
+#include <GL/glu.h>
 
 #include "obj.h"
 #include "primitives.h"
 #include "util.h"
+
+extern GLUquadric *q;
 
 static void
 drawArchRing(double cx, double cy, double outerR, double innerR, double zFront, double depth, int segments) {
@@ -167,4 +170,102 @@ void drawJanelaRetangular(
   // Travessa horizontal central (forma o "+")
   double centerY = (frame + glassTopRect) / 2 - bar / 2;
   drawBox((Vec3d){frame, centerY, -epsilon}, (Vec3d){innerW, bar, epsilon * 2});
+}
+
+/* helper C para paralelepípedo alinhado aos eixos:
+   desenha w x h x t a partir da origem local (0,0,0), avançando em -Z */
+static void drawBoxLocal(double w, double h, double t) {
+  glNormal3i(0, 0, -1);
+  glRectd(0, 0, w, h); /* frente z=0 */
+  glNormal3i(0, 0, 1);
+  drawRectZ(0, 0, w, h, t); /* trás  z=t   */
+
+  glPushMatrix();
+  glRotatef(-90, 0, 1, 0);
+  glNormal3i(-1, 0, 0);
+  glRectd(0, 0, t, h);
+  glPopMatrix(); /* lado esq    */
+
+  glPushMatrix();
+  glTranslated(w, 0, 0);
+  glRotatef(-90, 0, 1, 0);
+  glNormal3i(-1, 0, 0);
+  glRectd(0, 0, t, h);
+  glPopMatrix(); /* lado dir    */
+
+  glPushMatrix();
+  glRotatef(90, 1, 0, 0);
+  glNormal3i(0, 1, 0);
+  glRectd(0, 0, w, t);
+  glPopMatrix(); /* base        */
+
+  glPushMatrix();
+  glTranslated(0, h, 0);
+  glRotatef(90, 1, 0, 0);
+  glNormal3i(0, 1, 0);
+  glRectd(0, 0, w, t);
+  glPopMatrix(); /* topo        */
+}
+
+/* desenha a pilastra conforme as fotos – VERSÃO C */
+void drawPilastra(double x, double y, double z, double alturaFuste) {
+  /* proporções (m) */
+  const double baseW = 0.85, baseH = 0.12; /* base madeira escura */
+  const double pedestalW = 0.70, pedestalH = 0.75; /* bloco amarelo */
+  const double moldW = 0.90, moldH = 0.10; /* moldura branca */
+  const double fusteR = 0.20; /* coluna cilíndrica */
+  const double anelR = 0.30, anelH = 0.06; /* anel branco */
+  const double pratoR = 0.45, pratoH = 0.04; /* prato verde (teto) */
+
+  glPushMatrix();
+  glTranslated(x, y, z);
+
+  /* base madeira escura */
+  colorRgb(70, 42, 25);
+  drawBoxLocal(baseW, baseH, baseW);
+
+  /* pedestal amarelo */
+  glTranslated((baseW - pedestalW) / 2.0, baseH, (baseW - pedestalW) / 2.0);
+  colorRgb(225, 197, 126);
+  drawBoxLocal(pedestalW, pedestalH, pedestalW);
+
+  /* moldura branca */
+  glTranslated(-(moldW - pedestalW) / 2.0, pedestalH, -(moldW - pedestalW) / 2.0);
+  colorRgb(240, 240, 240);
+  drawBoxLocal(moldW, moldH, moldW);
+
+  /* fuste (cilindro fechado, alinhado ao eixo Y) */
+  glTranslated(moldW / 2.0, moldH, moldW / 2.0);
+  colorRgb(225, 197, 126);
+  glPushMatrix();
+  glRotatef(-90, 1, 0, 0); /* GLU usa +Z → vira para +Y */
+  gluCylinder(q, fusteR, fusteR, alturaFuste, 32, 1);
+  gluDisk(q, 0.0, fusteR, 32, 1); /* tampa inferior */
+  glTranslatef(0, 0, (GLfloat)alturaFuste);
+  gluDisk(q, 0.0, fusteR, 32, 1); /* tampa superior */
+  glPopMatrix();
+
+  /* anel branco no topo do fuste */
+  glPushMatrix();
+  glTranslated(0, alturaFuste, 0);
+  colorRgb(240, 240, 240);
+  glRotatef(-90, 1, 0, 0);
+  gluCylinder(q, anelR, anelR, anelH, 32, 1);
+  gluDisk(q, 0.0, anelR, 32, 1);
+  glTranslatef(0, 0, (GLfloat)anelH);
+  gluDisk(q, 0.0, anelR, 32, 1);
+  glPopMatrix();
+
+  /* prato verde que toca o teto */
+  glPushMatrix();
+  glTranslated(0, alturaFuste + anelH, 0);
+  colorRgb(126, 168, 146);
+  glRotatef(-90, 1, 0, 0);
+  gluCylinder(q, pratoR, pratoR, pratoH, 32, 1);
+  gluDisk(q, 0.0, pratoR, 32, 1);
+  glTranslatef(0, 0, (GLfloat)pratoH);
+  gluDisk(q, 0.0, pratoR, 32, 1);
+  glPopMatrix();
+
+  glPopMatrix();
 }

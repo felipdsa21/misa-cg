@@ -10,14 +10,15 @@
 #include "draw.h"
 #include "util.h"
 
-static Vec2i windowSize = {.x = 800, .y = 600};
+Vec2i windowSize = {.x = 800, .y = 600};
 static Vec2i lastMousePos = {};
 static bool firstMouse = true;
+static bool cameraFocused = true;
 static bool keyState[256] = {};
 static bool specialKeyState[256] = {};
 
 // https://learnopengl.com/Getting-started/Camera
-static Vec3d cameraPos = {.x = 0, .y = 1.7, .z = -5};
+Vec3d cameraPos = {.x = 0, .y = 1.7, .z = -5};
 static const Vec3d cameraUp = {.x = 0, .y = 1, .z = 0};
 static double pitch = 0, yaw = 90;
 
@@ -39,6 +40,8 @@ static void setupCamera(void) {
     cameraPos.x, cameraPos.y, cameraPos.z, centerPos.x, centerPos.y, centerPos.z, cameraUp.x, cameraUp.y,
     cameraUp.z
   );
+
+  onSetupCamera();
 }
 
 static void handleReshape(int w, int h) {
@@ -109,7 +112,12 @@ static void handleTimer(int value) {
     changed = true;
   }
 
-  if (updateSceneAnimation()) {
+  if (specialKeyState[GLUT_KEY_CTRL_L]) {
+    cameraFocused = false;
+    glutSetCursor(GLUT_CURSOR_INHERIT);
+  }
+
+  if (updateAnimation()) {
     changed = true;
   }
 
@@ -154,14 +162,16 @@ static void handleMotion(int x, int y) {
     return;
   }
 
-  int dx = x - lastMousePos.x;
-  int dy = lastMousePos.y - y;
+  if (cameraFocused) {
+    int dx = x - lastMousePos.x;
+    int dy = lastMousePos.y - y;
 
-  yaw += dx * mouseSensitivity;
-  pitch = clamp(pitch + (dy * mouseSensitivity), -89.9, 89.9);
+    yaw += dx * mouseSensitivity;
+    pitch = clamp(pitch + (dy * mouseSensitivity), -89.9, 89.9);
+  }
 
   // https://gamedev.stackexchange.com/a/98024
-  if (x < 100 || x > windowSize.x - 100 || y < 100 || y > windowSize.y - 100) {
+  if (cameraFocused && (x < 100 || x > windowSize.x - 100 || y < 100 || y > windowSize.y - 100)) {
     int newX = windowSize.x / 2, newY = windowSize.y / 2;
     glutWarpPointer(newX, newY);
     lastMousePos = (Vec2i){newX, newY};
@@ -171,6 +181,14 @@ static void handleMotion(int x, int y) {
 
   setupCamera();
   glutPostRedisplay();
+}
+
+static void handleMouse(int button, int state, int x, int y) {
+  if (!cameraFocused && !onMousePress(button, state, x, y) && button == GLUT_LEFT_BUTTON &&
+      state == GLUT_DOWN) {
+    cameraFocused = true;
+    glutSetCursor(GLUT_CURSOR_NONE);
+  }
 }
 
 int main(int argc, char *argv[]) {
@@ -191,6 +209,7 @@ int main(int argc, char *argv[]) {
   glutSpecialUpFunc(handleSpecialUp);
   glutMotionFunc(handleMotion);
   glutPassiveMotionFunc(handleMotion);
+  glutMouseFunc(handleMouse);
 
   glEnable(GL_DEPTH_TEST);
   init();

@@ -1,12 +1,17 @@
 #include <stdbool.h>
 
+#include <GL/freeglut_std.h>
 #include <GL/gl.h>
 
 #include "draw.h"
 #include "primitives.h"
 #include "util.h"
 
+extern Vec2i windowSize;
+extern Vec3d cameraPos;
+
 static const Vec3d portaSize = {2.8, 3.2, 0.0};
+static const Vec2i botaoSize = {120, 50};
 
 /* ---------- ANIMAÇÃO DAS PORTAS ---------- */
 static double doorAngle = 0.0;
@@ -29,16 +34,13 @@ static bool stepDoor(void) {
   }
   return before != doorAngle;
 }
-bool updateSceneAnimation(void) {
+bool updateAnimation(void) {
   return stepDoor();
 }
 
 void onKey(unsigned char key, int x, int y) {
   (void)x;
   (void)y;
-  if (key == 'r' || key == 'R') {
-    doorTarget = (doorTarget > 0.0) ? 0.0 : doorMax;
-  }
 }
 
 /* ---------- helpers ---------- */
@@ -267,4 +269,73 @@ void drawPorta(double xAntesPorta) {
   glPopMatrix();
 
   drawPortasFrente(xAntesPorta);
+}
+
+static void drawBitmapString(void *font, int x, int y, const char *s) {
+  glRasterPos2i(x, y);
+  for (const char *p = s; *p; ++p) {
+    glutBitmapCharacter(font, (int)*p);
+  }
+}
+
+void drawBotao(void) {
+  if (cameraPos.x < -5 || cameraPos.x > 5 || cameraPos.z < -5 || cameraPos.z > 5) {
+    return;
+  }
+
+  glMatrixMode(GL_PROJECTION);
+  glPushMatrix();
+  glLoadIdentity();
+  glOrtho(0, windowSize.x, windowSize.y, 0, -1, 1);
+
+  glMatrixMode(GL_MODELVIEW);
+  glPushMatrix();
+  glLoadIdentity();
+
+  bool lightingWas = glIsEnabled(GL_LIGHTING);
+  bool depthWas = glIsEnabled(GL_DEPTH_TEST);
+  if (lightingWas) {
+    glDisable(GL_LIGHTING);
+  }
+  if (depthWas) {
+    glDisable(GL_DEPTH_TEST);
+  }
+
+  int startX = windowSize.x - botaoSize.x - 50;
+  int startY = windowSize.y - botaoSize.y - 50;
+
+  colorRgb(80, 130, 190);
+  glRectd(startX, startY, startX + botaoSize.x, startY + botaoSize.y);
+
+  void *font = GLUT_BITMAP_HELVETICA_18;
+  colorRgb(100, 100, 100);
+  drawBitmapString(
+    font, startX + botaoSize.x / 2, startY + botaoSize.y / 2, doorTarget > 0 ? "Fechar" : "Abrir"
+  );
+
+  if (depthWas) {
+    glEnable(GL_DEPTH_TEST);
+  }
+  if (lightingWas) {
+    glEnable(GL_LIGHTING);
+  }
+
+  // restaura matrizes
+  glMatrixMode(GL_MODELVIEW);
+  glPopMatrix();
+  glMatrixMode(GL_PROJECTION);
+  glPopMatrix();
+}
+
+bool onMousePress(int button, int state, int x, int y) {
+  int startX = windowSize.x - botaoSize.x - 50;
+  int startY = windowSize.y - botaoSize.y - 50;
+
+  if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN && x > startX && y > startY &&
+      x < startX + botaoSize.x && y < startY + botaoSize.y) {
+    doorTarget = (doorTarget > 0.0) ? 0.0 : doorMax;
+    return true;
+  }
+
+  return false;
 }

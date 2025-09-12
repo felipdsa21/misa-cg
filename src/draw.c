@@ -1,4 +1,7 @@
+#include <stddef.h>
+
 #include <GL/gl.h>
+#include <GL/glu.h>
 
 #include "draw.h"
 #include "obj.h"
@@ -7,7 +10,13 @@
 #include "primitives.h"
 #include "util.h"
 
+GLUquadric *q = NULL;
+
 static const int groundSize = 50;
+static const float luzAmbiente[] = {0.15f, 0.15f, 0.15f, 1};
+static const float luzDifusa[] = {0.8f, 0.8f, 0.8f, 1};
+static const float luzEspecular[] = {0.1f, 0.1f, 0.1f, 1};
+static const float posicaoLuz[] = {0, 1.7, -5, 0};
 
 static const double pisoY = 1;
 static const double segundoAndarY = 7;
@@ -35,15 +44,15 @@ void init(void) {
 
   glEnable(GL_COLOR_MATERIAL);
   glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
-
-  float luzAmbiente[] = {0.15f, 0.15f, 0.15f, 1};
-  float luzDifusa[] = {0.8f, 0.8f, 0.8f, 1};
-  float luzEspecular[] = {0.1f, 0.1f, 0.1f, 1};
-  float posicaoLuz[] = {0, -1, 1, 0};
-
   glLightfv(GL_LIGHT0, GL_AMBIENT, luzAmbiente);
   glLightfv(GL_LIGHT0, GL_DIFFUSE, luzDifusa);
   glLightfv(GL_LIGHT0, GL_SPECULAR, luzEspecular);
+
+  q = gluNewQuadric();
+  gluQuadricNormals(q, GLU_SMOOTH);
+}
+
+void onSetupCamera(void) {
   glLightfv(GL_LIGHT0, GL_POSITION, posicaoLuz);
 }
 
@@ -279,7 +288,8 @@ void draw() {
   drawPisos();
   drawParteExterna(drawAsa, drawParteCentral);
   drawParteExterna(drawJanelasAsa, drawJanelasParteCentral);
+  // drawObjetos();
 
   glPopMatrix();
-  // drawObjetos();
+  drawBotao();
 }
