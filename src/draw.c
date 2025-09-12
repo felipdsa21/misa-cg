@@ -1,5 +1,5 @@
-#include <stddef.h>
 #include <math.h> /* cos / sin usados nas máscaras de arco */
+#include <stddef.h>
 
 #include <GL/gl.h>
 #include <GL/glu.h>
@@ -55,24 +55,24 @@ static const double janelaCimaYOffset = JANELA_CIMA_Y_OFFSET;
    Usa a função existente drawPilastra(x,y,z,alturaFuste) definida em obj.c. A altura
    passada corresponde apenas ao fuste cilíndrico; a função adiciona base/anel/prato.
 */
-static void drawPilastrasInternas(){
+static void drawPilastrasInternas() {
   const double alturaFuste = (segundoAndarY - pisoY) - 1.07; /* compensa base+anel+prato */
   const double offsetLateral = 2.0; /* distância da parede interna lateral */
-  const double primeiraZ = 3.8;     /* posição ao longo do eixo Z dentro da parte central (frente=0) */
+  const double primeiraZ = 3.8; /* posição ao longo do eixo Z dentro da parte central (frente=0) */
   const double distanciaEntrePares = 6.0; /* separar par frontal do traseiro */
 
   double xEsq = asaSize.x + offsetLateral;
   double xDir = asaSize.x + (parteCentralSize.x - offsetLateral);
 
-  for(int i=0;i<2;i++){
-    double z = primeiraZ + i*distanciaEntrePares - asaZOffset; /* compensar deslocamento asa */
+  for (int i = 0; i < 2; i++) {
+    double z = primeiraZ + i * distanciaEntrePares - asaZOffset; /* compensar deslocamento asa */
     drawPilastra(xEsq, pisoY, z, alturaFuste);
     drawPilastra(xDir, pisoY, z, alturaFuste);
   }
 }
 
 /* ------------------------------- Sacada frontal ------------------------------ */
-static void drawSacada(){
+static void drawSacada() {
   double xAntesPorta = (parteCentralSize.x - portaSize.x) / 2.0;
   double largura = portaSize.x + 4.0;
   double profundidade = 1.25;
@@ -86,107 +86,159 @@ static void drawSacada(){
   double baseY = portaSize.y + 1.5;
   if (baseY + guardaAltura + espessura > janelaCimaYOffset - 0.5) {
     guardaAltura = (janelaCimaYOffset - 0.5) - (baseY + espessura);
-    if (guardaAltura < 0.55) guardaAltura = 0.55;
+    if (guardaAltura < 0.55) {
+      guardaAltura = 0.55;
+    }
   }
 
-  double centroX = asaSize.x + xAntesPorta + portaSize.x/2.0;
-  double startX = centroX - largura/2.0;
+  double centroX = asaSize.x + xAntesPorta + portaSize.x / 2.0;
+  double startX = centroX - largura / 2.0;
 
   glPushMatrix();
   glTranslated(startX, baseY, 0);
 
   /* Branco total da sacada */
-  colorRgb(245,245,245); // laje
-  drawBox((Vec3d){0,0,0}, (Vec3d){largura, espessura, profundidade});
-  colorRgb(235,235,235); // moldura inferior
-  drawBox((Vec3d){0,-0.10,0}, (Vec3d){largura, 0.10, profundidade*0.95});
+  colorRgb(245, 245, 245); // laje
+  drawBox((Vec3d){0, 0, 0}, (Vec3d){largura, espessura, profundidade});
+  colorRgb(235, 235, 235); // moldura inferior
+  drawBox((Vec3d){0, -0.10, 0}, (Vec3d){largura, 0.10, profundidade * 0.95});
 
   double railBaseY = espessura;
   double railTopY = railBaseY + guardaAltura;
 
-  colorRgb(250,250,250); // Top rail
-  drawBox((Vec3d){0, railTopY-0.07, -0.14}, (Vec3d){largura, 0.07, 0.26});
+  colorRgb(250, 250, 250); // Top rail
+  drawBox((Vec3d){0, railTopY - 0.07, -0.14}, (Vec3d){largura, 0.07, 0.26});
 
-  colorRgb(250,250,250); // Balaústres
+  colorRgb(250, 250, 250); // Balaústres
   double usable = largura;
   int count = (int)(usable / (balaLarg + balaGap));
-  if(count < 3) count = 3;
-  double spacing = (usable - count*balaLarg)/(count-1);
-  for(int i=0;i<count;i++){
-    double x = i*(balaLarg + spacing);
-    drawBox((Vec3d){x, railBaseY, -0.07}, (Vec3d){balaLarg, guardaAltura-0.12, balaEsp*0.5});
+  if (count < 3) {
+    count = 3;
+  }
+  double spacing = (usable - count * balaLarg) / (count - 1);
+  for (int i = 0; i < count; i++) {
+    double x = i * (balaLarg + spacing);
+    drawBox((Vec3d){x, railBaseY, -0.07}, (Vec3d){balaLarg, guardaAltura - 0.12, balaEsp * 0.5});
   }
 
-  colorRgb(240,240,240); // Rodapé guarda
+  colorRgb(240, 240, 240); // Rodapé guarda
   drawBox((Vec3d){0, railBaseY, -0.12}, (Vec3d){largura, 0.11, 0.22});
 
   glPopMatrix();
 }
 
 /* ------------------------------- Telhado + frontão --------------------------- */
-static void drawTelhado(){
+static void drawTelhado() {
   double yBase = asaSize.y + 0.05;
   double beiral = 0.25;
   double ridgeAlt = 0.9;
   double zFront = asaZOffset - beiral;
-  double zBack  = asaZOffset + asaSize.z + beiral;
-  double zRidge = (zFront + zBack)/2.0;
+  double zBack = asaZOffset + asaSize.z + beiral;
+  double zRidge = (zFront + zBack) / 2.0;
 
-  colorRgb(120,50,45);
+  colorRgb(120, 50, 45);
   glBegin(GL_QUADS);
-  double xA = 0; double xB = asaSize.x; double ridgeY = yBase + ridgeAlt;
+  double xA = 0;
+  double xB = asaSize.x;
+  double ridgeY = yBase + ridgeAlt;
   glNormal3d(0, ridgeAlt, (zRidge - zFront));
-  glVertex3d(xA, yBase, zFront); glVertex3d(xB, yBase, zFront); glVertex3d(xB, ridgeY, zRidge); glVertex3d(xA, ridgeY, zRidge);
-  glNormal3d(0, ridgeAlt, (zBack - zRidge)*-1);
-  glVertex3d(xA, ridgeY, zRidge); glVertex3d(xB, ridgeY, zRidge); glVertex3d(xB, yBase, zBack); glVertex3d(xA, yBase, zBack);
-  xA = asaSize.x + parteCentralSize.x; xB = xA + asaSize.x;
+  glVertex3d(xA, yBase, zFront);
+  glVertex3d(xB, yBase, zFront);
+  glVertex3d(xB, ridgeY, zRidge);
+  glVertex3d(xA, ridgeY, zRidge);
+  glNormal3d(0, ridgeAlt, (zBack - zRidge) * -1);
+  glVertex3d(xA, ridgeY, zRidge);
+  glVertex3d(xB, ridgeY, zRidge);
+  glVertex3d(xB, yBase, zBack);
+  glVertex3d(xA, yBase, zBack);
+  xA = asaSize.x + parteCentralSize.x;
+  xB = xA + asaSize.x;
   glNormal3d(0, ridgeAlt, (zRidge - zFront));
-  glVertex3d(xA, yBase, zFront); glVertex3d(xB, yBase, zFront); glVertex3d(xB, ridgeY, zRidge); glVertex3d(xA, ridgeY, zRidge);
-  glNormal3d(0, ridgeAlt, (zBack - zRidge)*-1);
-  glVertex3d(xA, ridgeY, zRidge); glVertex3d(xB, ridgeY, zRidge); glVertex3d(xB, yBase, zBack); glVertex3d(xA, yBase, zBack);
+  glVertex3d(xA, yBase, zFront);
+  glVertex3d(xB, yBase, zFront);
+  glVertex3d(xB, ridgeY, zRidge);
+  glVertex3d(xA, ridgeY, zRidge);
+  glNormal3d(0, ridgeAlt, (zBack - zRidge) * -1);
+  glVertex3d(xA, ridgeY, zRidge);
+  glVertex3d(xB, ridgeY, zRidge);
+  glVertex3d(xB, yBase, zBack);
+  glVertex3d(xA, yBase, zBack);
   glEnd();
 
   /* Telhado central (duas águas mais alto que asas) */
   double centroBaseY = parteCentralSize.y + 0.05; /* topo bloco central */
-  double centroRidgeAlt = 2.4;                    /* altura extra */
+  double centroRidgeAlt = 2.4; /* altura extra */
   double centroBeiral = 0.35;
   double cFront = -centroBeiral;
-  double cBack  = parteCentralSize.z + centroBeiral;
-  double cRidgeZ = (cFront + cBack)/2.0;
+  double cBack = parteCentralSize.z + centroBeiral;
+  double cRidgeZ = (cFront + cBack) / 2.0;
   double cRidgeY = centroBaseY + centroRidgeAlt;
   double cStartX = asaSize.x - centroBeiral;
-  double cEndX   = asaSize.x + parteCentralSize.x + centroBeiral;
-  colorRgb(110,40,38);
+  double cEndX = asaSize.x + parteCentralSize.x + centroBeiral;
+  colorRgb(110, 40, 38);
   glBegin(GL_QUADS);
   glNormal3d(0, centroRidgeAlt, (cRidgeZ - cFront));
-  glVertex3d(cStartX, centroBaseY, cFront); glVertex3d(cEndX, centroBaseY, cFront); glVertex3d(cEndX, cRidgeY, cRidgeZ); glVertex3d(cStartX, cRidgeY, cRidgeZ);
-  glNormal3d(0, centroRidgeAlt, (cBack - cRidgeZ)*-1);
-  glVertex3d(cStartX, cRidgeY, cRidgeZ); glVertex3d(cEndX, cRidgeY, cRidgeZ); glVertex3d(cEndX, centroBaseY, cBack); glVertex3d(cStartX, centroBaseY, cBack);
+  glVertex3d(cStartX, centroBaseY, cFront);
+  glVertex3d(cEndX, centroBaseY, cFront);
+  glVertex3d(cEndX, cRidgeY, cRidgeZ);
+  glVertex3d(cStartX, cRidgeY, cRidgeZ);
+  glNormal3d(0, centroRidgeAlt, (cBack - cRidgeZ) * -1);
+  glVertex3d(cStartX, cRidgeY, cRidgeZ);
+  glVertex3d(cEndX, cRidgeY, cRidgeZ);
+  glVertex3d(cEndX, centroBaseY, cBack);
+  glVertex3d(cStartX, centroBaseY, cBack);
   glEnd();
 
   /* Friso (linha branca) acima das janelas superiores – percorre largura parte central */
-  colorRgb(245,240,235);
-  double frisoAlt = 0.30; double frisoY = janelaCimaYOffset + janelaComArco.y + 0.25; /* base do friso */
-  if(frisoY > parteCentralSize.y - 0.4) frisoY = parteCentralSize.y - 0.4; /* não invadir telhado central */
+  colorRgb(245, 240, 235);
+  double frisoAlt = 0.30;
+  double frisoY = janelaCimaYOffset + janelaComArco.y + 0.25; /* base do friso */
+  if (frisoY > parteCentralSize.y - 0.4) {
+    frisoY = parteCentralSize.y - 0.4; /* não invadir telhado central */
+  }
   drawBox((Vec3d){asaSize.x, frisoY, 0.02}, (Vec3d){parteCentralSize.x, frisoAlt, 0.18});
 
   /* Frontão curvo mais baixo (mantido) */
   double frontaoLarg = parteCentralSize.x * 0.65;
-  double frontaoAlt  = 1.8;
-  double frontaoEsp  = 0.16;
-  double frontaoBaseX = asaSize.x + (parteCentralSize.x - frontaoLarg)/2.0;
+  double frontaoAlt = 1.8;
+  double frontaoEsp = 0.16;
+  double frontaoBaseX = asaSize.x + (parteCentralSize.x - frontaoLarg) / 2.0;
   double frontaoBaseY = frisoY + frisoAlt * 0.15;
   double frontaoBaseZ = 0.05;
-  int seg = 32; double raio = frontaoLarg/2.0; double arcoH = frontaoAlt*0.65; double arcoBaseY = frontaoBaseY + frontaoAlt*0.35; double cx = frontaoBaseX + raio;
-  colorRgb(235,222,210);
-  drawBox((Vec3d){frontaoBaseX, frontaoBaseY, frontaoBaseZ}, (Vec3d){frontaoLarg, frontaoAlt*0.35, frontaoEsp});
+  int seg = 32;
+  double raio = frontaoLarg / 2.0;
+  double arcoH = frontaoAlt * 0.65;
+  double arcoBaseY = frontaoBaseY + frontaoAlt * 0.35;
+  double cx = frontaoBaseX + raio;
+  colorRgb(235, 222, 210);
+  drawBox(
+    (Vec3d){frontaoBaseX, frontaoBaseY, frontaoBaseZ}, (Vec3d){frontaoLarg, frontaoAlt * 0.35, frontaoEsp}
+  );
   glBegin(GL_QUADS);
-  for(int i=0;i<seg;i++){
-    double a1=PI*i/seg, a2=PI*(i+1)/seg; double x1=cx+cos(a1)*raio, y1=arcoBaseY+sin(a1)*arcoH; double x2=cx+cos(a2)*raio, y2=arcoBaseY+sin(a2)*arcoH; glVertex3d(x1,y1,frontaoBaseZ); glVertex3d(x2,y2,frontaoBaseZ); glVertex3d(x2,y2,frontaoBaseZ+frontaoEsp); glVertex3d(x1,y1,frontaoBaseZ+frontaoEsp);
+  for (int i = 0; i < seg; i++) {
+    double a1 = PI * i / seg, a2 = PI * (i + 1) / seg;
+    double x1 = cx + cos(a1) * raio, y1 = arcoBaseY + sin(a1) * arcoH;
+    double x2 = cx + cos(a2) * raio, y2 = arcoBaseY + sin(a2) * arcoH;
+    glVertex3d(x1, y1, frontaoBaseZ);
+    glVertex3d(x2, y2, frontaoBaseZ);
+    glVertex3d(x2, y2, frontaoBaseZ + frontaoEsp);
+    glVertex3d(x1, y1, frontaoBaseZ + frontaoEsp);
   }
   glEnd();
-  glBegin(GL_TRIANGLE_FAN); glVertex3d(cx, arcoBaseY, frontaoBaseZ); for(int i=0;i<=seg;i++){ double a=PI*i/seg; glVertex3d(cx+cos(a)*raio, arcoBaseY+sin(a)*arcoH, frontaoBaseZ);} glEnd();
-  glBegin(GL_TRIANGLE_FAN); glVertex3d(cx, arcoBaseY, frontaoBaseZ+frontaoEsp); for(int i=0;i<=seg;i++){ double a=PI*i/seg; glVertex3d(cx+cos(a)*raio, arcoBaseY+sin(a)*arcoH, frontaoBaseZ+frontaoEsp);} glEnd();
+  glBegin(GL_TRIANGLE_FAN);
+  glVertex3d(cx, arcoBaseY, frontaoBaseZ);
+  for (int i = 0; i <= seg; i++) {
+    double a = PI * i / seg;
+    glVertex3d(cx + cos(a) * raio, arcoBaseY + sin(a) * arcoH, frontaoBaseZ);
+  }
+  glEnd();
+  glBegin(GL_TRIANGLE_FAN);
+  glVertex3d(cx, arcoBaseY, frontaoBaseZ + frontaoEsp);
+  for (int i = 0; i <= seg; i++) {
+    double a = PI * i / seg;
+    glVertex3d(cx + cos(a) * raio, arcoBaseY + sin(a) * arcoH, frontaoBaseZ + frontaoEsp);
+  }
+  glEnd();
 }
 
 void init(void) {
@@ -286,21 +338,27 @@ static void drawPisos(void) {
 */
 #if ENABLE_STENCIL_WINDOWS
 /* Desenha um retângulo cheio no plano Z=0 para máscara */
-static inline void maskRect(double x1,double y1,double w,double h){
+static inline void maskRect(double x1, double y1, double w, double h) {
   glBegin(GL_QUADS);
-  glVertex3d(x1, y1, 0); glVertex3d(x1+w, y1, 0); glVertex3d(x1+w, y1+h, 0); glVertex3d(x1, y1+h, 0);
+  glVertex3d(x1, y1, 0);
+  glVertex3d(x1 + w, y1, 0);
+  glVertex3d(x1 + w, y1 + h, 0);
+  glVertex3d(x1, y1 + h, 0);
   glEnd();
 }
 
 /* Desenha retângulo + semicirculo topo (janela arco) para máscara */
-static void maskJanelaArco(double x, double yBase, double totalW, double totalH, int seg){
-  double radius = totalW * 0.5;         // raio = metade da largura
-  double rectH  = totalH - radius;      // altura da parte reta
-  maskRect(x, yBase, totalW, rectH);    // parte reta
+static void maskJanelaArco(double x, double yBase, double totalW, double totalH, int seg) {
+  double radius = totalW * 0.5; // raio = metade da largura
+  double rectH = totalH - radius; // altura da parte reta
+  maskRect(x, yBase, totalW, rectH); // parte reta
   double cx = x + radius, cy = yBase + rectH;
   glBegin(GL_TRIANGLE_FAN);
   glVertex3d(cx, cy, 0);
-  for(int i=0;i<=seg;i++){ double a = PI * (double)i / (double)seg; glVertex3d(cx + cos(a)*radius, cy + sin(a)*radius, 0);} 
+  for (int i = 0; i <= seg; i++) {
+    double a = PI * (double)i / (double)seg;
+    glVertex3d(cx + cos(a) * radius, cy + sin(a) * radius, 0);
+  }
   glEnd();
 }
 #endif
@@ -314,41 +372,48 @@ static void drawAsa(void) {
   int distBase = 3; // distância progressiva usada já no desenho das janelas
   double winX[3];
   double cursor = -winW;
-  for(int i=0;i<3;i++){ cursor += distBase; winX[i]=cursor; }
+  for (int i = 0; i < 3; i++) {
+    cursor += distBase;
+    winX[i] = cursor;
+  }
 
 #if ENABLE_STENCIL_WINDOWS
   // Modo preciso: usa stencil para recortar exatamente os retângulos das janelas
-  glNormal3i(0,0,-1);
+  glNormal3i(0, 0, -1);
   // Preparar stencil: marcamos 1 onde haverá janela
-  glColorMask(GL_FALSE,GL_FALSE,GL_FALSE,GL_FALSE);
+  glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
   glDepthMask(GL_FALSE);
   glStencilMask(0xFF);
   glClear(GL_STENCIL_BUFFER_BIT);
-  glStencilFunc(GL_ALWAYS,1,0xFF);
-  glStencilOp(GL_KEEP,GL_KEEP,GL_REPLACE);
+  glStencilFunc(GL_ALWAYS, 1, 0xFF);
+  glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
   glBegin(GL_QUADS);
-  for(int i=0;i<3;i++){ // máscara cada janela
+  for (int i = 0; i < 3; i++) { // máscara cada janela
     glVertex3d(winX[i], baseY, 0);
-    glVertex3d(winX[i]+winW, baseY, 0);
-    glVertex3d(winX[i]+winW, topY, 0);
+    glVertex3d(winX[i] + winW, baseY, 0);
+    glVertex3d(winX[i] + winW, topY, 0);
     glVertex3d(winX[i], topY, 0);
   }
   glEnd();
   // Desenha parede exceto onde stencil == 1
-  glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
+  glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
   glDepthMask(GL_TRUE);
-  glStencilFunc(GL_EQUAL,0,0xFF);
-  glStencilOp(GL_KEEP,GL_KEEP,GL_KEEP);
-  glRectd(0,0,asaSize.x,asaSize.y);
-  glStencilFunc(GL_ALWAYS,0,0xFF); // libera
+  glStencilFunc(GL_EQUAL, 0, 0xFF);
+  glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+  glRectd(0, 0, asaSize.x, asaSize.y);
+  glStencilFunc(GL_ALWAYS, 0, 0xFF); // libera
 #else
   // Modo simples: subtrai retângulos manualmente (menos preciso, mas rápido e sem stencil)
-  glNormal3i(0,0,-1);
-  glRectd(0,0,asaSize.x,baseY);          // faixa inferior
-  glRectd(0,topY,asaSize.x,asaSize.y);   // faixa superior
-  double segStart[] = {0, winX[0]+winW, winX[1]+winW, winX[2]+winW};
-  double segEnd[]   = {winX[0], winX[1], winX[2], asaSize.x};
-  for(int i=0;i<4;i++) if(segEnd[i]-segStart[i]>EPSILON) glRectd(segStart[i], baseY, segEnd[i], topY);
+  glNormal3i(0, 0, -1);
+  glRectd(0, 0, asaSize.x, baseY); // faixa inferior
+  glRectd(0, topY, asaSize.x, asaSize.y); // faixa superior
+  double segStart[] = {0, winX[0] + winW, winX[1] + winW, winX[2] + winW};
+  double segEnd[] = {winX[0], winX[1], winX[2], asaSize.x};
+  for (int i = 0; i < 4; i++) {
+    if (segEnd[i] - segStart[i] > EPSILON) {
+      glRectd(segStart[i], baseY, segEnd[i], topY);
+    }
+  }
 #endif
 
   // Atrás
@@ -370,23 +435,23 @@ static void drawAsa(void) {
 static void drawParteCentral() {
   double xAntesPorta = (parteCentralSize.x - portaSize.x) / 2.0; // início da porta na fachada frontal
   // Parâmetros das janelas com arco
-  double jw = janelaComArco.x;          // largura total
-  double jh = janelaComArco.y;          // altura total (reta + arco)
-  double yLow = janelaBaixoYOffset;     // base das janelas inferiores
-  double yTopBase = janelaCimaYOffset;  // base das janelas superiores
+  double jw = janelaComArco.x; // largura total
+  double jh = janelaComArco.y; // altura total (reta + arco)
+  double yLow = janelaBaixoYOffset; // base das janelas inferiores
+  double yTopBase = janelaCimaYOffset; // base das janelas superiores
   double distLado = (xAntesPorta - jw) / 2.0; // deslocamento lateral entre borda e primeira janela
   double distCentro = xAntesPorta + (portaSize.x - jw) / 2.0; // janela central superior
-  double rightStart = xAntesPorta + portaSize.x + distLado;   // primeira janela lado direito
+  double rightStart = xAntesPorta + portaSize.x + distLado; // primeira janela lado direito
 
 #if ENABLE_STENCIL_WINDOWS
   // --- STENCIL (modo preciso) ---
-  glNormal3i(0,0,-1);
-  glColorMask(GL_FALSE,GL_FALSE,GL_FALSE,GL_FALSE);
+  glNormal3i(0, 0, -1);
+  glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
   glDepthMask(GL_FALSE);
   glStencilMask(0xFF);
   glClear(GL_STENCIL_BUFFER_BIT);
-  glStencilFunc(GL_ALWAYS,1,0xFF);
-  glStencilOp(GL_KEEP,GL_KEEP,GL_REPLACE);
+  glStencilFunc(GL_ALWAYS, 1, 0xFF);
+  glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
   // Porta (retângulo)
   maskRect(xAntesPorta, 0, portaSize.x, portaSize.y);
   // Janelas arco (5): esquerda baixa/alta, central alta, direita baixa/alta
@@ -398,36 +463,79 @@ static void drawParteCentral() {
   maskJanelaArco(rightStart, yTopBase, jw, jh, seg);
 
   // Desenha parede exceto onde máscara = 1
-  glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
+  glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
   glDepthMask(GL_TRUE);
-  glStencilFunc(GL_EQUAL,0,0xFF);
-  glStencilOp(GL_KEEP,GL_KEEP,GL_KEEP);
-  glRectd(0,0,parteCentralSize.x,parteCentralSize.y);
-  glStencilFunc(GL_ALWAYS,0,0xFF);
+  glStencilFunc(GL_EQUAL, 0, 0xFF);
+  glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+  glRectd(0, 0, parteCentralSize.x, parteCentralSize.y);
+  glStencilFunc(GL_ALWAYS, 0, 0xFF);
 #else
   // --- SEGMENTAÇÃO (modo simples) ---
-  glNormal3i(0,0,-1);
-  double jh2Low = yLow + jh;     // topo janela inferior
+  glNormal3i(0, 0, -1);
+  double jh2Low = yLow + jh; // topo janela inferior
   double jh2Top = yTopBase + jh; // topo janela superior
-  struct Open {double x1,y1,x2,y2;} opens[] = {
-    {xAntesPorta,0,xAntesPorta+portaSize.x,portaSize.y},
-    {distLado,yLow,distLado+jw,jh2Low},
-    {distLado,yTopBase,distLado+jw,jh2Top},
-    {distCentro,yTopBase,distCentro+jw,jh2Top},
-    {rightStart,yLow,rightStart+jw,jh2Low},
-    {rightStart,yTopBase,rightStart+jw,jh2Top}
+  struct Open {
+    double x1, y1, x2, y2;
+  } opens[] = {
+    {xAntesPorta, 0, xAntesPorta + portaSize.x, portaSize.y},
+    {distLado, yLow, distLado + jw, jh2Low},
+    {distLado, yTopBase, distLado + jw, jh2Top},
+    {distCentro, yTopBase, distCentro + jw, jh2Top},
+    {rightStart, yLow, rightStart + jw, jh2Low},
+    {rightStart, yTopBase, rightStart + jw, jh2Top}
   };
   double yMarks[] = {0, portaSize.y, yLow, jh2Low, yTopBase, jh2Top, parteCentralSize.y};
-  int yCount = (int)(sizeof(yMarks)/sizeof(yMarks[0]));
-  for(int i=1;i<yCount;i++){ double v=yMarks[i]; int j=i-1; while(j>=0 && yMarks[j]>v){ yMarks[j+1]=yMarks[j]; j--; } yMarks[j+1]=v; }
-  for(int yi=0; yi<yCount-1; yi++){
-    double ya=yMarks[yi], yb=yMarks[yi+1]; if(yb-ya<=EPSILON) continue;
-    struct Seg {double a,b;} segs[8]; int sc=0;
-    for(unsigned o=0;o<sizeof(opens)/sizeof(opens[0]);o++) if(opens[o].y1<=ya+EPSILON && opens[o].y2>=yb-EPSILON) segs[sc++]=(struct Seg){opens[o].x1,opens[o].x2};
-    for(int i=1;i<sc;i++){ struct Seg v=segs[i]; int j=i-1; while(j>=0 && segs[j].a>v.a){segs[j+1]=segs[j]; j--; } segs[j+1]=v; }
-    int m=0; for(int i=0;i<sc;i++){ if(m==0 || segs[i].a>segs[m-1].b+EPSILON) segs[m++]=segs[i]; else if(segs[i].b>segs[m-1].b) segs[m-1].b=segs[i].b; }
-    double cursor=0; for(int i=0;i<m;i++){ if(segs[i].a-cursor>EPSILON) glRectd(cursor,ya,segs[i].a,yb); cursor=segs[i].b; }
-    if(parteCentralSize.x-cursor>EPSILON) glRectd(cursor,ya,parteCentralSize.x,yb);
+  int yCount = (int)(sizeof(yMarks) / sizeof(yMarks[0]));
+  for (int i = 1; i < yCount; i++) {
+    double v = yMarks[i];
+    int j = i - 1;
+    while (j >= 0 && yMarks[j] > v) {
+      yMarks[j + 1] = yMarks[j];
+      j--;
+    }
+    yMarks[j + 1] = v;
+  }
+  for (int yi = 0; yi < yCount - 1; yi++) {
+    double ya = yMarks[yi], yb = yMarks[yi + 1];
+    if (yb - ya <= EPSILON) {
+      continue;
+    }
+    struct Seg {
+      double a, b;
+    } segs[8];
+    int sc = 0;
+    for (unsigned o = 0; o < sizeof(opens) / sizeof(opens[0]); o++) {
+      if (opens[o].y1 <= ya + EPSILON && opens[o].y2 >= yb - EPSILON) {
+        segs[sc++] = (struct Seg){opens[o].x1, opens[o].x2};
+      }
+    }
+    for (int i = 1; i < sc; i++) {
+      struct Seg v = segs[i];
+      int j = i - 1;
+      while (j >= 0 && segs[j].a > v.a) {
+        segs[j + 1] = segs[j];
+        j--;
+      }
+      segs[j + 1] = v;
+    }
+    int m = 0;
+    for (int i = 0; i < sc; i++) {
+      if (m == 0 || segs[i].a > segs[m - 1].b + EPSILON) {
+        segs[m++] = segs[i];
+      } else if (segs[i].b > segs[m - 1].b) {
+        segs[m - 1].b = segs[i].b;
+      }
+    }
+    double cursor = 0;
+    for (int i = 0; i < m; i++) {
+      if (segs[i].a - cursor > EPSILON) {
+        glRectd(cursor, ya, segs[i].a, yb);
+      }
+      cursor = segs[i].b;
+    }
+    if (parteCentralSize.x - cursor > EPSILON) {
+      glRectd(cursor, ya, parteCentralSize.x, yb);
+    }
   }
 #endif
 

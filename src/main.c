@@ -186,6 +186,7 @@ static void handleMotion(int x, int y) {
 static void handleMouse(int button, int state, int x, int y) {
   if (!cameraFocused && !onMousePress(button, state, x, y) && button == GLUT_LEFT_BUTTON &&
       state == GLUT_DOWN) {
+    firstMouse = true;
     cameraFocused = true;
     glutSetCursor(GLUT_CURSOR_NONE);
   }

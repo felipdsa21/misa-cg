@@ -11,7 +11,7 @@ extern Vec2i windowSize;
 extern Vec3d cameraPos;
 
 static const Vec3d portaSize = {2.8, 3.2, 0.0};
-static const Vec2i botaoSize = {120, 50};
+static const Vec2i botaoSize = {100, 50};
 
 /* ---------- ANIMAÇÃO DAS PORTAS ---------- */
 static double doorAngle = 0.0;
@@ -308,10 +308,8 @@ void drawBotao(void) {
   glRectd(startX, startY, startX + botaoSize.x, startY + botaoSize.y);
 
   void *font = GLUT_BITMAP_HELVETICA_18;
-  colorRgb(100, 100, 100);
-  drawBitmapString(
-    font, startX + botaoSize.x / 2, startY + botaoSize.y / 2, doorTarget > 0 ? "Fechar" : "Abrir"
-  );
+  colorRgb(255, 255, 255);
+  drawBitmapString(font, startX + 30, startY + 30, doorTarget > 0 ? "Fechar" : "Abrir");
 
   if (depthWas) {
     glEnable(GL_DEPTH_TEST);
