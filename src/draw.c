@@ -4,21 +4,6 @@
 #include <GL/gl.h>
 #include <GL/glu.h>
 
-/*
-  Definições de controle de compilação:
-  - ENABLE_STENCIL_WINDOWS: quando definido (default aqui), usa stencil buffer para recortar
-    exatamente o formato das janelas (incluindo arco). Se desabilitado, cai no modo de
-    segmentação simples que apenas abre retângulos envolventes (mais rápido, menos preciso).
-
-  Para desativar stencil ao compilar:
-    gcc -UENABLE_STENCIL_WINDOWS ...
-*/
-#ifndef DISABLE_STENCIL_WINDOWS
-#ifndef ENABLE_STENCIL_WINDOWS
-#define ENABLE_STENCIL_WINDOWS 1
-#endif
-#endif
-
 #include "draw.h"
 #include "obj.h"
 #include "objImporter.h"
@@ -258,10 +243,8 @@ void init(void) {
   q = gluNewQuadric();
   gluQuadricNormals(q, GLU_SMOOTH);
 
-#if ENABLE_STENCIL_WINDOWS
   glClearStencil(0);
   glEnable(GL_STENCIL_TEST);
-#endif
 }
 
 void onSetupCamera(void) {
@@ -336,7 +319,6 @@ static void drawPisos(void) {
 /* --------------------------------------------------------------------------
    Helpers para stencil
 */
-#if ENABLE_STENCIL_WINDOWS
 /* Desenha um retângulo cheio no plano Z=0 para máscara */
 static inline void maskRect(double x1, double y1, double w, double h) {
   glBegin(GL_QUADS);
@@ -361,7 +343,6 @@ static void maskJanelaArco(double x, double yBase, double totalW, double totalH,
   }
   glEnd();
 }
-#endif
 
 static void drawAsa(void) {
   // Calcula posições das 3 janelas retangulares na asa (distribuição uniforme pelo distBase)
@@ -377,7 +358,6 @@ static void drawAsa(void) {
     winX[i] = cursor;
   }
 
-#if ENABLE_STENCIL_WINDOWS
   // Modo preciso: usa stencil para recortar exatamente os retângulos das janelas
   glNormal3i(0, 0, -1);
   // Preparar stencil: marcamos 1 onde haverá janela
@@ -402,19 +382,6 @@ static void drawAsa(void) {
   glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
   glRectd(0, 0, asaSize.x, asaSize.y);
   glStencilFunc(GL_ALWAYS, 0, 0xFF); // libera
-#else
-  // Modo simples: subtrai retângulos manualmente (menos preciso, mas rápido e sem stencil)
-  glNormal3i(0, 0, -1);
-  glRectd(0, 0, asaSize.x, baseY); // faixa inferior
-  glRectd(0, topY, asaSize.x, asaSize.y); // faixa superior
-  double segStart[] = {0, winX[0] + winW, winX[1] + winW, winX[2] + winW};
-  double segEnd[] = {winX[0], winX[1], winX[2], asaSize.x};
-  for (int i = 0; i < 4; i++) {
-    if (segEnd[i] - segStart[i] > EPSILON) {
-      glRectd(segStart[i], baseY, segEnd[i], topY);
-    }
-  }
-#endif
 
   // Atrás
   glNormal3i(0, 0, 1);
@@ -443,7 +410,6 @@ static void drawParteCentral() {
   double distCentro = xAntesPorta + (portaSize.x - jw) / 2.0; // janela central superior
   double rightStart = xAntesPorta + portaSize.x + distLado; // primeira janela lado direito
 
-#if ENABLE_STENCIL_WINDOWS
   // --- STENCIL (modo preciso) ---
   glNormal3i(0, 0, -1);
   glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
@@ -469,75 +435,6 @@ static void drawParteCentral() {
   glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
   glRectd(0, 0, parteCentralSize.x, parteCentralSize.y);
   glStencilFunc(GL_ALWAYS, 0, 0xFF);
-#else
-  // --- SEGMENTAÇÃO (modo simples) ---
-  glNormal3i(0, 0, -1);
-  double jh2Low = yLow + jh; // topo janela inferior
-  double jh2Top = yTopBase + jh; // topo janela superior
-  struct Open {
-    double x1, y1, x2, y2;
-  } opens[] = {
-    {xAntesPorta, 0, xAntesPorta + portaSize.x, portaSize.y},
-    {distLado, yLow, distLado + jw, jh2Low},
-    {distLado, yTopBase, distLado + jw, jh2Top},
-    {distCentro, yTopBase, distCentro + jw, jh2Top},
-    {rightStart, yLow, rightStart + jw, jh2Low},
-    {rightStart, yTopBase, rightStart + jw, jh2Top}
-  };
-  double yMarks[] = {0, portaSize.y, yLow, jh2Low, yTopBase, jh2Top, parteCentralSize.y};
-  int yCount = (int)(sizeof(yMarks) / sizeof(yMarks[0]));
-  for (int i = 1; i < yCount; i++) {
-    double v = yMarks[i];
-    int j = i - 1;
-    while (j >= 0 && yMarks[j] > v) {
-      yMarks[j + 1] = yMarks[j];
-      j--;
-    }
-    yMarks[j + 1] = v;
-  }
-  for (int yi = 0; yi < yCount - 1; yi++) {
-    double ya = yMarks[yi], yb = yMarks[yi + 1];
-    if (yb - ya <= EPSILON) {
-      continue;
-    }
-    struct Seg {
-      double a, b;
-    } segs[8];
-    int sc = 0;
-    for (unsigned o = 0; o < sizeof(opens) / sizeof(opens[0]); o++) {
-      if (opens[o].y1 <= ya + EPSILON && opens[o].y2 >= yb - EPSILON) {
-        segs[sc++] = (struct Seg){opens[o].x1, opens[o].x2};
-      }
-    }
-    for (int i = 1; i < sc; i++) {
-      struct Seg v = segs[i];
-      int j = i - 1;
-      while (j >= 0 && segs[j].a > v.a) {
-        segs[j + 1] = segs[j];
-        j--;
-      }
-      segs[j + 1] = v;
-    }
-    int m = 0;
-    for (int i = 0; i < sc; i++) {
-      if (m == 0 || segs[i].a > segs[m - 1].b + EPSILON) {
-        segs[m++] = segs[i];
-      } else if (segs[i].b > segs[m - 1].b) {
-        segs[m - 1].b = segs[i].b;
-      }
-    }
-    double cursor = 0;
-    for (int i = 0; i < m; i++) {
-      if (segs[i].a - cursor > EPSILON) {
-        glRectd(cursor, ya, segs[i].a, yb);
-      }
-      cursor = segs[i].b;
-    }
-    if (parteCentralSize.x - cursor > EPSILON) {
-      glRectd(cursor, ya, parteCentralSize.x, yb);
-    }
-  }
-#endif
 
   // Porta (folhas) desenhada depois da parede para aparecer no vão
   glPushAttrib(GL_CURRENT_BIT);
