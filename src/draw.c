@@ -38,7 +38,7 @@ static const double pisoY = 1;
 static const double segundoAndarY = 7;
 static const Vec2d aberturaEscadaSize = {1, 3};
 
-static const Vec3d parteCentralSize = {13, 13.5, 20};
+static const Vec3d parteCentralSize = {13, 12.5, 20};
 static const Vec3d asaSize = {10.5, 7, 15};
 static const double asaZOffset = 1;
 
@@ -48,7 +48,7 @@ static const Vec2d espacoPortaSize = {3, 3};
 static const Vec3d janelaComArco = {1.2, 2.6, 0.3};
 static const Vec3d janelaRetangularSize = {1.2, 2, 0.3};
 #define JANELA_BAIXO_Y_OFFSET 1.4
-#define JANELA_CIMA_Y_OFFSET (JANELA_BAIXO_Y_OFFSET + 1.2 + 3.2)
+#define JANELA_CIMA_Y_OFFSET (JANELA_BAIXO_Y_OFFSET + 1.6 + 3.2)
 static const double janelaBaixoYOffset = JANELA_BAIXO_Y_OFFSET;
 static const double janelaCimaYOffset = JANELA_CIMA_Y_OFFSET;
 /* ---------------------------- Pilastras Internas ----------------------------
@@ -83,7 +83,7 @@ static void drawSacada(){
   double balaGap = 0.25;
 
   /* Altura: colocar a sacada mais alta (~ entre topo porta 3.2 e base janela superior 4.6) */
-  double baseY = portaSize.y + 0.55; /* 3.75 */
+  double baseY = portaSize.y + 1.5;
   if (baseY + guardaAltura + espessura > janelaCimaYOffset - 0.5) {
     guardaAltura = (janelaCimaYOffset - 0.5) - (baseY + espessura);
     if (guardaAltura < 0.55) guardaAltura = 0.55;
