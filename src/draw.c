@@ -8,7 +8,6 @@
 #include "util.h"
 
 static const int groundSize = 50;
-static const double groundGridY = 0.001;
 
 static const double pisoY = 1;
 static const double segundoAndarY = 7;
@@ -19,60 +18,78 @@ static const Vec3d asaSize = {10.5, 7, 15};
 static const double asaZOffset = 1;
 
 static const Vec3d portaSize = {2.8, 3.2, 0};
+static const Vec2d espacoPortaSize = {3, 3};
 
 static const Vec3d janelaComArco = {1.2, 2.6, 0.3};
 static const Vec3d janelaRetangularSize = {1.2, 2, 0.3};
-static const double janelaBaixoYOffset = 1;
+static const double janelaBaixoYOffset = 1.4;
 static const double janelaCimaYOffset = janelaBaixoYOffset + 1.2 + 3.2;
 
 void init(void) {
   glClearColor(0.53f, 0.81f, 0.98f, 1);
 }
 
-static void drawGround(void) {
+static void drawGrass(void) {
   colorRgb(65, 152, 10);
   glNormal3i(0, 1, 0);
   drawRectY(-groundSize, -groundSize, groundSize, groundSize, 0);
 }
 
-static void drawGroundGrid(void) {
-  colorRgb(153, 153, 153);
+static void drawChao(void) {
+  Vec2d tamanho = {parteCentralSize.x + asaSize.x * 2, parteCentralSize.z + asaSize.z * 2};
+
+  colorRgb(156, 146, 143);
+  glNormal3i(0, 1, 0);
+  drawRectY(-2, -2, tamanho.x + 2, tamanho.y + 2, EPSILON);
+}
+
+static void drawPiso(double x1, double z1, double x2, double z2, double y) {
+  colorRgb(150, 108, 72);
+  drawRectY(x1, z1, x2, z2, y);
+
+  colorRgb(97, 67, 42);
+  GLdouble spacing = 0.45;
+
   glBegin(GL_LINES);
-  for (int i = -groundSize; i <= groundSize; i++) {
-    glVertex3d(i, groundGridY, -groundSize);
-    glVertex3d(i, groundGridY, groundSize);
-    glVertex3d(-groundSize, groundGridY, i);
-    glVertex3d(groundSize, groundGridY, i);
+  for (GLdouble x = x1 + spacing; x < x2; x += spacing) {
+    glVertex3d(x, y + EPSILON, z1);
+    glVertex3d(x, y + EPSILON, z2);
   }
   glEnd();
 }
 
 static void drawPisos(void) {
-  colorRgb(123, 107, 99);
   glNormal3i(0, 1, 0);
   glPushMatrix();
 
   // Asa direita
   glTranslated(0, 0, asaZOffset);
-  drawRectY(0, 0, asaSize.x, asaSize.z, pisoY);
+  drawPiso(0, 0, asaSize.x, asaSize.z, pisoY);
 
   // Parte central
   glTranslated(asaSize.x, 0, -asaZOffset);
-  drawRectY(0, 0, parteCentralSize.x, parteCentralSize.z, pisoY);
+
+  GLdouble espacoPortaXStart = (parteCentralSize.x - espacoPortaSize.x) / 2;
+  GLdouble espacoPortaXEnd = (parteCentralSize.x + espacoPortaSize.x) / 2;
+  // Espaço para porta
+  drawPiso(0, espacoPortaSize.y, parteCentralSize.x, parteCentralSize.z, pisoY);
+  drawPiso(0, 0, espacoPortaXStart, espacoPortaSize.y, pisoY);
+  drawPiso(espacoPortaXEnd, 0, parteCentralSize.x, espacoPortaSize.y, pisoY);
+  drawPiso(espacoPortaXStart, 0, espacoPortaXEnd, espacoPortaSize.y, EPSILON * 2);
 
   // Segundo andar
   GLdouble limiteX = parteCentralSize.x - aberturaEscadaSize.x;
   GLdouble limiteZ = parteCentralSize.z / 2;
   GLdouble fimAberturaZ = limiteZ + aberturaEscadaSize.y;
 
-  drawRectY(0, 0, limiteX, parteCentralSize.z, segundoAndarY);
-  drawRectY(limiteX, 0, parteCentralSize.x, limiteZ, segundoAndarY);
-  drawRectY(limiteX, fimAberturaZ, parteCentralSize.x, parteCentralSize.z, segundoAndarY);
-  drawRectY(parteCentralSize.x - 0.1, limiteZ, parteCentralSize.x, fimAberturaZ, segundoAndarY);
+  drawPiso(0, 0, limiteX, parteCentralSize.z, segundoAndarY);
+  drawPiso(limiteX, 0, parteCentralSize.x, limiteZ, segundoAndarY);
+  drawPiso(limiteX, fimAberturaZ, parteCentralSize.x, parteCentralSize.z, segundoAndarY);
+  drawPiso(parteCentralSize.x - 0.1, limiteZ, parteCentralSize.x, fimAberturaZ, segundoAndarY);
 
   // Asa esquerda
   glTranslated(parteCentralSize.x, 0, asaZOffset);
-  drawRectY(0, 0, asaSize.x, asaSize.z, pisoY);
+  drawPiso(0, 0, asaSize.x, asaSize.z, pisoY);
 
   glPopMatrix();
 }
@@ -107,7 +124,9 @@ static void drawParteCentral() {
   glRectd(xAntesPorta, portaSize.y, xAntesPorta + portaSize.x, parteCentralSize.y);
   glRectd(xAntesPorta + portaSize.x, 0, parteCentralSize.x, parteCentralSize.y);
 
+  glPushAttrib(GL_CURRENT_BIT);
   drawPorta(xAntesPorta);
+  glPopAttrib();
 
   // Atrás
   glNormal3i(0, 0, 1);
@@ -199,9 +218,7 @@ static void drawJanelaRetangularAjustado(Vec3d pos) {
 }
 
 static void drawJanelasAsa(void) {
-  // Frente
   int distBase = 3;
-  int x = 0;
 
   Vec3d janelaPos = {-janelaRetangularSize.x, janelaBaixoYOffset, 0};
 
@@ -235,16 +252,16 @@ static void drawJanelasParteCentral(void) {
 }
 
 void draw() {
-  drawGround();
-  drawGroundGrid();
+  drawGrass();
 
   glPushMatrix();
   glTranslated(-(parteCentralSize.x / 2 + asaSize.x), 0, 0);
 
+  drawChao();
   drawPisos();
   drawParteExterna(drawAsa, drawParteCentral);
   drawParteExterna(drawJanelasAsa, drawJanelasParteCentral);
 
   glPopMatrix();
-  drawObjetos();
+  // drawObjetos();
 }
