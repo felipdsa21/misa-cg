@@ -27,24 +27,6 @@ static const double janelaCimaYOffset = janelaBaixoYOffset + 1.2 + 3.2;
 
 void init(void) {
   glClearColor(0.53f, 0.81f, 0.98f, 1);
-
-  glEnable(GL_LIGHTING);
-  glEnable(GL_LIGHT0);
-  glEnable(GL_NORMALIZE);
-  glShadeModel(GL_SMOOTH);
-
-  glEnable(GL_COLOR_MATERIAL);
-  glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
-
-  float luzAmbiente[] = {0.15f, 0.15f, 0.15f, 1};
-  float luzDifusa[] = {0.8f, 0.8f, 0.8f, 1};
-  float luzEspecular[] = {0.1f, 0.1f, 0.1f, 1};
-  float posicaoLuz[] = {0, -1, 1, 0};
-
-  glLightfv(GL_LIGHT0, GL_AMBIENT, luzAmbiente);
-  glLightfv(GL_LIGHT0, GL_DIFFUSE, luzDifusa);
-  glLightfv(GL_LIGHT0, GL_SPECULAR, luzEspecular);
-  glLightfv(GL_LIGHT0, GL_POSITION, posicaoLuz);
 }
 
 static void drawGround(void) {
