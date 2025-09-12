@@ -7,6 +7,10 @@ typedef struct {
 } Vec2i;
 
 typedef struct {
+  double x, y;
+} Vec2d;
+
+typedef struct {
   double x, y, z;
 } Vec3d;
 

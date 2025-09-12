@@ -6,11 +6,12 @@
 #include "primitives.h"
 #include "util.h"
 
-static Model obj;
-
 static const int groundSize = 50;
 static const double groundGridY = 0.001;
+
 static const double pisoY = 1;
+static const double segundoAndarY = 7;
+static const Vec2d aberturaEscadaSize = {1, 3};
 
 static const Vec3d parteCentralSize = {13, 13.5, 20};
 static const Vec3d asaSize = {10.5, 7, 15};
@@ -63,7 +64,7 @@ static void drawGroundGrid(void) {
   glEnd();
 }
 
-static void drawPiso(void) {
+static void drawPisos(void) {
   colorRgb(123, 107, 99);
   glNormal3i(0, 1, 0);
   glPushMatrix();
@@ -75,6 +76,16 @@ static void drawPiso(void) {
   // Parte central
   glTranslated(asaSize.x, 0, -asaZOffset);
   drawRectY(0, 0, parteCentralSize.x, parteCentralSize.z, pisoY);
+
+  // Segundo andar
+  GLdouble limiteX = parteCentralSize.x - aberturaEscadaSize.x;
+  GLdouble limiteZ = parteCentralSize.z / 2;
+  GLdouble fimAberturaZ = limiteZ + aberturaEscadaSize.y;
+
+  drawRectY(0, 0, limiteX, parteCentralSize.z, segundoAndarY);
+  drawRectY(limiteX, 0, parteCentralSize.x, limiteZ, segundoAndarY);
+  drawRectY(limiteX, fimAberturaZ, parteCentralSize.x, parteCentralSize.z, segundoAndarY);
+  drawRectY(parteCentralSize.x - 0.1, limiteZ, parteCentralSize.x, fimAberturaZ, segundoAndarY);
 
   // Asa esquerda
   glTranslated(parteCentralSize.x, 0, asaZOffset);
@@ -245,7 +256,7 @@ void draw() {
   glPushMatrix();
   glTranslated(-(parteCentralSize.x / 2 + asaSize.x), 0, 0);
 
-  drawPiso();
+  drawPisos();
   drawParteExterna(drawAsa, drawParteCentral);
   drawParteExterna(drawJanelasAsa, drawJanelasParteCentral);
 
