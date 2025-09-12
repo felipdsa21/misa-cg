@@ -492,26 +492,51 @@ static void drawParteExterna(void (*asaFunc)(void), void (*parteCentralFunc)(voi
 static void drawObjetos(void) {
   Model obj = loadModel("models/Mesa.obj");
   glPushMatrix();
-  glTranslatef(10.0f, pisoY, 7.0f); // movendo o objeto
-  glRotatef(-90.0f, 0.0f, 1.0f, 0.0f);
+  glTranslatef(10.0f, 1.0f, 7.0f); // movendo o objeto
+  glRotatef(90.0f, 0.0f, 1.0f, 0.0f);
+  glColor3f(0.0f, 0.0f, 0.0f);
+  drawModelFaces(obj);
+  glPopMatrix();
+
+  glPushMatrix();
+  glTranslatef(10.0f, 1.0f, 12.0f); // movendo o objeto
+  glRotatef(90.0f, 0.0f, 1.0f, 0.0f);
   glColor3f(0.0f, 0.0f, 0.0f);
   drawModelFaces(obj);
   glPopMatrix();
 
   obj = loadModel("models/Flores.obj");
   glPushMatrix();
-  glTranslatef(10.5f, pisoY + 1.0f, 6.5f); // movendo o objeto
-  glRotatef(180.0f, 0.0f, 1.0f, 0.0f);
+  glTranslatef(9.5f, 2.0f, 6.5f); // movendo o objeto
+  glRotatef(0.0f, 0.0f, 1.0f, 0.0f);
   glScalef(0.2f, 0.2f, 0.2f); // reduzindo a escala
-  glColor3f(1.0f, 0.0f, 0.0f);
+  glColor3f(245.0f/255.0f, 245.0f/255.0f, 220.0f/255.0f);
   drawModelFaces(obj);
   glPopMatrix();
 
   glPushMatrix();
-  glTranslatef(10.5f, pisoY + 1.0f, 7.5f); // movendo o objeto
-  glRotatef(180.0f, 0.0f, 1.0f, 0.0f);
+  glTranslatef(9.5f, 2.0f, 7.5f); // movendo o objeto
+  glRotatef(0.0f, 0.0f, 1.0f, 0.0f);
   glScalef(0.2f, 0.2f, 0.2f); // reduzindo a escala
-  glColor3f(1.0f, 0.0f, 0.0f);
+  glColor3f(245.0f/255.0f, 245.0f/255.0f, 220.0f/255.0f);
+  drawModelFaces(obj);
+  glPopMatrix();
+
+  obj = loadModel("models/Tv.obj");
+  glPushMatrix();
+  glTranslatef(9.5f, 2.2f, 12.5f); // movendo o objeto
+  glRotatef(0.0f, 0.0f, 1.0f, 0.0f);
+  glScalef(0.2f, 0.2f, 0.2f); // reduzindo a escala
+  glColor3f(0.0f/255.0f, 245.0f/255.0f, 220.0f/255.0f);
+  drawModelFaces(obj);
+  glPopMatrix();
+
+  obj = loadModel("models/Telefone.obj");
+  glPushMatrix();
+  glTranslatef(9.5f, 2.1f, 11.5f); // movendo o objeto
+  glRotatef(180.0f, 0.0f, 1.0f, 0.0f);
+  glScalef(0.1f, 0.1f, 0.1f); // reduzindo a escala
+  glColor3f(0.0f, 0.0f, 1.0f);
   drawModelFaces(obj);
   glPopMatrix();
 }
