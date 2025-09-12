@@ -492,7 +492,7 @@ static void drawParteExterna(void (*asaFunc)(void), void (*parteCentralFunc)(voi
 static void drawObjetos(void) {
   Model obj = loadModel("models/Mesa.obj");
   glPushMatrix();
-  glTranslatef(10.0f, 0.0f, 7.0f); // movendo o objeto
+  glTranslatef(10.0f, pisoY, 7.0f); // movendo o objeto
   glRotatef(-90.0f, 0.0f, 1.0f, 0.0f);
   glColor3f(0.0f, 0.0f, 0.0f);
   drawModelFaces(obj);
@@ -500,7 +500,7 @@ static void drawObjetos(void) {
 
   obj = loadModel("models/Flores.obj");
   glPushMatrix();
-  glTranslatef(10.5f, 1.0f, 6.5f); // movendo o objeto
+  glTranslatef(10.5f, pisoY + 1.0f, 6.5f); // movendo o objeto
   glRotatef(180.0f, 0.0f, 1.0f, 0.0f);
   glScalef(0.2f, 0.2f, 0.2f); // reduzindo a escala
   glColor3f(1.0f, 0.0f, 0.0f);
@@ -508,7 +508,7 @@ static void drawObjetos(void) {
   glPopMatrix();
 
   glPushMatrix();
-  glTranslatef(10.5f, 1.0f, 7.5f); // movendo o objeto
+  glTranslatef(10.5f, pisoY + 1.0f, 7.5f); // movendo o objeto
   glRotatef(180.0f, 0.0f, 1.0f, 0.0f);
   glScalef(0.2f, 0.2f, 0.2f); // reduzindo a escala
   glColor3f(1.0f, 0.0f, 0.0f);
@@ -577,7 +577,7 @@ void draw() {
   drawPilastrasInternas();
   drawSacada();
   drawTelhado();
-  // drawObjetos();
+  drawObjetos();
 
   glPopMatrix();
   drawBotao();
