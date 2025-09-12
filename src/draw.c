@@ -3,7 +3,10 @@
 #include <GL/gl.h>
 
 #include "draw.h"
+#include "objImporter.h"
 #include "util.h"
+
+static Model obj;
 
 static const int groundSize = 50;
 
@@ -305,6 +308,33 @@ static void drawParteExterna(void) {
   glPopMatrix();
 }
 
+static void drawObjetos(void) {
+  Model obj = loadModel("models/Mesa.obj");
+  glPushMatrix();
+  glTranslatef(10.0f, 0.0f, 7.0f); // movendo o objeto
+  glRotatef(-90.0f, 0.0f, 1.0f, 0.0f);
+  glColor3f(0.0f, 0.0f, 0.0f);
+  drawModelFaces(obj);
+  glPopMatrix();
+
+  obj = loadModel("models/Flores.obj");
+  glPushMatrix();
+  glTranslatef(10.5f, 1.0f, 6.5f); // movendo o objeto
+  glRotatef(180.0f, 0.0f, 1.0f, 0.0f);
+  glScalef(0.2f, 0.2f, 0.2f); // reduzindo a escala
+  glColor3f(1.0f, 0.0f, 0.0f);
+  drawModelFaces(obj);
+  glPopMatrix();
+
+  glPushMatrix();
+  glTranslatef(10.5f, 1.0f, 7.5f); // movendo o objeto
+  glRotatef(180.0f, 0.0f, 1.0f, 0.0f);
+  glScalef(0.2f, 0.2f, 0.2f); // reduzindo a escala
+  glColor3f(1.0f, 0.0f, 0.0f);
+  drawModelFaces(obj);
+  glPopMatrix();
+}
+
 void draw() {
   drawGround();
   drawGroundGrid();
@@ -319,4 +349,6 @@ void draw() {
 
   // pos = (x=40, y=0, z=0)  | largura=3.0 | altura=6.0 | moldura=0.22 | profundidade=0.30
   drawMuseumWindow((Vec3d){40.0, 0.0, 0.0}, 3.0, 6.0, 0.22, 0.30);
+
+  drawObjetos();
 }
