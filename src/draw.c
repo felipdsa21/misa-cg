@@ -51,6 +51,27 @@ static const Vec3d janelaRetangularSize = {1.2, 2, 0.3};
 #define JANELA_CIMA_Y_OFFSET (JANELA_BAIXO_Y_OFFSET + 1.2 + 3.2)
 static const double janelaBaixoYOffset = JANELA_BAIXO_Y_OFFSET;
 static const double janelaCimaYOffset = JANELA_CIMA_Y_OFFSET;
+/* ---------------------------- Pilastras Internas ----------------------------
+   Usa a função existente drawPilastra(x,y,z,alturaFuste) definida em obj.c. A altura
+   passada corresponde apenas ao fuste cilíndrico; a função adiciona base/anel/prato.
+*/
+static void drawPilastrasInternas(){
+  const double alturaFuste = (segundoAndarY - pisoY) - 1.07; /* compensa base+anel+prato */
+  const double offsetLateral = 2.0; /* distância da parede interna lateral */
+  const double primeiraZ = 3.8;     /* posição ao longo do eixo Z dentro da parte central (frente=0) */
+  const double distanciaEntrePares = 6.0; /* separar par frontal do traseiro */
+
+  /* Sistema de coordenadas atual em draw() já está com origem no início da asa direita.
+     A parte central começa em x = asaSize.x */
+  double xEsq = asaSize.x + offsetLateral;
+  double xDir = asaSize.x + (parteCentralSize.x - offsetLateral);
+
+  for(int i=0;i<2;i++){
+    double z = primeiraZ + i*distanciaEntrePares - asaZOffset; /* compensar deslocamento asa */
+    drawPilastra(xEsq, pisoY, z, alturaFuste);
+    drawPilastra(xDir, pisoY, z, alturaFuste);
+  }
+}
 
 void init(void) {
   glClearColor(0.53f, 0.81f, 0.98f, 1);
@@ -432,6 +453,7 @@ void draw() {
   drawPisos();
   drawParteExterna(drawAsa, drawParteCentral);
   drawParteExterna(drawJanelasAsa, drawJanelasParteCentral);
+  drawPilastrasInternas();
   // drawObjetos();
 
   glPopMatrix();
