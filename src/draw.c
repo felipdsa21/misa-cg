@@ -61,8 +61,6 @@ static void drawPilastrasInternas(){
   const double primeiraZ = 3.8;     /* posição ao longo do eixo Z dentro da parte central (frente=0) */
   const double distanciaEntrePares = 6.0; /* separar par frontal do traseiro */
 
-  /* Sistema de coordenadas atual em draw() já está com origem no início da asa direita.
-     A parte central começa em x = asaSize.x */
   double xEsq = asaSize.x + offsetLateral;
   double xDir = asaSize.x + (parteCentralSize.x - offsetLateral);
 
@@ -71,6 +69,124 @@ static void drawPilastrasInternas(){
     drawPilastra(xEsq, pisoY, z, alturaFuste);
     drawPilastra(xDir, pisoY, z, alturaFuste);
   }
+}
+
+/* ------------------------------- Sacada frontal ------------------------------ */
+static void drawSacada(){
+  double xAntesPorta = (parteCentralSize.x - portaSize.x) / 2.0;
+  double largura = portaSize.x + 4.0;
+  double profundidade = 1.25;
+  double espessura = 0.18;
+  double guardaAltura = 0.80;
+  double balaLarg = 0.15;
+  double balaEsp = 0.15;
+  double balaGap = 0.25;
+
+  /* Altura: colocar a sacada mais alta (~ entre topo porta 3.2 e base janela superior 4.6) */
+  double baseY = portaSize.y + 0.55; /* 3.75 */
+  if (baseY + guardaAltura + espessura > janelaCimaYOffset - 0.5) {
+    guardaAltura = (janelaCimaYOffset - 0.5) - (baseY + espessura);
+    if (guardaAltura < 0.55) guardaAltura = 0.55;
+  }
+
+  double centroX = asaSize.x + xAntesPorta + portaSize.x/2.0;
+  double startX = centroX - largura/2.0;
+
+  glPushMatrix();
+  glTranslated(startX, baseY, 0);
+
+  /* Branco total da sacada */
+  colorRgb(245,245,245); // laje
+  drawBox((Vec3d){0,0,0}, (Vec3d){largura, espessura, profundidade});
+  colorRgb(235,235,235); // moldura inferior
+  drawBox((Vec3d){0,-0.10,0}, (Vec3d){largura, 0.10, profundidade*0.95});
+
+  double railBaseY = espessura;
+  double railTopY = railBaseY + guardaAltura;
+
+  colorRgb(250,250,250); // Top rail
+  drawBox((Vec3d){0, railTopY-0.07, -0.14}, (Vec3d){largura, 0.07, 0.26});
+
+  colorRgb(250,250,250); // Balaústres
+  double usable = largura;
+  int count = (int)(usable / (balaLarg + balaGap));
+  if(count < 3) count = 3;
+  double spacing = (usable - count*balaLarg)/(count-1);
+  for(int i=0;i<count;i++){
+    double x = i*(balaLarg + spacing);
+    drawBox((Vec3d){x, railBaseY, -0.07}, (Vec3d){balaLarg, guardaAltura-0.12, balaEsp*0.5});
+  }
+
+  colorRgb(240,240,240); // Rodapé guarda
+  drawBox((Vec3d){0, railBaseY, -0.12}, (Vec3d){largura, 0.11, 0.22});
+
+  glPopMatrix();
+}
+
+/* ------------------------------- Telhado + frontão --------------------------- */
+static void drawTelhado(){
+  double yBase = asaSize.y + 0.05;
+  double beiral = 0.25;
+  double ridgeAlt = 0.9;
+  double zFront = asaZOffset - beiral;
+  double zBack  = asaZOffset + asaSize.z + beiral;
+  double zRidge = (zFront + zBack)/2.0;
+
+  colorRgb(120,50,45);
+  glBegin(GL_QUADS);
+  double xA = 0; double xB = asaSize.x; double ridgeY = yBase + ridgeAlt;
+  glNormal3d(0, ridgeAlt, (zRidge - zFront));
+  glVertex3d(xA, yBase, zFront); glVertex3d(xB, yBase, zFront); glVertex3d(xB, ridgeY, zRidge); glVertex3d(xA, ridgeY, zRidge);
+  glNormal3d(0, ridgeAlt, (zBack - zRidge)*-1);
+  glVertex3d(xA, ridgeY, zRidge); glVertex3d(xB, ridgeY, zRidge); glVertex3d(xB, yBase, zBack); glVertex3d(xA, yBase, zBack);
+  xA = asaSize.x + parteCentralSize.x; xB = xA + asaSize.x;
+  glNormal3d(0, ridgeAlt, (zRidge - zFront));
+  glVertex3d(xA, yBase, zFront); glVertex3d(xB, yBase, zFront); glVertex3d(xB, ridgeY, zRidge); glVertex3d(xA, ridgeY, zRidge);
+  glNormal3d(0, ridgeAlt, (zBack - zRidge)*-1);
+  glVertex3d(xA, ridgeY, zRidge); glVertex3d(xB, ridgeY, zRidge); glVertex3d(xB, yBase, zBack); glVertex3d(xA, yBase, zBack);
+  glEnd();
+
+  /* Telhado central (duas águas mais alto que asas) */
+  double centroBaseY = parteCentralSize.y + 0.05; /* topo bloco central */
+  double centroRidgeAlt = 2.4;                    /* altura extra */
+  double centroBeiral = 0.35;
+  double cFront = -centroBeiral;
+  double cBack  = parteCentralSize.z + centroBeiral;
+  double cRidgeZ = (cFront + cBack)/2.0;
+  double cRidgeY = centroBaseY + centroRidgeAlt;
+  double cStartX = asaSize.x - centroBeiral;
+  double cEndX   = asaSize.x + parteCentralSize.x + centroBeiral;
+  colorRgb(110,40,38);
+  glBegin(GL_QUADS);
+  glNormal3d(0, centroRidgeAlt, (cRidgeZ - cFront));
+  glVertex3d(cStartX, centroBaseY, cFront); glVertex3d(cEndX, centroBaseY, cFront); glVertex3d(cEndX, cRidgeY, cRidgeZ); glVertex3d(cStartX, cRidgeY, cRidgeZ);
+  glNormal3d(0, centroRidgeAlt, (cBack - cRidgeZ)*-1);
+  glVertex3d(cStartX, cRidgeY, cRidgeZ); glVertex3d(cEndX, cRidgeY, cRidgeZ); glVertex3d(cEndX, centroBaseY, cBack); glVertex3d(cStartX, centroBaseY, cBack);
+  glEnd();
+
+  /* Friso (linha branca) acima das janelas superiores – percorre largura parte central */
+  colorRgb(245,240,235);
+  double frisoAlt = 0.30; double frisoY = janelaCimaYOffset + janelaComArco.y + 0.25; /* base do friso */
+  if(frisoY > parteCentralSize.y - 0.4) frisoY = parteCentralSize.y - 0.4; /* não invadir telhado central */
+  drawBox((Vec3d){asaSize.x, frisoY, 0.02}, (Vec3d){parteCentralSize.x, frisoAlt, 0.18});
+
+  /* Frontão curvo mais baixo (mantido) */
+  double frontaoLarg = parteCentralSize.x * 0.65;
+  double frontaoAlt  = 1.8;
+  double frontaoEsp  = 0.16;
+  double frontaoBaseX = asaSize.x + (parteCentralSize.x - frontaoLarg)/2.0;
+  double frontaoBaseY = frisoY + frisoAlt * 0.15;
+  double frontaoBaseZ = 0.05;
+  int seg = 32; double raio = frontaoLarg/2.0; double arcoH = frontaoAlt*0.65; double arcoBaseY = frontaoBaseY + frontaoAlt*0.35; double cx = frontaoBaseX + raio;
+  colorRgb(235,222,210);
+  drawBox((Vec3d){frontaoBaseX, frontaoBaseY, frontaoBaseZ}, (Vec3d){frontaoLarg, frontaoAlt*0.35, frontaoEsp});
+  glBegin(GL_QUADS);
+  for(int i=0;i<seg;i++){
+    double a1=PI*i/seg, a2=PI*(i+1)/seg; double x1=cx+cos(a1)*raio, y1=arcoBaseY+sin(a1)*arcoH; double x2=cx+cos(a2)*raio, y2=arcoBaseY+sin(a2)*arcoH; glVertex3d(x1,y1,frontaoBaseZ); glVertex3d(x2,y2,frontaoBaseZ); glVertex3d(x2,y2,frontaoBaseZ+frontaoEsp); glVertex3d(x1,y1,frontaoBaseZ+frontaoEsp);
+  }
+  glEnd();
+  glBegin(GL_TRIANGLE_FAN); glVertex3d(cx, arcoBaseY, frontaoBaseZ); for(int i=0;i<=seg;i++){ double a=PI*i/seg; glVertex3d(cx+cos(a)*raio, arcoBaseY+sin(a)*arcoH, frontaoBaseZ);} glEnd();
+  glBegin(GL_TRIANGLE_FAN); glVertex3d(cx, arcoBaseY, frontaoBaseZ+frontaoEsp); for(int i=0;i<=seg;i++){ double a=PI*i/seg; glVertex3d(cx+cos(a)*raio, arcoBaseY+sin(a)*arcoH, frontaoBaseZ+frontaoEsp);} glEnd();
 }
 
 void init(void) {
@@ -454,6 +570,8 @@ void draw() {
   drawParteExterna(drawAsa, drawParteCentral);
   drawParteExterna(drawJanelasAsa, drawJanelasParteCentral);
   drawPilastrasInternas();
+  drawSacada();
+  drawTelhado();
   // drawObjetos();
 
   glPopMatrix();
