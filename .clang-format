@@ -4,6 +4,8 @@ AlignTrailingComments:
   Kind: Never
 AllowShortFunctionsOnASingleLine: None
 AlwaysBreakBeforeMultilineStrings: true
+ColumnLimit: 110
+ContinuationIndentWidth: 2
 IncludeBlocks: Regroup
 IncludeCategories:
   - Regex:        '^<GL/freeglut_ext\.h>'
@@ -15,7 +17,6 @@ IncludeCategories:
   - Regex:        '^<.*>'
     Priority:     1
     SortPriority: 1
-ColumnLimit: 110
-ContinuationIndentWidth: 2
+IncludeIsMainRegex: '$^'
 IndentWidth: 2
 InsertBraces: true

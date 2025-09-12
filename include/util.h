@@ -1,3 +1,5 @@
+#pragma once
+
 #include <GL/gl.h>
 
 typedef struct {
@@ -8,7 +10,7 @@ typedef struct {
   double x, y, z;
 } Vec3d;
 
-static const double PI = 3.14159;
+static const double PI = 3.14159265358979323846;
 
 double clamp(double x, double upper, double lower);
 double radians(double degrees);

@@ -1,6 +1,6 @@
-#include "util.h"
-
 #include <math.h>
+
+#include "util.h"
 
 double clamp(double x, double lower, double upper) {
   return x < lower ? lower : (x > upper ? upper : x);
