@@ -1,7 +1,8 @@
+#include <math.h>
+
 #include <GL/gl.h>
 
 #include "draw.h"
-#include "primitives.h"
 #include "util.h"
 
 static const int groundSize = 50;
@@ -31,6 +32,170 @@ void init(void) {
   glLightfv(GL_LIGHT0, GL_DIFFUSE, luzDifusa);
   glLightfv(GL_LIGHT0, GL_SPECULAR, luzEspecular);
   glLightfv(GL_LIGHT0, GL_POSITION, posicaoLuz);
+}
+
+// funções auxiliares para a janela
+static void drawBox(Vec3d p, GLdouble w, GLdouble h, GLdouble d) {
+  glBegin(GL_QUADS);
+  // frente
+  glVertex3d(p.x, p.y, p.z);
+  glVertex3d(p.x + w, p.y, p.z);
+  glVertex3d(p.x + w, p.y + h, p.z);
+  glVertex3d(p.x, p.y + h, p.z);
+  // trás
+  glVertex3d(p.x, p.y, p.z - d);
+  glVertex3d(p.x + w, p.y, p.z - d);
+  glVertex3d(p.x + w, p.y + h, p.z - d);
+  glVertex3d(p.x, p.y + h, p.z - d);
+  // esquerda
+  glVertex3d(p.x, p.y, p.z);
+  glVertex3d(p.x, p.y, p.z - d);
+  glVertex3d(p.x, p.y + h, p.z - d);
+  glVertex3d(p.x, p.y + h, p.z);
+  // direita
+  glVertex3d(p.x + w, p.y, p.z);
+  glVertex3d(p.x + w, p.y, p.z - d);
+  glVertex3d(p.x + w, p.y + h, p.z - d);
+  glVertex3d(p.x + w, p.y + h, p.z);
+  // topo
+  glVertex3d(p.x, p.y + h, p.z);
+  glVertex3d(p.x + w, p.y + h, p.z);
+  glVertex3d(p.x + w, p.y + h, p.z - d);
+  glVertex3d(p.x, p.y + h, p.z - d);
+  // base
+  glVertex3d(p.x, p.y, p.z);
+  glVertex3d(p.x + w, p.y, p.z);
+  glVertex3d(p.x + w, p.y, p.z - d);
+  glVertex3d(p.x, p.y, p.z - d);
+  glEnd();
+}
+
+static void drawArchRing(
+  GLdouble cx, GLdouble cy, GLdouble outerR, GLdouble innerR, GLdouble zFront, GLdouble depth, int segments
+) {
+  GLdouble zBack = zFront - depth;
+
+  // anel frontal
+  glBegin(GL_TRIANGLE_STRIP);
+  for (int i = 0; i <= segments; ++i) {
+    GLdouble a = PI * (GLdouble)i / (GLdouble)segments; // 0..pi
+    GLdouble xo = cos(a) * outerR, yo = sin(a) * outerR;
+    GLdouble xi = cos(a) * innerR, yi = sin(a) * innerR;
+    glVertex3d(cx + xo, cy + yo, zFront);
+    glVertex3d(cx + xi, cy + yi, zFront);
+  }
+  glEnd();
+
+  // anel traseiro
+  glBegin(GL_TRIANGLE_STRIP);
+  for (int i = 0; i <= segments; ++i) {
+    GLdouble a = PI * (GLdouble)i / (GLdouble)segments;
+    GLdouble xo = cos(a) * outerR, yo = sin(a) * outerR;
+    GLdouble xi = cos(a) * innerR, yi = sin(a) * innerR;
+    glVertex3d(cx + xo, cy + yo, zBack);
+    glVertex3d(cx + xi, cy + yi, zBack);
+  }
+  glEnd();
+
+  // lateral externa
+  glBegin(GL_QUAD_STRIP);
+  for (int i = 0; i <= segments; ++i) {
+    GLdouble a = PI * (GLdouble)i / (GLdouble)segments;
+    GLdouble xo = cos(a) * outerR, yo = sin(a) * outerR;
+    glVertex3d(cx + xo, cy + yo, zFront);
+    glVertex3d(cx + xo, cy + yo, zBack);
+  }
+  glEnd();
+
+  // lateral interna
+  glBegin(GL_QUAD_STRIP);
+  for (int i = 0; i <= segments; ++i) {
+    GLdouble a = PI * (GLdouble)i / (GLdouble)segments;
+    GLdouble xi = cos(a) * innerR, yi = sin(a) * innerR;
+    glVertex3d(cx + xi, cy + yi, zBack);
+    glVertex3d(cx + xi, cy + yi, zFront);
+  }
+  glEnd();
+}
+
+// função para a janela
+static void drawMuseumWindow(
+  Vec3d pos,
+  GLdouble width, // largura total
+  GLdouble height, // altura total (reta + arco)
+  GLdouble frame, // espessura da moldura
+  GLdouble depth
+) { // quanto "entra" na parede
+  if (frame > width * 0.45) {
+    frame = width * 0.45;
+  }
+
+  GLdouble radius = width / 2.0; // arco semicircular
+  if (height <= radius) {
+    height = radius + 0.01;
+  }
+  GLdouble rectH = height - radius; // parte reta
+  const int seg = 48;
+  const GLdouble eps = 0.002; // evita z-fighting
+  GLdouble zFront = pos.z;
+
+  // --- Moldura (tom rosado) ---
+  colorRgb(191, 124, 124);
+  // ombreiras (laterais) e peitoril (base)
+  drawBox((Vec3d){pos.x, pos.y, zFront}, frame, rectH, depth);
+  drawBox((Vec3d){pos.x + width - frame, pos.y, zFront}, frame, rectH, depth);
+  drawBox((Vec3d){pos.x, pos.y, zFront}, width, frame, depth);
+
+  // arco superior (anel extrudado)
+  GLdouble cx = pos.x + radius;
+  GLdouble cy = pos.y + rectH;
+  drawArchRing(cx, cy, radius, radius - frame, zFront, depth, seg);
+
+  // --- Vidro translúcido ---
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  glColor4d(0.78, 0.87, 0.96, 0.25); // azul claro com alpha
+
+  // retângulo de vidro (parte reta)
+  glBegin(GL_QUADS);
+  glVertex3d(pos.x + frame, pos.y + frame, zFront - eps);
+  glVertex3d(pos.x + width - frame, pos.y + frame, zFront - eps);
+  glVertex3d(pos.x + width - frame, pos.y + rectH - frame, zFront - eps);
+  glVertex3d(pos.x + frame, pos.y + rectH - frame, zFront - eps);
+  glEnd();
+
+  // vidro do arco
+  glBegin(GL_TRIANGLE_FAN);
+  glVertex3d(cx, cy, zFront - eps);
+  for (int i = 0; i <= seg; ++i) {
+    GLdouble a = PI * (GLdouble)i / (GLdouble)seg;
+    GLdouble xi = cos(a) * (radius - frame);
+    GLdouble yi = sin(a) * (radius - frame);
+    glVertex3d(cx + xi, cy + yi, zFront - eps);
+  }
+  glEnd();
+
+  glDisable(GL_BLEND);
+
+  // --- Travessas internas (caixilhos) ---
+  colorRgb(191, 124, 124);
+  GLdouble bar = frame * 0.45;
+  GLdouble innerW = width - 2.0 * frame;
+  GLdouble glassBottom = pos.y + frame;
+  GLdouble glassTopRect = pos.y + rectH - frame;
+
+  // montante vertical central
+  drawBox(
+    (Vec3d){pos.x + width / 2.0 - bar / 2.0, glassBottom, zFront - eps}, bar, (glassTopRect - glassBottom),
+    eps * 2.0
+  );
+
+  // travessa horizontal central (forma o "+")
+  GLdouble centerY = (glassBottom + glassTopRect) / 2.0 - bar / 2.0;
+  drawBox((Vec3d){pos.x + frame, centerY, zFront - eps}, innerW, bar, eps * 2.0);
+
+  // travessa horizontal próxima ao arco (mantida)
+  drawBox((Vec3d){pos.x + frame, pos.y + rectH - frame - bar / 2.0, zFront - eps}, innerW, bar, eps * 2.0);
 }
 
 static void drawGround(void) {
@@ -151,4 +316,7 @@ void draw() {
   drawChao();
 
   glPopMatrix();
+
+  // pos = (x=40, y=0, z=0)  | largura=3.0 | altura=6.0 | moldura=0.22 | profundidade=0.30
+  drawMuseumWindow((Vec3d){40.0, 0.0, 0.0}, 3.0, 6.0, 0.22, 0.30);
 }
