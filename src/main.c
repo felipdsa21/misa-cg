@@ -25,8 +25,11 @@ static double pitch = 0, yaw = 90;
 static const double mouseSensitivity = 0.1;
 static const double walkSpeed = 0.07195;
 
+static void setupCamera(void);
+
 static void handleDisplay(void) {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  setupCamera();
   draw();
   glutSwapBuffers();
 }
@@ -112,7 +115,7 @@ static void handleTimer(int value) {
     changed = true;
   }
 
-  if (specialKeyState[GLUT_KEY_CTRL_L]) {
+  if (keyState['z']) {
     cameraFocused = false;
     glutSetCursor(GLUT_CURSOR_INHERIT);
   }
