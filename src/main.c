@@ -1,3 +1,4 @@
+#include <ctype.h>
 #include <stdbool.h>
 #include <stdlib.h>
 
@@ -123,7 +124,7 @@ static void handleTimer(int value) {
 static void handleKeyboard(unsigned char key, int x, int y) {
   (void)x;
   (void)y;
-  keyState[key] = true;
+  keyState[tolower(key)] = true;
 
   onKey(key, x, y);
 }
@@ -131,7 +132,7 @@ static void handleKeyboard(unsigned char key, int x, int y) {
 static void handleKeyboardUp(unsigned char key, int x, int y) {
   (void)x;
   (void)y;
-  keyState[key] = false;
+  keyState[tolower(key)] = false;
 }
 
 static void handleSpecial(int key, int x, int y) {

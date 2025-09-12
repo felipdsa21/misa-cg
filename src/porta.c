@@ -61,7 +61,7 @@ static void colorMetal() {
   colorRgb(80, 80, 80);
 } /* maçaneta */
 
-static void drawBox(double w, double h, double t) {
+static void drawBoxEsp(double w, double h, double t) {
   glNormal3i(0, 0, -1);
   glRectd(0, 0, w, h); /* frente z=0 */
   glNormal3i(0, 0, 1);
@@ -128,7 +128,7 @@ drawFramedInset(double x, double y, double w, double h, double t, double moldura
   glPushMatrix();
   glTranslated(x + moldura, y + moldura, t * rebaixo);
   colorWoodInset();
-  drawBox(w - 2 * moldura, h - 2 * moldura, t * 0.12);
+  drawBoxEsp(w - 2 * moldura, h - 2 * moldura, t * 0.12);
   glPopMatrix();
 }
 
@@ -138,7 +138,7 @@ static void drawDoorLeaf(double folhaW, double folhaH, double t, bool isRightLea
 
   /* corpo */
   colorWoodBase();
-  drawBox(folhaW, folhaH, t);
+  drawBoxEsp(folhaW, folhaH, t);
 
   /* stiles/rails */
   const double stile = 0.18;
@@ -214,7 +214,7 @@ static void drawDoorLeaf(double folhaW, double folhaH, double t, bool isRightLea
     double knobW = 0.06, knobH = 0.06, knobT = 0.04;
     glPushMatrix();
     glTranslated(folhaW - 0.12 - knobW, yMid0 + railMid * 0.5 - knobH * 0.5, knobT * 0.5);
-    drawBox(knobW, knobH, knobT);
+    drawBoxEsp(knobW, knobH, knobT);
     glPopMatrix();
   }
 }
