@@ -1,4 +1,4 @@
-## Requirementos
+## Dependências
 - Ambiente de desenvolvimento WSL, MSYS2 ou Linux.
 - Compilador C (preferencialmente GCC) e GNU Make.
 - Freeglut e OpenGL.

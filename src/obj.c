@@ -74,7 +74,7 @@ void drawJanelaComArco(
   double zFront = 0;
 
   // Moldura (tom rosado)
-  colorRgb(191, 124, 124);
+  glColor3ub(191, 124, 124);
   // ombreiras (laterais) e peitoril (base)
   drawBox((Vec3d){0, 0, zFront}, (Vec3d){frame, rectH, depth});
   drawBox((Vec3d){width - frame, 0, zFront}, (Vec3d){frame, rectH, depth});
@@ -88,7 +88,7 @@ void drawJanelaComArco(
   // Vidro translúcido
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  glColor4d(0.78, 0.87, 0.96, 0.25); // azul claro com alpha
+  glColor4ub(199, 222, 245, 64); // azul claro com alpha
 
   // Retângulo de vidro (parte reta)
   glBegin(GL_QUADS);
@@ -112,7 +112,7 @@ void drawJanelaComArco(
   glDisable(GL_BLEND);
 
   // Travessas internas (caixilhos)
-  colorRgb(191, 124, 124);
+  glColor3ub(191, 124, 124);
   double bar = frame * 0.45;
   double innerW = width - 2.0 * frame;
   double glassBottom = frame;
@@ -141,14 +141,14 @@ void drawJanelaRetangular(
   double epsilon = 0.002; // evita z-fighting
 
   // Moldura
-  colorRgb(191, 124, 124);
+  glColor3ub(191, 124, 124);
   drawBox((Vec3d){0, 0, 0}, (Vec3d){frame, height, depth});
   drawBox((Vec3d){width - frame, 0, 0}, (Vec3d){frame, height, depth});
   drawBox((Vec3d){0, 0, 0}, (Vec3d){width, frame, depth});
   drawBox((Vec3d){0, height - frame, 0}, (Vec3d){width, frame, depth});
 
   // Vidro
-  colorRgb(199, 222, 245);
+  glColor3ub(199, 222, 245);
   glBegin(GL_QUADS);
   glVertex3d(frame, frame, -epsilon);
   glVertex3d(width - frame, frame, -epsilon);
@@ -157,7 +157,7 @@ void drawJanelaRetangular(
   glEnd();
 
   // Travessas internas (caixilhos)
-  colorRgb(191, 124, 124);
+  glColor3ub(191, 124, 124);
   double bar = frame * 0.5;
   double innerW = width - 2.0 * frame;
   double glassTopRect = height - frame;
@@ -221,22 +221,22 @@ void drawPilastra(double x, double y, double z, double alturaFuste) {
   glTranslated(x, y, z);
 
   /* base madeira escura */
-  colorRgb(70, 42, 25);
+  glColor3ub(70, 42, 25);
   drawBoxLocal(baseW, baseH, baseW);
 
   /* pedestal amarelo */
   glTranslated((baseW - pedestalW) / 2.0, baseH, (baseW - pedestalW) / 2.0);
-  colorRgb(225, 197, 126);
+  glColor3ub(225, 197, 126);
   drawBoxLocal(pedestalW, pedestalH, pedestalW);
 
   /* moldura branca */
   glTranslated(-(moldW - pedestalW) / 2.0, pedestalH, -(moldW - pedestalW) / 2.0);
-  colorRgb(240, 240, 240);
+  glColor3ub(240, 240, 240);
   drawBoxLocal(moldW, moldH, moldW);
 
   /* fuste (cilindro fechado, alinhado ao eixo Y) */
   glTranslated(moldW / 2.0, moldH, moldW / 2.0);
-  colorRgb(225, 197, 126);
+  glColor3ub(225, 197, 126);
   glPushMatrix();
   glRotatef(-90, 1, 0, 0); /* GLU usa +Z → vira para +Y */
   gluCylinder(q, fusteR, fusteR, alturaFuste, 32, 1);
@@ -248,7 +248,7 @@ void drawPilastra(double x, double y, double z, double alturaFuste) {
   /* anel branco no topo do fuste */
   glPushMatrix();
   glTranslated(0, alturaFuste, 0);
-  colorRgb(240, 240, 240);
+  glColor3ub(240, 240, 240);
   glRotatef(-90, 1, 0, 0);
   gluCylinder(q, anelR, anelR, anelH, 32, 1);
   gluDisk(q, 0.0, anelR, 32, 1);
@@ -259,7 +259,7 @@ void drawPilastra(double x, double y, double z, double alturaFuste) {
   /* prato verde que toca o teto */
   glPushMatrix();
   glTranslated(0, alturaFuste + anelH, 0);
-  colorRgb(126, 168, 146);
+  glColor3ub(126, 168, 146);
   glRotatef(-90, 1, 0, 0);
   gluCylinder(q, pratoR, pratoR, pratoH, 32, 1);
   gluDisk(q, 0.0, pratoR, 32, 1);

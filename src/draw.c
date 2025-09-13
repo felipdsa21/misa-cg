@@ -1,4 +1,4 @@
-#include <math.h> /* cos / sin usados nas máscaras de arco */
+#include <math.h>
 #include <stddef.h>
 
 #include <GL/gl.h>
@@ -13,7 +13,7 @@
 
 GLUquadric *q = NULL;
 
-static const int groundSize = 50;
+static const int gramaSize = 50;
 static const float luzAmbiente[] = {0.15f, 0.15f, 0.15f, 1};
 static const float luzDifusa[] = {0.8f, 0.8f, 0.8f, 1};
 static const float luzEspecular[] = {0.1f, 0.1f, 0.1f, 1};
@@ -32,10 +32,9 @@ static const Vec2d espacoPortaSize = {3, 3};
 
 static const Vec3d janelaComArco = {1.2, 2.6, 0.3};
 static const Vec3d janelaRetangularSize = {1.2, 2, 0.3};
-#define JANELA_BAIXO_Y_OFFSET 1.4
-#define JANELA_CIMA_Y_OFFSET (JANELA_BAIXO_Y_OFFSET + 1.6 + 3.2)
-static const double janelaBaixoYOffset = JANELA_BAIXO_Y_OFFSET;
-static const double janelaCimaYOffset = JANELA_CIMA_Y_OFFSET;
+static const double janelaBaixoYOffset = 1.4;
+static const double janelaCimaYOffset = janelaBaixoYOffset + 1.6 + 3.2;
+
 /* ---------------------------- Pilastras Internas ----------------------------
    Usa a função existente drawPilastra(x,y,z,alturaFuste) definida em obj.c. A altura
    passada corresponde apenas ao fuste cilíndrico; a função adiciona base/anel/prato.
@@ -83,18 +82,18 @@ static void drawSacada() {
   glTranslated(startX, baseY, 0);
 
   /* Branco total da sacada */
-  colorRgb(245, 245, 245); // laje
+  glColor3ub(245, 245, 245); // laje
   drawBox((Vec3d){0, 0, 0}, (Vec3d){largura, espessura, profundidade});
-  colorRgb(235, 235, 235); // moldura inferior
+  glColor3ub(235, 235, 235); // moldura inferior
   drawBox((Vec3d){0, -0.10, 0}, (Vec3d){largura, 0.10, profundidade * 0.95});
 
   double railBaseY = espessura;
   double railTopY = railBaseY + guardaAltura;
 
-  colorRgb(250, 250, 250); // Top rail
+  glColor3ub(250, 250, 250); // Top rail
   drawBox((Vec3d){0, railTopY - 0.07, -0.14}, (Vec3d){largura, 0.07, 0.26});
 
-  colorRgb(250, 250, 250); // Balaústres
+  glColor3ub(250, 250, 250); // Balaústres
   double usable = largura;
   int count = (int)(usable / (balaLarg + balaGap));
   if (count < 3) {
@@ -106,7 +105,7 @@ static void drawSacada() {
     drawBox((Vec3d){x, railBaseY, -0.07}, (Vec3d){balaLarg, guardaAltura - 0.12, balaEsp * 0.5});
   }
 
-  colorRgb(240, 240, 240); // Rodapé guarda
+  glColor3ub(240, 240, 240); // Rodapé guarda
   drawBox((Vec3d){0, railBaseY, -0.12}, (Vec3d){largura, 0.11, 0.22});
 
   glPopMatrix();
@@ -121,7 +120,7 @@ static void drawTelhado() {
   double zBack = asaZOffset + asaSize.z + beiral;
   double zRidge = (zFront + zBack) / 2.0;
 
-  colorRgb(120, 50, 45);
+  glColor3ub(120, 50, 45);
   glBegin(GL_QUADS);
   double xA = 0;
   double xB = asaSize.x;
@@ -160,7 +159,7 @@ static void drawTelhado() {
   double cRidgeY = centroBaseY + centroRidgeAlt;
   double cStartX = asaSize.x - centroBeiral;
   double cEndX = asaSize.x + parteCentralSize.x + centroBeiral;
-  colorRgb(110, 40, 38);
+  glColor3ub(110, 40, 38);
   glBegin(GL_QUADS);
   glNormal3d(0, centroRidgeAlt, (cRidgeZ - cFront));
   glVertex3d(cStartX, centroBaseY, cFront);
@@ -175,7 +174,7 @@ static void drawTelhado() {
   glEnd();
 
   /* Friso (linha branca) acima das janelas superiores – percorre largura parte central */
-  colorRgb(245, 240, 235);
+  glColor3ub(245, 240, 235);
   double frisoAlt = 0.30;
   double frisoY = janelaCimaYOffset + janelaComArco.y + 0.25; /* base do friso */
   if (frisoY > parteCentralSize.y - 0.4) {
@@ -195,7 +194,7 @@ static void drawTelhado() {
   double arcoH = frontaoAlt * 0.65;
   double arcoBaseY = frontaoBaseY + frontaoAlt * 0.35;
   double cx = frontaoBaseX + raio;
-  colorRgb(235, 222, 210);
+  glColor3ub(235, 222, 210);
   drawBox(
     (Vec3d){frontaoBaseX, frontaoBaseY, frontaoBaseZ}, (Vec3d){frontaoLarg, frontaoAlt * 0.35, frontaoEsp}
   );
@@ -251,25 +250,25 @@ void onSetupCamera(void) {
   glLightfv(GL_LIGHT0, GL_POSITION, posicaoLuz);
 }
 
-static void drawGrass(void) {
-  colorRgb(65, 152, 10);
+static void drawGrama(void) {
+  glColor3ub(65, 152, 10);
   glNormal3i(0, 1, 0);
-  drawRectY(-groundSize, -groundSize, groundSize, groundSize, 0);
+  drawRectY(-gramaSize, -gramaSize, gramaSize, gramaSize, 0);
 }
 
 static void drawChao(void) {
   Vec2d tamanho = {parteCentralSize.x + asaSize.x * 2, parteCentralSize.z + asaSize.z * 2};
 
-  colorRgb(156, 146, 143);
+  glColor3ub(156, 146, 143);
   glNormal3i(0, 1, 0);
   drawRectY(-2, -2, tamanho.x + 2, tamanho.y + 2, EPSILON);
 }
 
 static void drawPiso(double x1, double z1, double x2, double z2, double y) {
-  colorRgb(150, 108, 72);
+  glColor3ub(150, 108, 72);
   drawRectY(x1, z1, x2, z2, y);
 
-  colorRgb(97, 67, 42);
+  glColor3ub(97, 67, 42);
   GLdouble spacing = 0.45;
 
   glBegin(GL_LINES);
@@ -469,7 +468,7 @@ static void drawParteCentral() {
 }
 
 static void drawParteExterna(void (*asaFunc)(void), void (*parteCentralFunc)(void)) {
-  colorRgb(228, 206, 211);
+  glColor3ub(228, 206, 211);
   glPushMatrix();
 
   // Asa direita
@@ -494,14 +493,14 @@ static void drawObjetos(void) {
   glPushMatrix();
   glTranslatef(10.0f, 1.0f, 7.0f); // movendo o objeto
   glRotatef(90.0f, 0.0f, 1.0f, 0.0f);
-  glColor3f(0.0f, 0.0f, 0.0f);
+  glColor3ub(0.0f, 0.0f, 0.0f);
   drawModelFaces(obj);
   glPopMatrix();
 
   glPushMatrix();
   glTranslatef(10.0f, 1.0f, 12.0f); // movendo o objeto
   glRotatef(90.0f, 0.0f, 1.0f, 0.0f);
-  glColor3f(0.0f, 0.0f, 0.0f);
+  glColor3ub(0.0f, 0.0f, 0.0f);
   drawModelFaces(obj);
   glPopMatrix();
 
@@ -510,7 +509,7 @@ static void drawObjetos(void) {
   glTranslatef(9.5f, 2.0f, 6.5f); // movendo o objeto
   glRotatef(0.0f, 0.0f, 1.0f, 0.0f);
   glScalef(0.2f, 0.2f, 0.2f); // reduzindo a escala
-  glColor3f(245.0f/255.0f, 245.0f/255.0f, 220.0f/255.0f);
+  glColor3ub(245.0f, 245.0f, 220.0f);
   drawModelFaces(obj);
   glPopMatrix();
 
@@ -518,7 +517,7 @@ static void drawObjetos(void) {
   glTranslatef(9.5f, 2.0f, 7.5f); // movendo o objeto
   glRotatef(0.0f, 0.0f, 1.0f, 0.0f);
   glScalef(0.2f, 0.2f, 0.2f); // reduzindo a escala
-  glColor3f(245.0f/255.0f, 245.0f/255.0f, 220.0f/255.0f);
+  glColor3ub(245.0f, 245.0f, 220.0f);
   drawModelFaces(obj);
   glPopMatrix();
 
@@ -527,7 +526,7 @@ static void drawObjetos(void) {
   glTranslatef(9.5f, 2.2f, 12.5f); // movendo o objeto
   glRotatef(0.0f, 0.0f, 1.0f, 0.0f);
   glScalef(0.2f, 0.2f, 0.2f); // reduzindo a escala
-  glColor3f(0.0f/255.0f, 245.0f/255.0f, 220.0f/255.0f);
+  glColor3ub(0.0f, 245.0f, 220.0f);
   drawModelFaces(obj);
   glPopMatrix();
 
@@ -536,7 +535,7 @@ static void drawObjetos(void) {
   glTranslatef(9.5f, 2.1f, 11.5f); // movendo o objeto
   glRotatef(180.0f, 0.0f, 1.0f, 0.0f);
   glScalef(0.1f, 0.1f, 0.1f); // reduzindo a escala
-  glColor3f(0.0f, 0.0f, 1.0f);
+  glColor3ub(0.0f, 0.0f, 255.0f);
   drawModelFaces(obj);
   glPopMatrix();
 }
@@ -590,7 +589,7 @@ static void drawJanelasParteCentral(void) {
 }
 
 void draw() {
-  drawGrass();
+  drawGrama();
 
   glPushMatrix();
   glTranslated(-(parteCentralSize.x / 2 + asaSize.x), 0, 0);

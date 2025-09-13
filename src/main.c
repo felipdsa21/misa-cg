@@ -10,26 +10,23 @@
 #include "draw.h"
 #include "util.h"
 
-Vec2i windowSize = {.x = 800, .y = 600};
+// https://learnopengl.com/Getting-started/Camera
+static const Vec3d cameraUp = {.x = 0, .y = 1, .z = 0};
+static const double mouseSensitivity = 0.1;
+static const double walkSpeed = 0.07195;
+
+/* non-static */ Vec2i windowSize = {.x = 800, .y = 600};
 static Vec2i lastMousePos = {};
 static bool firstMouse = true;
 static bool cameraFocused = true;
 static bool keyState[256] = {};
 static bool specialKeyState[256] = {};
 
-// https://learnopengl.com/Getting-started/Camera
-Vec3d cameraPos = {.x = 0, .y = 1.7, .z = -5};
-static const Vec3d cameraUp = {.x = 0, .y = 1, .z = 0};
+/* non-static */ Vec3d cameraPos = {.x = 0, .y = 1.7, .z = -5};
 static double pitch = 0, yaw = 90;
-
-static const double mouseSensitivity = 0.1;
-static const double walkSpeed = 0.07195;
-
-static void setupCamera(void);
 
 static void handleDisplay(void) {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  setupCamera();
   draw();
   glutSwapBuffers();
 }
@@ -37,7 +34,7 @@ static void handleDisplay(void) {
 static void setupCamera(void) {
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
-  Vec3d centerPos = sum3d(cameraPos, calcDirectionVec(radians(pitch), radians(yaw)));
+  Vec3d centerPos = sum3d(cameraPos, calcDirectionVec(toRadians(pitch), toRadians(yaw)));
 
   gluLookAt(
     cameraPos.x, cameraPos.y, cameraPos.z, centerPos.x, centerPos.y, centerPos.z, cameraUp.x, cameraUp.y,
@@ -60,19 +57,32 @@ static void handleReshape(int w, int h) {
 }
 
 static void moveCamera(bool perpendicular, bool negative) {
-  Vec3d directionVec = calcDirectionVec(radians(pitch), radians(yaw));
-  directionVec.y = 0;
-  directionVec = normalize3d(directionVec);
+  Vec3d direction = calcDirectionVec(toRadians(pitch), toRadians(yaw));
+  direction.y = 0;
+  direction = normalize3d(direction);
 
   if (perpendicular) {
-    directionVec = crossProduct3d(directionVec, cameraUp);
-    directionVec.y = 0;
-    directionVec = normalize3d(directionVec);
+    direction = crossProduct3d(direction, cameraUp);
+    direction.y = 0;
+    direction = normalize3d(direction);
   }
 
   double speed = negative ? -walkSpeed : walkSpeed;
-  directionVec = scalarMult3d(speed, directionVec);
-  cameraPos = sum3d(cameraPos, directionVec);
+  direction = scalarMult3d(speed, direction);
+  cameraPos = sum3d(cameraPos, direction);
+}
+
+static void setCameraFocused(bool value) {
+  if (cameraFocused == value) {
+    return;
+  }
+
+  cameraFocused = value;
+  glutSetCursor(value ? GLUT_CURSOR_NONE : GLUT_CURSOR_INHERIT);
+
+  if (value) {
+    firstMouse = true;
+  }
 }
 
 static void handleTimer(int value) {
@@ -115,12 +125,11 @@ static void handleTimer(int value) {
     changed = true;
   }
 
-  if (keyState['z']) {
-    cameraFocused = false;
-    glutSetCursor(GLUT_CURSOR_INHERIT);
+  if (specialKeyState[GLUT_KEY_CTRL_L]) {
+    setCameraFocused(false);
   }
 
-  if (updateAnimation()) {
+  if (onLoop()) {
     changed = true;
   }
 
@@ -136,8 +145,6 @@ static void handleKeyboard(unsigned char key, int x, int y) {
   (void)x;
   (void)y;
   keyState[tolower(key)] = true;
-
-  onKey(key, x, y);
 }
 
 static void handleKeyboardUp(unsigned char key, int x, int y) {
@@ -163,18 +170,19 @@ static void handleMotion(int x, int y) {
     lastMousePos = (Vec2i){x, y};
     firstMouse = false;
     return;
+  } else if (!cameraFocused) {
+    lastMousePos = (Vec2i){x, y};
+    return;
   }
 
-  if (cameraFocused) {
-    int dx = x - lastMousePos.x;
-    int dy = lastMousePos.y - y;
+  int dx = x - lastMousePos.x;
+  int dy = lastMousePos.y - y;
 
-    yaw += dx * mouseSensitivity;
-    pitch = clamp(pitch + (dy * mouseSensitivity), -89.9, 89.9);
-  }
+  yaw += dx * mouseSensitivity;
+  pitch = clamp(pitch + (dy * mouseSensitivity), -89.9, 89.9);
 
   // https://gamedev.stackexchange.com/a/98024
-  if (cameraFocused && (x < 100 || x > windowSize.x - 100 || y < 100 || y > windowSize.y - 100)) {
+  if (x < 100 || x > windowSize.x - 100 || y < 100 || y > windowSize.y - 100) {
     int newX = windowSize.x / 2, newY = windowSize.y / 2;
     glutWarpPointer(newX, newY);
     lastMousePos = (Vec2i){newX, newY};
@@ -189,9 +197,7 @@ static void handleMotion(int x, int y) {
 static void handleMouse(int button, int state, int x, int y) {
   if (!cameraFocused && !onMousePress(button, state, x, y) && button == GLUT_LEFT_BUTTON &&
       state == GLUT_DOWN) {
-    firstMouse = true;
-    cameraFocused = true;
-    glutSetCursor(GLUT_CURSOR_NONE);
+    setCameraFocused(true);
   }
 }
 

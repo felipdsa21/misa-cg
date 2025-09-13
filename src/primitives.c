@@ -3,10 +3,6 @@
 #include "primitives.h"
 #include "util.h"
 
-void colorRgb(int r, int g, int b) {
-  glColor3d((double)r / 255, (double)g / 255, (double)b / 255);
-}
-
 void drawRectY(double x1, double z1, double x2, double z2, double y) {
   glBegin(GL_QUADS);
   glVertex3d(x1, y, z1);

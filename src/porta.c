@@ -34,33 +34,28 @@ static bool stepDoor(void) {
   }
   return before != doorAngle;
 }
-bool updateAnimation(void) {
+bool onLoop(void) {
   return stepDoor();
-}
-
-void onKey(unsigned char key, int x, int y) {
-  (void)x;
-  (void)y;
 }
 
 /* ---------- helpers ---------- */
 static void colorWoodBase() {
-  colorRgb(120, 78, 48);
+  glColor3ub(120, 78, 48);
 } /* marrom base */
 static void colorWoodHighlight() {
-  colorRgb(139, 94, 62);
+  glColor3ub(139, 94, 62);
 } /* partes salientes */
 static void colorWoodInset() {
-  colorRgb(97, 67, 42);
+  glColor3ub(97, 67, 42);
 } /* painéis rebaixados */
 static void colorWoodFrame() {
-  colorRgb(150, 108, 72);
+  glColor3ub(150, 108, 72);
 } /* moldura dos painéis */
 static void colorWoodJamb() {
-  colorRgb(90, 60, 40);
+  glColor3ub(90, 60, 40);
 } /* junta central */
 static void colorMetal() {
-  colorRgb(80, 80, 80);
+  glColor3ub(80, 80, 80);
 } /* maçaneta */
 
 static void drawBoxEsp(double w, double h, double t) {
@@ -247,7 +242,7 @@ static void drawPortasFrente(double xAntesPorta) {
 void drawPorta(double xAntesPorta) {
   /* batente do vão (leve saliência) */
   const double zLift = -0.002;
-  colorRgb(210, 170, 170);
+  glColor3ub(210, 170, 170);
   glPushMatrix();
   glTranslated(0, 0, zLift);
   glNormal3i(0, 0, -1);
@@ -304,11 +299,11 @@ void drawBotao(void) {
   int startX = windowSize.x - botaoSize.x - 50;
   int startY = windowSize.y - botaoSize.y - 50;
 
-  colorRgb(80, 130, 190);
+  glColor3ub(80, 130, 190);
   glRectd(startX, startY, startX + botaoSize.x, startY + botaoSize.y);
 
   void *font = GLUT_BITMAP_HELVETICA_18;
-  colorRgb(255, 255, 255);
+  glColor3ub(255, 255, 255);
   drawBitmapString(font, startX + 30, startY + 30, doorTarget > 0 ? "Fechar" : "Abrir");
 
   if (depthWas) {
@@ -319,9 +314,9 @@ void drawBotao(void) {
   }
 
   // restaura matrizes
-  glMatrixMode(GL_MODELVIEW);
-  glPopMatrix();
   glMatrixMode(GL_PROJECTION);
+  glPopMatrix();
+  glMatrixMode(GL_MODELVIEW);
   glPopMatrix();
 }
 

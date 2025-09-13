@@ -21,8 +21,8 @@ static const double EPSILON = 0.001; // Para evitar z-fighting
 
 // Funções matemáticas
 double clamp(double x, double lower, double upper);
-double radians(double degrees);
-Vec3d copyY3d(Vec3d u, Vec3d v);
+double toRadians(double degrees);
+Vec3d withY3d(Vec3d u, int newY);
 Vec3d calcDirectionVec(double pitch, double yaw);
 Vec3d sum3d(Vec3d u, Vec3d v);
 Vec3d scalarMult3d(double a, Vec3d u);

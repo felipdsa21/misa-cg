@@ -6,12 +6,12 @@ double clamp(double x, double lower, double upper) {
   return x < lower ? lower : (x > upper ? upper : x);
 }
 
-double radians(double degrees) {
+double toRadians(double degrees) {
   return degrees * PI / 180.0;
 }
 
-Vec3d copyY3d(Vec3d u, Vec3d v) {
-  return (Vec3d){.x = u.x, .y = v.y, .z = u.z};
+Vec3d withY3d(Vec3d u, int newY) {
+  return (Vec3d){.x = u.x, .y = newY, .z = u.z};
 }
 
 Vec3d calcDirectionVec(double pitch, double yaw) {
