@@ -159,11 +159,11 @@ def handle_timer(value: int):
 
 
 def handle_keyboard(key: int, x: int, y: int):
-    key_state[key] = True
+    key_state[ord(key)] = True
 
 
 def handle_keyboard_up(key: int, x: int, y: int):
-    key_state[key] = False
+    key_state[ord(key)] = False
 
 
 def handle_special(key: int, x: int, y: int):
