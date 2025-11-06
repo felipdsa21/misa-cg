@@ -14,7 +14,7 @@ from .util import (
     cross_product3d,
 )
 from . import draw
-from . import porta
+from .scene import door
 
 GLUT_KEY_SHIFT_L = 112
 GLUT_KEY_CTRL_L = 114
@@ -70,8 +70,8 @@ def handle_reshape(w: int, h: int):
     first_mouse = True
     window_size = Vec2i(w, h)
     # Update porta module globals
-    porta.window_size = window_size
-    porta.camera_pos = camera_pos
+    door.window_size = window_size
+    door.camera_pos = camera_pos
 
     glViewport(0, 0, window_size.x, window_size.y)
 
@@ -113,8 +113,8 @@ def set_camera_focused(value: bool):
 def handle_timer(value: int):
     global camera_pos, camera_focused, window_size
     # Update porta module globals
-    porta.window_size = window_size
-    porta.camera_pos = camera_pos
+    door.window_size = window_size
+    door.camera_pos = camera_pos
 
     if key_state.get(27, False):  # ESC
         sys.exit(0)
@@ -148,7 +148,7 @@ def handle_timer(value: int):
     if special_key_state.get(GLUT_KEY_CTRL_L, False):
         set_camera_focused(False)
 
-    if porta.on_loop():
+    if door.on_loop():
         changed = True
 
     if changed:
@@ -177,8 +177,8 @@ def handle_special_up(key: int, x: int, y: int):
 def handle_motion(x: int, y: int):
     global first_mouse, last_mouse_pos, pitch, yaw, window_size, camera_pos
     # Update porta module globals
-    porta.window_size = window_size
-    porta.camera_pos = camera_pos
+    door.window_size = window_size
+    door.camera_pos = camera_pos
 
     if first_mouse:
         last_mouse_pos = Vec2i(x, y)
@@ -211,7 +211,7 @@ def handle_mouse(button: int, state: int, x: int, y: int):
     global camera_focused
     if (
         not camera_focused
-        and not porta.on_mouse_press(button, state, x, y)
+        and not door.on_mouse_press(button, state, x, y)
         and button == GLUT_LEFT_BUTTON
         and state == GLUT_DOWN
     ):

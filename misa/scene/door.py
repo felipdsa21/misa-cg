@@ -1,7 +1,7 @@
 from OpenGL.GL import *
 from OpenGL.GLUT import *
-from .util import Vec3d, Vec2i
-from .primitives import draw_box, draw_rect_z
+from ..util import Vec3d, Vec2i
+from ..primitives import draw_box, draw_rect_z
 
 # Global state (will be updated by main.py)
 window_size = Vec2i(800, 600)
