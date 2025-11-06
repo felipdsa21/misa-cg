@@ -1,18 +1,16 @@
 ## Dependências
-- Ambiente de desenvolvimento WSL, MSYS2 ou Linux.
-- Compilador C (preferencialmente GCC) e GNU Make.
-- Freeglut e OpenGL.
+- Python 3.12 ou superior
+- PyOpenGL e PyOpenGL-accelerate
+- FreeGLUT
 
-## Como compilar
-Abra um terminal e execute:
+### Instalação das dependências
 
 ```shell
-$ make build
+$ pip install -r requirements.txt
 ```
 
 ## Como executar
-Depois de compilar, execute:
 
 ```shell
-$ build/misa
+$ python -m misa
 ```
