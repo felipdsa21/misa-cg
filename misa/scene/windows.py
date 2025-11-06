@@ -1,7 +1,7 @@
 """Window drawing functions - Rectangular and arched windows."""
 
 import math
-from OpenGL.GL import *
+from OpenGL import GL
 from ..util import Vec3d, PI
 from ..primitives import draw_box
 
@@ -19,48 +19,48 @@ def draw_arch_ring(
     z_back = z_front - depth
 
     # Anel frontal
-    glBegin(GL_TRIANGLE_STRIP)
+    GL.glBegin(GL.GL_TRIANGLE_STRIP)
     for i in range(segments + 1):
         a = PI * i / segments
         xo = math.cos(a) * outer_r
         yo = math.sin(a) * outer_r
         xi = math.cos(a) * inner_r
         yi = math.sin(a) * inner_r
-        glVertex3d(cx + xo, cy + yo, z_front)
-        glVertex3d(cx + xi, cy + yi, z_front)
-    glEnd()
+        GL.glVertex3d(cx + xo, cy + yo, z_front)
+        GL.glVertex3d(cx + xi, cy + yi, z_front)
+    GL.glEnd()
 
     # Anel traseiro
-    glBegin(GL_TRIANGLE_STRIP)
+    GL.glBegin(GL.GL_TRIANGLE_STRIP)
     for i in range(segments + 1):
         a = PI * i / segments
         xo = math.cos(a) * outer_r
         yo = math.sin(a) * outer_r
         xi = math.cos(a) * inner_r
         yi = math.sin(a) * inner_r
-        glVertex3d(cx + xo, cy + yo, z_back)
-        glVertex3d(cx + xi, cy + yi, z_back)
-    glEnd()
+        GL.glVertex3d(cx + xo, cy + yo, z_back)
+        GL.glVertex3d(cx + xi, cy + yi, z_back)
+    GL.glEnd()
 
     # Lateral externa
-    glBegin(GL_QUAD_STRIP)
+    GL.glBegin(GL.GL_QUAD_STRIP)
     for i in range(segments + 1):
         a = PI * i / segments
         xo = math.cos(a) * outer_r
         yo = math.sin(a) * outer_r
-        glVertex3d(cx + xo, cy + yo, z_front)
-        glVertex3d(cx + xo, cy + yo, z_back)
-    glEnd()
+        GL.glVertex3d(cx + xo, cy + yo, z_front)
+        GL.glVertex3d(cx + xo, cy + yo, z_back)
+    GL.glEnd()
 
     # Lateral interna
-    glBegin(GL_QUAD_STRIP)
+    GL.glBegin(GL.GL_QUAD_STRIP)
     for i in range(segments + 1):
         a = PI * i / segments
         xi = math.cos(a) * inner_r
         yi = math.sin(a) * inner_r
-        glVertex3d(cx + xi, cy + yi, z_back)
-        glVertex3d(cx + xi, cy + yi, z_front)
-    glEnd()
+        GL.glVertex3d(cx + xi, cy + yi, z_back)
+        GL.glVertex3d(cx + xi, cy + yi, z_front)
+    GL.glEnd()
 
 
 def draw_janela_com_arco(width: float, height: float, depth: float):
@@ -77,7 +77,7 @@ def draw_janela_com_arco(width: float, height: float, depth: float):
     z_front = 0
 
     # Moldura (tom rosado)
-    glColor3ub(191, 124, 124)
+    GL.glColor3ub(191, 124, 124)
     # ombreiras (laterais) e peitoril (base)
     draw_box(Vec3d(0, 0, z_front), Vec3d(frame, rect_h, depth))
     draw_box(Vec3d(width - frame, 0, z_front), Vec3d(frame, rect_h, depth))
@@ -89,32 +89,32 @@ def draw_janela_com_arco(width: float, height: float, depth: float):
     draw_arch_ring(cx, cy, radius, radius - frame, z_front, depth, seg)
 
     # Vidro translúcido
-    glEnable(GL_BLEND)
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
-    glColor4ub(199, 222, 245, 64)  # azul claro com alpha
+    GL.glEnable(GL.GL_BLEND)
+    GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
+    GL.glColor4ub(199, 222, 245, 64)  # azul claro com alpha
 
     # Retângulo de vidro (parte reta)
-    glBegin(GL_QUADS)
-    glVertex3d(frame, frame, z_front - epsilon)
-    glVertex3d(width - frame, frame, z_front - epsilon)
-    glVertex3d(width - frame, rect_h - frame, z_front - epsilon)
-    glVertex3d(frame, rect_h - frame, z_front - epsilon)
-    glEnd()
+    GL.glBegin(GL.GL_QUADS)
+    GL.glVertex3d(frame, frame, z_front - epsilon)
+    GL.glVertex3d(width - frame, frame, z_front - epsilon)
+    GL.glVertex3d(width - frame, rect_h - frame, z_front - epsilon)
+    GL.glVertex3d(frame, rect_h - frame, z_front - epsilon)
+    GL.glEnd()
 
     # Vidro do arco
-    glBegin(GL_TRIANGLE_FAN)
-    glVertex3d(cx, cy, z_front - epsilon)
+    GL.glBegin(GL.GL_TRIANGLE_FAN)
+    GL.glVertex3d(cx, cy, z_front - epsilon)
     for i in range(seg + 1):
         a = PI * i / seg
         xi = math.cos(a) * (radius - frame)
         yi = math.sin(a) * (radius - frame)
-        glVertex3d(cx + xi, cy + yi, z_front - epsilon)
-    glEnd()
+        GL.glVertex3d(cx + xi, cy + yi, z_front - epsilon)
+    GL.glEnd()
 
-    glDisable(GL_BLEND)
+    GL.glDisable(GL.GL_BLEND)
 
     # Travessas internas (caixilhos)
-    glColor3ub(191, 124, 124)
+    GL.glColor3ub(191, 124, 124)
     bar = frame * 0.45
     inner_w = width - 2.0 * frame
     glass_bottom = frame
@@ -145,23 +145,23 @@ def draw_janela_retangular(width: float, height: float, depth: float):
     epsilon = 0.002  # evita z-fighting
 
     # Moldura
-    glColor3ub(191, 124, 124)
+    GL.glColor3ub(191, 124, 124)
     draw_box(Vec3d(0, 0, 0), Vec3d(frame, height, depth))
     draw_box(Vec3d(width - frame, 0, 0), Vec3d(frame, height, depth))
     draw_box(Vec3d(0, 0, 0), Vec3d(width, frame, depth))
     draw_box(Vec3d(0, height - frame, 0), Vec3d(width, frame, depth))
 
     # Vidro
-    glColor3ub(199, 222, 245)
-    glBegin(GL_QUADS)
-    glVertex3d(frame, frame, -epsilon)
-    glVertex3d(width - frame, frame, -epsilon)
-    glVertex3d(width - frame, height - frame, -epsilon)
-    glVertex3d(frame, height - frame, -epsilon)
-    glEnd()
+    GL.glColor3ub(199, 222, 245)
+    GL.glBegin(GL.GL_QUADS)
+    GL.glVertex3d(frame, frame, -epsilon)
+    GL.glVertex3d(width - frame, frame, -epsilon)
+    GL.glVertex3d(width - frame, height - frame, -epsilon)
+    GL.glVertex3d(frame, height - frame, -epsilon)
+    GL.glEnd()
 
     # Travessas internas (caixilhos)
-    glColor3ub(191, 124, 124)
+    GL.glColor3ub(191, 124, 124)
     bar = frame * 0.5
     inner_w = width - 2.0 * frame
     glass_top_rect = height - frame

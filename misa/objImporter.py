@@ -11,7 +11,7 @@ models to your OpenGL project in Python.
 
 from dataclasses import dataclass
 from typing import List
-from OpenGL.GL import *
+from OpenGL import GL
 
 
 @dataclass
@@ -74,32 +74,32 @@ def load_model(file_name: str) -> Model:
 
 
 def draw_model_vertex(point_size: float, obj_model: Model):
-    glPointSize(point_size)
-    glBegin(GL_POINTS)
+    GL.glPointSize(point_size)
+    GL.glBegin(GL.GL_POINTS)
     for vertex in obj_model.v:
-        glVertex3f(vertex.x, vertex.y, vertex.z)
-    glEnd()
+        GL.glVertex3f(vertex.x, vertex.y, vertex.z)
+    GL.glEnd()
 
 
 def draw_model_faces(obj_model: Model):
     for face in obj_model.f:
         if face.v_number == 3:
-            glBegin(GL_TRIANGLES)
+            GL.glBegin(GL.GL_TRIANGLES)
             v1 = face.faces[0] - 1
             v2 = face.faces[1] - 1
             v3 = face.faces[2] - 1
-            glVertex3f(obj_model.v[v1].x, obj_model.v[v1].y, obj_model.v[v1].z)
-            glVertex3f(obj_model.v[v2].x, obj_model.v[v2].y, obj_model.v[v2].z)
-            glVertex3f(obj_model.v[v3].x, obj_model.v[v3].y, obj_model.v[v3].z)
-            glEnd()
+            GL.glVertex3f(obj_model.v[v1].x, obj_model.v[v1].y, obj_model.v[v1].z)
+            GL.glVertex3f(obj_model.v[v2].x, obj_model.v[v2].y, obj_model.v[v2].z)
+            GL.glVertex3f(obj_model.v[v3].x, obj_model.v[v3].y, obj_model.v[v3].z)
+            GL.glEnd()
         elif face.v_number == 4:
-            glBegin(GL_QUADS)
+            GL.glBegin(GL.GL_QUADS)
             v1 = face.faces[0] - 1
             v2 = face.faces[1] - 1
             v3 = face.faces[2] - 1
             v4 = face.faces[3] - 1
-            glVertex3f(obj_model.v[v1].x, obj_model.v[v1].y, obj_model.v[v1].z)
-            glVertex3f(obj_model.v[v2].x, obj_model.v[v2].y, obj_model.v[v2].z)
-            glVertex3f(obj_model.v[v3].x, obj_model.v[v3].y, obj_model.v[v3].z)
-            glVertex3f(obj_model.v[v4].x, obj_model.v[v4].y, obj_model.v[v4].z)
-            glEnd()
+            GL.glVertex3f(obj_model.v[v1].x, obj_model.v[v1].y, obj_model.v[v1].z)
+            GL.glVertex3f(obj_model.v[v2].x, obj_model.v[v2].y, obj_model.v[v2].z)
+            GL.glVertex3f(obj_model.v[v3].x, obj_model.v[v3].y, obj_model.v[v3].z)
+            GL.glVertex3f(obj_model.v[v4].x, obj_model.v[v4].y, obj_model.v[v4].z)
+            GL.glEnd()

@@ -1,7 +1,6 @@
 """Pillar drawing functions - Internal pillars for structural support."""
 
-from OpenGL.GL import *
-from OpenGL.GLU import *
+from OpenGL import GL, GLU
 from ..util import Vec3d
 from ..primitives import draw_rect_z
 
@@ -11,36 +10,36 @@ q = None
 
 def draw_box_local(w: float, h: float, t: float):
     """Helper function to draw a local box aligned to axes."""
-    glNormal3i(0, 0, -1)
-    glRectd(0, 0, w, h)  # frente z=0
-    glNormal3i(0, 0, 1)
+    GL.glNormal3i(0, 0, -1)
+    GL.glRectd(0, 0, w, h)  # frente z=0
+    GL.glNormal3i(0, 0, 1)
     draw_rect_z(0, 0, w, h, t)  # trás  z=t
 
-    glPushMatrix()
-    glRotatef(-90, 0, 1, 0)
-    glNormal3i(-1, 0, 0)
-    glRectd(0, 0, t, h)
-    glPopMatrix()  # lado esq
+    GL.glPushMatrix()
+    GL.glRotatef(-90, 0, 1, 0)
+    GL.glNormal3i(-1, 0, 0)
+    GL.glRectd(0, 0, t, h)
+    GL.glPopMatrix()  # lado esq
 
-    glPushMatrix()
-    glTranslated(w, 0, 0)
-    glRotatef(-90, 0, 1, 0)
-    glNormal3i(-1, 0, 0)
-    glRectd(0, 0, t, h)
-    glPopMatrix()  # lado dir
+    GL.glPushMatrix()
+    GL.glTranslated(w, 0, 0)
+    GL.glRotatef(-90, 0, 1, 0)
+    GL.glNormal3i(-1, 0, 0)
+    GL.glRectd(0, 0, t, h)
+    GL.glPopMatrix()  # lado dir
 
-    glPushMatrix()
-    glRotatef(90, 1, 0, 0)
-    glNormal3i(0, 1, 0)
-    glRectd(0, 0, w, t)
-    glPopMatrix()  # base
+    GL.glPushMatrix()
+    GL.glRotatef(90, 1, 0, 0)
+    GL.glNormal3i(0, 1, 0)
+    GL.glRectd(0, 0, w, t)
+    GL.glPopMatrix()  # base
 
-    glPushMatrix()
-    glTranslated(0, h, 0)
-    glRotatef(90, 1, 0, 0)
-    glNormal3i(0, 1, 0)
-    glRectd(0, 0, w, t)
-    glPopMatrix()  # topo
+    GL.glPushMatrix()
+    GL.glTranslated(0, h, 0)
+    GL.glRotatef(90, 1, 0, 0)
+    GL.glNormal3i(0, 1, 0)
+    GL.glRectd(0, 0, w, t)
+    GL.glPopMatrix()  # topo
 
 
 def draw_pilastra(x: float, y: float, z: float, altura_fuste: float):
@@ -59,57 +58,59 @@ def draw_pilastra(x: float, y: float, z: float, altura_fuste: float):
     prato_r = 0.45
     prato_h = 0.04  # prato verde (teto)
 
-    glPushMatrix()
-    glTranslated(x, y, z)
+    GL.glPushMatrix()
+    GL.glTranslated(x, y, z)
 
     # base madeira escura
-    glColor3ub(70, 42, 25)
+    GL.glColor3ub(70, 42, 25)
     draw_box_local(base_w, base_h, base_w)
 
     # pedestal amarelo
-    glTranslated((base_w - pedestal_w) / 2.0, base_h, (base_w - pedestal_w) / 2.0)
-    glColor3ub(225, 197, 126)
+    GL.glTranslated((base_w - pedestal_w) / 2.0, base_h, (base_w - pedestal_w) / 2.0)
+    GL.glColor3ub(225, 197, 126)
     draw_box_local(pedestal_w, pedestal_h, pedestal_w)
 
     # moldura branca
-    glTranslated(-(mold_w - pedestal_w) / 2.0, pedestal_h, -(mold_w - pedestal_w) / 2.0)
-    glColor3ub(240, 240, 240)
+    GL.glTranslated(
+        -(mold_w - pedestal_w) / 2.0, pedestal_h, -(mold_w - pedestal_w) / 2.0
+    )
+    GL.glColor3ub(240, 240, 240)
     draw_box_local(mold_w, mold_h, mold_w)
 
     # fuste (cilindro fechado, alinhado ao eixo Y)
-    glTranslated(mold_w / 2.0, mold_h, mold_w / 2.0)
-    glColor3ub(225, 197, 126)
-    glPushMatrix()
-    glRotatef(-90, 1, 0, 0)  # GLU usa +Z → vira para +Y
-    gluCylinder(q, fuste_r, fuste_r, altura_fuste, 32, 1)
-    gluDisk(q, 0.0, fuste_r, 32, 1)  # tampa inferior
-    glTranslatef(0, 0, altura_fuste)
-    gluDisk(q, 0.0, fuste_r, 32, 1)  # tampa superior
-    glPopMatrix()
+    GL.glTranslated(mold_w / 2.0, mold_h, mold_w / 2.0)
+    GL.glColor3ub(225, 197, 126)
+    GL.glPushMatrix()
+    GL.glRotatef(-90, 1, 0, 0)  # GLU usa +Z → vira para +Y
+    GLU.gluCylinder(q, fuste_r, fuste_r, altura_fuste, 32, 1)
+    GLU.gluDisk(q, 0.0, fuste_r, 32, 1)  # tampa inferior
+    GL.glTranslatef(0, 0, altura_fuste)
+    GLU.gluDisk(q, 0.0, fuste_r, 32, 1)  # tampa superior
+    GL.glPopMatrix()
 
     # anel branco no topo do fuste
-    glPushMatrix()
-    glTranslated(0, altura_fuste, 0)
-    glColor3ub(240, 240, 240)
-    glRotatef(-90, 1, 0, 0)
-    gluCylinder(q, anel_r, anel_r, anel_h, 32, 1)
-    gluDisk(q, 0.0, anel_r, 32, 1)
-    glTranslatef(0, 0, anel_h)
-    gluDisk(q, 0.0, anel_r, 32, 1)
-    glPopMatrix()
+    GL.glPushMatrix()
+    GL.glTranslated(0, altura_fuste, 0)
+    GL.glColor3ub(240, 240, 240)
+    GL.glRotatef(-90, 1, 0, 0)
+    GLU.gluCylinder(q, anel_r, anel_r, anel_h, 32, 1)
+    GLU.gluDisk(q, 0.0, anel_r, 32, 1)
+    GL.glTranslatef(0, 0, anel_h)
+    GLU.gluDisk(q, 0.0, anel_r, 32, 1)
+    GL.glPopMatrix()
 
     # prato verde que toca o teto
-    glPushMatrix()
-    glTranslated(0, altura_fuste + anel_h, 0)
-    glColor3ub(126, 168, 146)
-    glRotatef(-90, 1, 0, 0)
-    gluCylinder(q, prato_r, prato_r, prato_h, 32, 1)
-    gluDisk(q, 0.0, prato_r, 32, 1)
-    glTranslatef(0, 0, prato_h)
-    gluDisk(q, 0.0, prato_r, 32, 1)
-    glPopMatrix()
+    GL.glPushMatrix()
+    GL.glTranslated(0, altura_fuste + anel_h, 0)
+    GL.glColor3ub(126, 168, 146)
+    GL.glRotatef(-90, 1, 0, 0)
+    GLU.gluCylinder(q, prato_r, prato_r, prato_h, 32, 1)
+    GLU.gluDisk(q, 0.0, prato_r, 32, 1)
+    GL.glTranslatef(0, 0, prato_h)
+    GLU.gluDisk(q, 0.0, prato_r, 32, 1)
+    GL.glPopMatrix()
 
-    glPopMatrix()
+    GL.glPopMatrix()
 
 
 def draw_pilastras_internas():

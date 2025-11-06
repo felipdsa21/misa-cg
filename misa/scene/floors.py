@@ -1,25 +1,25 @@
 """Floor drawing functions - All floor levels in the building."""
 
-from OpenGL.GL import *
+from OpenGL import GL
 from ..util import Vec2d, EPSILON
 from ..primitives import draw_rect_y
 
 
 def draw_piso(x1: float, z1: float, x2: float, z2: float, y: float):
     """Draw a single floor section with wood texture and lines."""
-    glColor3ub(150, 108, 72)
+    GL.glColor3ub(150, 108, 72)
     draw_rect_y(x1, z1, x2, z2, y)
 
-    glColor3ub(97, 67, 42)
+    GL.glColor3ub(97, 67, 42)
     spacing = 0.45
 
-    glBegin(GL_LINES)
+    GL.glBegin(GL.GL_LINES)
     x = x1 + spacing
     while x < x2:
-        glVertex3d(x, y + EPSILON, z1)
-        glVertex3d(x, y + EPSILON, z2)
+        GL.glVertex3d(x, y + EPSILON, z1)
+        GL.glVertex3d(x, y + EPSILON, z2)
         x += spacing
-    glEnd()
+    GL.glEnd()
 
 
 def draw_pisos():
@@ -34,15 +34,15 @@ def draw_pisos():
         abertura_escada_size,
     )
 
-    glNormal3i(0, 1, 0)
-    glPushMatrix()
+    GL.glNormal3i(0, 1, 0)
+    GL.glPushMatrix()
 
     # Asa direita
-    glTranslated(0, 0, asa_z_offset)
+    GL.glTranslated(0, 0, asa_z_offset)
     draw_piso(0, 0, asa_size.x, asa_size.z, piso_y)
 
     # Parte central
-    glTranslated(asa_size.x, 0, -asa_z_offset)
+    GL.glTranslated(asa_size.x, 0, -asa_z_offset)
 
     espaco_porta_x_start = (parte_central_size.x - espaco_porta_size.x) / 2
     espaco_porta_x_end = (parte_central_size.x + espaco_porta_size.x) / 2
@@ -79,7 +79,7 @@ def draw_pisos():
     )
 
     # Asa esquerda
-    glTranslated(parte_central_size.x, 0, asa_z_offset)
+    GL.glTranslated(parte_central_size.x, 0, asa_z_offset)
     draw_piso(0, 0, asa_size.x, asa_size.z, piso_y)
 
-    glPopMatrix()
+    GL.glPopMatrix()

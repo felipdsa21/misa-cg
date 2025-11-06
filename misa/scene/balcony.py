@@ -1,6 +1,6 @@
 """Balcony drawing functions - Front balcony with railing and balusters."""
 
-from OpenGL.GL import *
+from OpenGL import GL
 from ..util import Vec3d
 from ..primitives import draw_box
 
@@ -34,22 +34,22 @@ def draw_sacada():
     centro_x = asa_size.x + x_antes_porta + porta_size.x / 2.0
     start_x = centro_x - largura / 2.0
 
-    glPushMatrix()
-    glTranslated(start_x, base_y, 0)
+    GL.glPushMatrix()
+    GL.glTranslated(start_x, base_y, 0)
 
     # Branco total da sacada
-    glColor3ub(245, 245, 245)  # laje
+    GL.glColor3ub(245, 245, 245)  # laje
     draw_box(Vec3d(0, 0, 0), Vec3d(largura, espessura, profundidade))
-    glColor3ub(235, 235, 235)  # moldura inferior
+    GL.glColor3ub(235, 235, 235)  # moldura inferior
     draw_box(Vec3d(0, -0.10, 0), Vec3d(largura, 0.10, profundidade * 0.95))
 
     rail_base_y = espessura
     rail_top_y = rail_base_y + guarda_altura
 
-    glColor3ub(250, 250, 250)  # Top rail
+    GL.glColor3ub(250, 250, 250)  # Top rail
     draw_box(Vec3d(0, rail_top_y - 0.07, -0.14), Vec3d(largura, 0.07, 0.26))
 
-    glColor3ub(250, 250, 250)  # Balaústres
+    GL.glColor3ub(250, 250, 250)  # Balaústres
     usable = largura
     count = int(usable / (bala_larg + bala_gap))
     if count < 3:
@@ -62,7 +62,7 @@ def draw_sacada():
             Vec3d(bala_larg, guarda_altura - 0.12, bala_esp * 0.5),
         )
 
-    glColor3ub(240, 240, 240)  # Rodapé guarda
+    GL.glColor3ub(240, 240, 240)  # Rodapé guarda
     draw_box(Vec3d(0, rail_base_y, -0.12), Vec3d(largura, 0.11, 0.22))
 
-    glPopMatrix()
+    GL.glPopMatrix()

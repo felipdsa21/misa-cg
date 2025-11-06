@@ -1,7 +1,5 @@
 import sys
-from OpenGL.GL import *
-from OpenGL.GLU import *
-from OpenGL.GLUT import *
+from OpenGL import GL, GLU, GLUT
 from .util import (
     Vec2i,
     Vec3d,
@@ -16,8 +14,8 @@ from .util import (
 from . import draw
 from .scene import door
 
-GLUT_KEY_SHIFT_L = 112
-GLUT_KEY_CTRL_L = 114
+GLUT.GLUT_KEY_SHIFT_L = 112
+GLUT.GLUT_KEY_CTRL_L = 114
 
 # Camera constants
 camera_up = Vec3d(0, 1, 0)
@@ -38,19 +36,19 @@ yaw = 90.0
 
 
 def handle_display():
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+    GL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
     draw.draw()
-    glutSwapBuffers()
+    GLUT.glutSwapBuffers()
 
 
 def setup_camera():
-    glMatrixMode(GL_MODELVIEW)
-    glLoadIdentity()
+    GL.glMatrixMode(GL.GL_MODELVIEW)
+    GL.glLoadIdentity()
     center_pos = sum3d(
         camera_pos, calc_direction_vec(to_radians(pitch), to_radians(yaw))
     )
 
-    gluLookAt(
+    GLU.gluLookAt(
         camera_pos.x,
         camera_pos.y,
         camera_pos.z,
@@ -73,11 +71,11 @@ def handle_reshape(w: int, h: int):
     door.window_size = window_size
     door.camera_pos = camera_pos
 
-    glViewport(0, 0, window_size.x, window_size.y)
+    GL.glViewport(0, 0, window_size.x, window_size.y)
 
-    glMatrixMode(GL_PROJECTION)
-    glLoadIdentity()
-    gluPerspective(70, window_size.x / window_size.y, 0.1, 50)
+    GL.glMatrixMode(GL.GL_PROJECTION)
+    GL.glLoadIdentity()
+    GLU.gluPerspective(70, window_size.x / window_size.y, 0.1, 50)
 
     setup_camera()
 
@@ -104,7 +102,7 @@ def set_camera_focused(value: bool):
         return
 
     camera_focused = value
-    glutSetCursor(GLUT_CURSOR_NONE if value else GLUT_CURSOR_INHERIT)
+    GLUT.glutSetCursor(GLUT.GLUT_CURSOR_NONE if value else GLUT.GLUT_CURSOR_INHERIT)
 
     if value:
         first_mouse = True
@@ -141,11 +139,11 @@ def handle_timer(value: int):
         camera_pos.y += walk_speed
         changed = True
 
-    if special_key_state.get(GLUT_KEY_SHIFT_L, False):
+    if special_key_state.get(GLUT.GLUT_KEY_SHIFT_L, False):
         camera_pos.y -= walk_speed
         changed = True
 
-    if special_key_state.get(GLUT_KEY_CTRL_L, False):
+    if special_key_state.get(GLUT.GLUT_KEY_CTRL_L, False):
         set_camera_focused(False)
 
     if door.on_loop():
@@ -153,9 +151,9 @@ def handle_timer(value: int):
 
     if changed:
         setup_camera()
-        glutPostRedisplay()
+        GLUT.glutPostRedisplay()
 
-    glutTimerFunc(1000 // 60, handle_timer, 0)
+    GLUT.glutTimerFunc(1000 // 60, handle_timer, 0)
 
 
 def handle_keyboard(key: int, x: int, y: int):
@@ -198,13 +196,13 @@ def handle_motion(x: int, y: int):
     if x < 100 or x > window_size.x - 100 or y < 100 or y > window_size.y - 100:
         new_x = window_size.x // 2
         new_y = window_size.y // 2
-        glutWarpPointer(new_x, new_y)
+        GLUT.glutWarpPointer(new_x, new_y)
         last_mouse_pos = Vec2i(new_x, new_y)
     else:
         last_mouse_pos = Vec2i(x, y)
 
     setup_camera()
-    glutPostRedisplay()
+    GLUT.glutPostRedisplay()
 
 
 def handle_mouse(button: int, state: int, x: int, y: int):
@@ -212,36 +210,38 @@ def handle_mouse(button: int, state: int, x: int, y: int):
     if (
         not camera_focused
         and not door.on_mouse_press(button, state, x, y)
-        and button == GLUT_LEFT_BUTTON
-        and state == GLUT_DOWN
+        and button == GLUT.GLUT_LEFT_BUTTON
+        and state == GLUT.GLUT_DOWN
     ):
         set_camera_focused(True)
 
 
 def main():
     global window_size, camera_pos
-    glutInit(sys.argv)
+    GLUT.glutInit(sys.argv)
 
-    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH | GLUT_MULTISAMPLE)
-    glutInitWindowSize(window_size.x, window_size.y)
-    glutCreateWindow(b"MISA")
-    glutIgnoreKeyRepeat(1)
-    glutSetCursor(GLUT_CURSOR_NONE)
+    GLUT.glutInitDisplayMode(
+        GLUT.GLUT_DOUBLE | GLUT.GLUT_RGBA | GLUT.GLUT_DEPTH | GLUT.GLUT_MULTISAMPLE
+    )
+    GLUT.glutInitWindowSize(window_size.x, window_size.y)
+    GLUT.glutCreateWindow(b"MISA")
+    GLUT.glutIgnoreKeyRepeat(1)
+    GLUT.glutSetCursor(GLUT.GLUT_CURSOR_NONE)
 
-    glutDisplayFunc(handle_display)
-    glutReshapeFunc(handle_reshape)
-    glutTimerFunc(1000 // 60, handle_timer, 0)
-    glutKeyboardFunc(handle_keyboard)
-    glutKeyboardUpFunc(handle_keyboard_up)
-    glutSpecialFunc(handle_special)
-    glutSpecialUpFunc(handle_special_up)
-    glutMotionFunc(handle_motion)
-    glutPassiveMotionFunc(handle_motion)
-    glutMouseFunc(handle_mouse)
+    GLUT.glutDisplayFunc(handle_display)
+    GLUT.glutReshapeFunc(handle_reshape)
+    GLUT.glutTimerFunc(1000 // 60, handle_timer, 0)
+    GLUT.glutKeyboardFunc(handle_keyboard)
+    GLUT.glutKeyboardUpFunc(handle_keyboard_up)
+    GLUT.glutSpecialFunc(handle_special)
+    GLUT.glutSpecialUpFunc(handle_special_up)
+    GLUT.glutMotionFunc(handle_motion)
+    GLUT.glutPassiveMotionFunc(handle_motion)
+    GLUT.glutMouseFunc(handle_mouse)
 
-    glEnable(GL_DEPTH_TEST)
+    GL.glEnable(GL.GL_DEPTH_TEST)
     draw.init()
-    glutMainLoop()
+    GLUT.glutMainLoop()
 
 
 if __name__ == "__main__":

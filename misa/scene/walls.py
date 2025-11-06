@@ -1,7 +1,7 @@
 """Wall drawing functions - Building walls with windows and doors."""
 
 import math
-from OpenGL.GL import *
+from OpenGL import GL
 from ..util import Vec3d, PI
 from ..primitives import draw_rect_y, draw_rect_z
 from .windows import draw_janela_com_arco, draw_janela_retangular
@@ -9,12 +9,12 @@ from .windows import draw_janela_com_arco, draw_janela_retangular
 
 def mask_rect(x1: float, y1: float, w: float, h: float):
     """Helper function to create a rectangular mask for stencil."""
-    glBegin(GL_QUADS)
-    glVertex3d(x1, y1, 0)
-    glVertex3d(x1 + w, y1, 0)
-    glVertex3d(x1 + w, y1 + h, 0)
-    glVertex3d(x1, y1 + h, 0)
-    glEnd()
+    GL.glBegin(GL.GL_QUADS)
+    GL.glVertex3d(x1, y1, 0)
+    GL.glVertex3d(x1 + w, y1, 0)
+    GL.glVertex3d(x1 + w, y1 + h, 0)
+    GL.glVertex3d(x1, y1 + h, 0)
+    GL.glEnd()
 
 
 def mask_janela_arco(x: float, y_base: float, total_w: float, total_h: float, seg: int):
@@ -24,34 +24,34 @@ def mask_janela_arco(x: float, y_base: float, total_w: float, total_h: float, se
     mask_rect(x, y_base, total_w, rect_h)  # parte reta
     cx = x + radius
     cy = y_base + rect_h
-    glBegin(GL_TRIANGLE_FAN)
-    glVertex3d(cx, cy, 0)
+    GL.glBegin(GL.GL_TRIANGLE_FAN)
+    GL.glVertex3d(cx, cy, 0)
     for i in range(seg + 1):
         a = PI * i / seg
-        glVertex3d(cx + math.cos(a) * radius, cy + math.sin(a) * radius, 0)
-    glEnd()
+        GL.glVertex3d(cx + math.cos(a) * radius, cy + math.sin(a) * radius, 0)
+    GL.glEnd()
 
 
 def draw_janela_com_arco_ajustado(pos: Vec3d):
     """Draw an arched window at a specific position."""
     from ..draw import janela_com_arco
 
-    glPushMatrix()
-    glTranslated(pos.x, pos.y, pos.z)
+    GL.glPushMatrix()
+    GL.glTranslated(pos.x, pos.y, pos.z)
     draw_janela_com_arco(janela_com_arco.x, janela_com_arco.y, janela_com_arco.z)
-    glPopMatrix()
+    GL.glPopMatrix()
 
 
 def draw_janela_retangular_ajustado(pos: Vec3d):
     """Draw a rectangular window at a specific position."""
     from ..draw import janela_retangular_size
 
-    glPushMatrix()
-    glTranslated(pos.x, pos.y, pos.z)
+    GL.glPushMatrix()
+    GL.glTranslated(pos.x, pos.y, pos.z)
     draw_janela_retangular(
         janela_retangular_size.x, janela_retangular_size.y, janela_retangular_size.z
     )
-    glPopMatrix()
+    GL.glPopMatrix()
 
 
 def draw_asa():
@@ -75,42 +75,42 @@ def draw_asa():
         win_x.append(cursor)
 
     # Modo preciso: usa stencil para recortar exatamente os retângulos das janelas
-    glNormal3i(0, 0, -1)
+    GL.glNormal3i(0, 0, -1)
     # Preparar stencil: marcamos 1 onde haverá janela
-    glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE)
-    glDepthMask(GL_FALSE)
-    glStencilMask(0xFF)
-    glClear(GL_STENCIL_BUFFER_BIT)
-    glStencilFunc(GL_ALWAYS, 1, 0xFF)
-    glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE)
-    glBegin(GL_QUADS)
+    GL.glColorMask(GL.GL_FALSE, GL.GL_FALSE, GL.GL_FALSE, GL.GL_FALSE)
+    GL.glDepthMask(GL.GL_FALSE)
+    GL.glStencilMask(0xFF)
+    GL.glClear(GL.GL_STENCIL_BUFFER_BIT)
+    GL.glStencilFunc(GL.GL_ALWAYS, 1, 0xFF)
+    GL.glStencilOp(GL.GL_KEEP, GL.GL_KEEP, GL.GL_REPLACE)
+    GL.glBegin(GL.GL_QUADS)
     for i in range(3):  # máscara cada janela
-        glVertex3d(win_x[i], base_y, 0)
-        glVertex3d(win_x[i] + win_w, base_y, 0)
-        glVertex3d(win_x[i] + win_w, top_y, 0)
-        glVertex3d(win_x[i], top_y, 0)
-    glEnd()
+        GL.glVertex3d(win_x[i], base_y, 0)
+        GL.glVertex3d(win_x[i] + win_w, base_y, 0)
+        GL.glVertex3d(win_x[i] + win_w, top_y, 0)
+        GL.glVertex3d(win_x[i], top_y, 0)
+    GL.glEnd()
     # Desenha parede exceto onde stencil == 1
-    glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE)
-    glDepthMask(GL_TRUE)
-    glStencilFunc(GL_EQUAL, 0, 0xFF)
-    glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP)
-    glRectd(0, 0, asa_size.x, asa_size.y)
-    glStencilFunc(GL_ALWAYS, 0, 0xFF)  # libera
+    GL.glColorMask(GL.GL_TRUE, GL.GL_TRUE, GL.GL_TRUE, GL.GL_TRUE)
+    GL.glDepthMask(GL.GL_TRUE)
+    GL.glStencilFunc(GL.GL_EQUAL, 0, 0xFF)
+    GL.glStencilOp(GL.GL_KEEP, GL.GL_KEEP, GL.GL_KEEP)
+    GL.glRectd(0, 0, asa_size.x, asa_size.y)
+    GL.glStencilFunc(GL.GL_ALWAYS, 0, 0xFF)  # libera
 
     # Atrás
-    glNormal3i(0, 0, 1)
+    GL.glNormal3i(0, 0, 1)
     draw_rect_z(0, 0, asa_size.x, asa_size.y, asa_size.z)
 
     # Lado
-    glPushMatrix()
-    glRotatef(-90, 0, 1, 0)
-    glNormal3i(-1, 0, 0)
-    glRectd(0, 0, asa_size.z, asa_size.y)
-    glPopMatrix()
+    GL.glPushMatrix()
+    GL.glRotatef(-90, 0, 1, 0)
+    GL.glNormal3i(-1, 0, 0)
+    GL.glRectd(0, 0, asa_size.z, asa_size.y)
+    GL.glPopMatrix()
 
     # Cima
-    glNormal3i(0, 1, 0)
+    GL.glNormal3i(0, 1, 0)
     draw_rect_y(0, 0, asa_size.x, asa_size.z, asa_size.y)
 
 
@@ -142,13 +142,13 @@ def draw_parte_central():
     )  # primeira janela lado direito
 
     # --- STENCIL (modo preciso) ---
-    glNormal3i(0, 0, -1)
-    glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE)
-    glDepthMask(GL_FALSE)
-    glStencilMask(0xFF)
-    glClear(GL_STENCIL_BUFFER_BIT)
-    glStencilFunc(GL_ALWAYS, 1, 0xFF)
-    glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE)
+    GL.glNormal3i(0, 0, -1)
+    GL.glColorMask(GL.GL_FALSE, GL.GL_FALSE, GL.GL_FALSE, GL.GL_FALSE)
+    GL.glDepthMask(GL.GL_FALSE)
+    GL.glStencilMask(0xFF)
+    GL.glClear(GL.GL_STENCIL_BUFFER_BIT)
+    GL.glStencilFunc(GL.GL_ALWAYS, 1, 0xFF)
+    GL.glStencilOp(GL.GL_KEEP, GL.GL_KEEP, GL.GL_REPLACE)
     # Porta (retângulo)
     mask_rect(x_antes_porta, 0, porta_size.x, porta_size.y)
     # Janelas arco (5): esquerda baixa/alta, central alta, direita baixa/alta
@@ -160,69 +160,69 @@ def draw_parte_central():
     mask_janela_arco(right_start, y_top_base, jw, jh, seg)
 
     # Desenha parede exceto onde máscara = 1
-    glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE)
-    glDepthMask(GL_TRUE)
-    glStencilFunc(GL_EQUAL, 0, 0xFF)
-    glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP)
-    glRectd(0, 0, parte_central_size.x, parte_central_size.y)
-    glStencilFunc(GL_ALWAYS, 0, 0xFF)
+    GL.glColorMask(GL.GL_TRUE, GL.GL_TRUE, GL.GL_TRUE, GL.GL_TRUE)
+    GL.glDepthMask(GL.GL_TRUE)
+    GL.glStencilFunc(GL.GL_EQUAL, 0, 0xFF)
+    GL.glStencilOp(GL.GL_KEEP, GL.GL_KEEP, GL.GL_KEEP)
+    GL.glRectd(0, 0, parte_central_size.x, parte_central_size.y)
+    GL.glStencilFunc(GL.GL_ALWAYS, 0, 0xFF)
 
     # Porta (folhas) desenhada depois da parede para aparecer no vão
-    glPushAttrib(GL_CURRENT_BIT)
+    GL.glPushAttrib(GL.GL_CURRENT_BIT)
     draw_porta(x_antes_porta)
-    glPopAttrib()
+    GL.glPopAttrib()
 
     # Atrás
-    glNormal3i(0, 0, 1)
+    GL.glNormal3i(0, 0, 1)
     draw_rect_z(0, 0, parte_central_size.x, parte_central_size.y, parte_central_size.z)
 
     # Cima
-    glNormal3i(0, 1, 0)
+    GL.glNormal3i(0, 1, 0)
     draw_rect_y(0, 0, parte_central_size.x, parte_central_size.z, parte_central_size.y)
 
     # Lados
     from ..draw import asa_z_offset, asa_size
 
     z_depois_asa = asa_z_offset + asa_size.z
-    glPushMatrix()
-    glRotatef(-90, 0, 1, 0)
+    GL.glPushMatrix()
+    GL.glRotatef(-90, 0, 1, 0)
 
-    glNormal3i(-1, 0, 0)
-    glRectd(0, 0, asa_z_offset, asa_size.y)  # Em frente a asa
-    glRectd(0, asa_size.y, z_depois_asa, parte_central_size.y)  # Cima
-    glRectd(z_depois_asa, 0, parte_central_size.z, parte_central_size.y)  # Atrás
+    GL.glNormal3i(-1, 0, 0)
+    GL.glRectd(0, 0, asa_z_offset, asa_size.y)  # Em frente a asa
+    GL.glRectd(0, asa_size.y, z_depois_asa, parte_central_size.y)  # Cima
+    GL.glRectd(z_depois_asa, 0, parte_central_size.z, parte_central_size.y)  # Atrás
 
-    glTranslated(0, 0, -parte_central_size.x)
-    glNormal3i(-1, 0, 0)
-    glRectd(0, 0, asa_z_offset, asa_size.y)  # Em frente a asa
-    glRectd(0, asa_size.y, z_depois_asa, parte_central_size.y)  # Cima
-    glRectd(z_depois_asa, 0, parte_central_size.z, parte_central_size.y)  # Atrás
+    GL.glTranslated(0, 0, -parte_central_size.x)
+    GL.glNormal3i(-1, 0, 0)
+    GL.glRectd(0, 0, asa_z_offset, asa_size.y)  # Em frente a asa
+    GL.glRectd(0, asa_size.y, z_depois_asa, parte_central_size.y)  # Cima
+    GL.glRectd(z_depois_asa, 0, parte_central_size.z, parte_central_size.y)  # Atrás
 
-    glPopMatrix()
+    GL.glPopMatrix()
 
 
 def draw_parte_externa(asa_func, parte_central_func):
     """Draw the external walls (wings and central part) with a function for each."""
     from ..draw import asa_size, parte_central_size, asa_z_offset
 
-    glColor3ub(228, 206, 211)
-    glPushMatrix()
+    GL.glColor3ub(228, 206, 211)
+    GL.glPushMatrix()
 
     # Asa direita
-    glTranslated(0, 0, asa_z_offset)
+    GL.glTranslated(0, 0, asa_z_offset)
     asa_func()
 
     # Parte central
-    glTranslated(asa_size.x, 0, -asa_z_offset)
+    GL.glTranslated(asa_size.x, 0, -asa_z_offset)
     parte_central_func()
 
     # Asa esquerda
-    glTranslated(parte_central_size.x, 0, asa_z_offset)
-    glTranslated(asa_size.x, 0, 0)
-    glScalef(-1, 1, 1)  # Espelha
+    GL.glTranslated(parte_central_size.x, 0, asa_z_offset)
+    GL.glTranslated(asa_size.x, 0, 0)
+    GL.glScalef(-1, 1, 1)  # Espelha
     asa_func()
 
-    glPopMatrix()
+    GL.glPopMatrix()
 
 
 def draw_janelas_asa():
@@ -250,7 +250,7 @@ def draw_janelas_parte_central():
 
     # Frente
     x_antes_porta = (parte_central_size.x - porta_size.x) / 2
-    glNormal3i(0, 0, -1)
+    GL.glNormal3i(0, 0, -1)
 
     dist_lado = (x_antes_porta - janela_com_arco.x) / 2
     dist_centro = x_antes_porta + (porta_size.x - janela_com_arco.x) / 2

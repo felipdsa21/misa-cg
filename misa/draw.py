@@ -1,5 +1,4 @@
-from OpenGL.GL import *
-from OpenGL.GLU import *
+from OpenGL import GL, GLU
 from .util import Vec2d, Vec3d
 from .scene.door import draw_botao
 from .scene.balcony import *
@@ -47,37 +46,37 @@ def init():
     from . import obj
     from .scene import pillars
 
-    glClearColor(0.53, 0.81, 0.98, 1.0)
+    GL.glClearColor(0.53, 0.81, 0.98, 1.0)
 
-    glEnable(GL_LIGHTING)
-    glEnable(GL_LIGHT0)
-    glEnable(GL_NORMALIZE)
-    glShadeModel(GL_SMOOTH)
+    GL.glEnable(GL.GL_LIGHTING)
+    GL.glEnable(GL.GL_LIGHT0)
+    GL.glEnable(GL.GL_NORMALIZE)
+    GL.glShadeModel(GL.GL_SMOOTH)
 
-    glEnable(GL_COLOR_MATERIAL)
-    glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE)
-    glLightfv(GL_LIGHT0, GL_AMBIENT, luz_ambiente)
-    glLightfv(GL_LIGHT0, GL_DIFFUSE, luz_difusa)
-    glLightfv(GL_LIGHT0, GL_SPECULAR, luz_especular)
+    GL.glEnable(GL.GL_COLOR_MATERIAL)
+    GL.glColorMaterial(GL.GL_FRONT_AND_BACK, GL.GL_AMBIENT_AND_DIFFUSE)
+    GL.glLightfv(GL.GL_LIGHT0, GL.GL_AMBIENT, luz_ambiente)
+    GL.glLightfv(GL.GL_LIGHT0, GL.GL_DIFFUSE, luz_difusa)
+    GL.glLightfv(GL.GL_LIGHT0, GL.GL_SPECULAR, luz_especular)
 
-    q = gluNewQuadric()
-    gluQuadricNormals(q, GLU_SMOOTH)
+    q = GLU.gluNewQuadric()
+    GLU.gluQuadricNormals(q, GLU.GLU_SMOOTH)
     obj.q = q  # Share quadric with obj module
     pillars.q = q  # Share quadric with pillars module
 
-    glClearStencil(0)
-    glEnable(GL_STENCIL_TEST)
+    GL.glClearStencil(0)
+    GL.glEnable(GL.GL_STENCIL_TEST)
 
 
 def on_setup_camera():
-    glLightfv(GL_LIGHT0, GL_POSITION, posicao_luz)
+    GL.glLightfv(GL.GL_LIGHT0, GL.GL_POSITION, posicao_luz)
 
 
 def draw():
     draw_grama()
 
-    glPushMatrix()
-    glTranslated(-(parte_central_size.x / 2 + asa_size.x), 0, 0)
+    GL.glPushMatrix()
+    GL.glTranslated(-(parte_central_size.x / 2 + asa_size.x), 0, 0)
 
     draw_chao()
     draw_pisos()
@@ -88,5 +87,5 @@ def draw():
     draw_telhado()
     draw_objetos()
 
-    glPopMatrix()
+    GL.glPopMatrix()
     draw_botao()
