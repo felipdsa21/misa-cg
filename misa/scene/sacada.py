@@ -13,6 +13,7 @@ def draw_sacada():
     bala_larg = 0.15
     bala_esp = 0.15
     bala_gap = 0.25
+    borda_offset = 0.04  # afastamento da guarda em relação à borda externa da sacada
 
     # Altura: colocar a sacada mais alta (~ entre topo porta 3.2 e base janela superior 4.6)
     base_y = constantes.porta_size.y + 1.5
@@ -37,7 +38,9 @@ def draw_sacada():
         rail_top_y = rail_base_y + guarda_altura
 
         GL.glColor3ub(250, 250, 250)  # Corrimão superior
-        primitives.draw_box(util.Vec3d(0, rail_top_y - 0.07, -0.14), util.Vec3d(largura, 0.07, 0.26))
+        corrimao_esp = 0.18
+        corrimao_pos_z = -profundidade + borda_offset + corrimao_esp
+        primitives.draw_box(util.Vec3d(0, rail_top_y - 0.07, corrimao_pos_z), util.Vec3d(largura, 0.07, corrimao_esp))
 
         GL.glColor3ub(250, 250, 250)  # Balaústres
         count = max(3, int(largura / (bala_larg + bala_gap)))
@@ -45,8 +48,11 @@ def draw_sacada():
         for i in range(count):
             x = i * (bala_larg + spacing)
             primitives.draw_box(
-                util.Vec3d(x, rail_base_y, -0.07), util.Vec3d(bala_larg, guarda_altura - 0.12, bala_esp * 0.5)
+                util.Vec3d(x, rail_base_y, -profundidade + borda_offset + bala_esp * 0.5),
+                util.Vec3d(bala_larg, guarda_altura - 0.12, bala_esp * 0.5),
             )
 
         GL.glColor3ub(240, 240, 240)  # Rodapé da guarda
-        primitives.draw_box(util.Vec3d(0, rail_base_y, -0.12), util.Vec3d(largura, 0.11, 0.22))
+        rodape_esp = 0.16
+        rodape_pos_z = -profundidade + borda_offset + rodape_esp
+        primitives.draw_box(util.Vec3d(0, rail_base_y, rodape_pos_z), util.Vec3d(largura, 0.11, rodape_esp))

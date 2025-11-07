@@ -70,36 +70,42 @@ def draw_rect_z(x1: float, y1: float, x2: float, y2: float, z: float) -> None:
 def draw_box(pos: util.Vec3d, size: util.Vec3d) -> None:
     with begin(GL.GL_QUADS):
         # Frente
+        GL.glNormal3f(0.0, 0.0, 1.0)
         GL.glVertex3d(pos.x, pos.y, pos.z)
         GL.glVertex3d(pos.x + size.x, pos.y, pos.z)
         GL.glVertex3d(pos.x + size.x, pos.y + size.y, pos.z)
         GL.glVertex3d(pos.x, pos.y + size.y, pos.z)
 
         # Trás
+        GL.glNormal3f(0.0, 0.0, -1.0)
         GL.glVertex3d(pos.x, pos.y, pos.z - size.z)
         GL.glVertex3d(pos.x + size.x, pos.y, pos.z - size.z)
         GL.glVertex3d(pos.x + size.x, pos.y + size.y, pos.z - size.z)
         GL.glVertex3d(pos.x, pos.y + size.y, pos.z - size.z)
 
         # Esquerda
+        GL.glNormal3f(-1.0, 0.0, 0.0)
         GL.glVertex3d(pos.x, pos.y, pos.z)
         GL.glVertex3d(pos.x, pos.y, pos.z - size.z)
         GL.glVertex3d(pos.x, pos.y + size.y, pos.z - size.z)
         GL.glVertex3d(pos.x, pos.y + size.y, pos.z)
 
         # Direita
+        GL.glNormal3f(1.0, 0.0, 0.0)
         GL.glVertex3d(pos.x + size.x, pos.y, pos.z)
         GL.glVertex3d(pos.x + size.x, pos.y, pos.z - size.z)
         GL.glVertex3d(pos.x + size.x, pos.y + size.y, pos.z - size.z)
         GL.glVertex3d(pos.x + size.x, pos.y + size.y, pos.z)
 
         # Topo
+        GL.glNormal3f(0.0, 1.0, 0.0)
         GL.glVertex3d(pos.x, pos.y + size.y, pos.z)
         GL.glVertex3d(pos.x + size.x, pos.y + size.y, pos.z)
         GL.glVertex3d(pos.x + size.x, pos.y + size.y, pos.z - size.z)
         GL.glVertex3d(pos.x, pos.y + size.y, pos.z - size.z)
 
         # Base
+        GL.glNormal3f(0.0, -1.0, 0.0)
         GL.glVertex3d(pos.x, pos.y, pos.z)
         GL.glVertex3d(pos.x + size.x, pos.y, pos.z)
         GL.glVertex3d(pos.x + size.x, pos.y, pos.z - size.z)
