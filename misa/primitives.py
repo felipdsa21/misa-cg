@@ -43,6 +43,14 @@ def free_stencil() -> None:
     GL.glStencilFunc(GL.GL_ALWAYS, 0, 0xFF)
 
 
+def draw_rect_x(y1: float, z1: float, y2: float, z2: float, x: float) -> None:
+    with begin(GL.GL_QUADS):
+        GL.glVertex3d(x, y1, z1)
+        GL.glVertex3d(x, y2, z1)
+        GL.glVertex3d(x, y2, z2)
+        GL.glVertex3d(x, y1, z2)
+
+
 def draw_rect_y(x1: float, z1: float, x2: float, z2: float, y: float) -> None:
     with begin(GL.GL_QUADS):
         GL.glVertex3d(x1, y, z1)

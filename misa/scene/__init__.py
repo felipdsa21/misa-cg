@@ -11,8 +11,12 @@ def init() -> None:
     GL.glEnable(GL.GL_LIGHT0)
     GL.glEnable(GL.GL_NORMALIZE)
     GL.glEnable(GL.GL_COLOR_MATERIAL)
+    GL.glEnable(GL.GL_STENCIL_TEST)
+    GL.glEnable(GL.GL_TEXTURE_2D)
+
     GL.glShadeModel(GL.GL_SMOOTH)
     GL.glColorMaterial(GL.GL_FRONT_AND_BACK, GL.GL_AMBIENT_AND_DIFFUSE)
+    GL.glClearStencil(0)
 
     luz_ambiente = [0.15, 0.15, 0.15, 1.0]
     luz_difusa = [0.8, 0.8, 0.8, 1.0]
@@ -20,9 +24,6 @@ def init() -> None:
     GL.glLightfv(GL.GL_LIGHT0, GL.GL_AMBIENT, luz_ambiente)
     GL.glLightfv(GL.GL_LIGHT0, GL.GL_DIFFUSE, luz_difusa)
     GL.glLightfv(GL.GL_LIGHT0, GL.GL_SPECULAR, luz_especular)
-
-    GL.glClearStencil(0)
-    GL.glEnable(GL.GL_STENCIL_TEST)
 
 
 def draw() -> None:
