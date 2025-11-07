@@ -1,10 +1,15 @@
 from OpenGL import GL
 
-from .. import primitives
+from .. import primitives, texture
 from . import chao, constantes, objetos, paredes, pilastras, pisos, porta, sacada, telhado
+
+# ID da textura de reboco (carregada em init())
+_textura_reboco = None
 
 
 def init() -> None:
+    global _textura_reboco
+    
     GL.glClearColor(0.53, 0.81, 0.98, 1.0)
 
     GL.glEnable(GL.GL_LIGHTING)
@@ -24,6 +29,9 @@ def init() -> None:
     GL.glLightfv(GL.GL_LIGHT0, GL.GL_AMBIENT, luz_ambiente)
     GL.glLightfv(GL.GL_LIGHT0, GL.GL_DIFFUSE, luz_difusa)
     GL.glLightfv(GL.GL_LIGHT0, GL.GL_SPECULAR, luz_especular)
+    
+    # Carregar textura de reboco
+    _textura_reboco = texture.load_plaster_texture()
 
 
 def draw() -> None:
@@ -34,7 +42,16 @@ def draw() -> None:
 
         chao.draw_chao()
         pisos.draw_pisos()
+        
+        # Ativar textura de reboco para as paredes
+        if _textura_reboco is not None:
+            texture.bind_texture(_textura_reboco)
+        
         paredes.draw_parte_externa(paredes.draw_asa, paredes.draw_parte_central)
+        
+        # Desativar textura antes de desenhar janelas
+        texture.unbind_texture()
+        
         paredes.draw_parte_externa(paredes.draw_janelas_asa, paredes.draw_janelas_parte_central)
         pilastras.draw_pilastras_internas()
         sacada.draw_sacada()
