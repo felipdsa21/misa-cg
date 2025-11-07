@@ -3,9 +3,6 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass
 
-# Constantes
-EPSILON = 0.001  # Para evitar z-fighting
-
 
 @dataclass(frozen=True, slots=True)
 class Vec2i:

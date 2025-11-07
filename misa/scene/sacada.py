@@ -40,7 +40,9 @@ def draw_sacada():
         GL.glColor3ub(250, 250, 250)  # Corrimão superior
         corrimao_esp = 0.18
         corrimao_pos_z = -profundidade + borda_offset + corrimao_esp
-        primitives.draw_box(util.Vec3d(0, rail_top_y - 0.07, corrimao_pos_z), util.Vec3d(largura, 0.07, corrimao_esp))
+        primitives.draw_box(
+            util.Vec3d(0, rail_top_y - 0.07, corrimao_pos_z), util.Vec3d(largura, 0.07, corrimao_esp)
+        )
 
         GL.glColor3ub(250, 250, 250)  # Balaústres
         count = max(3, int(largura / (bala_larg + bala_gap)))

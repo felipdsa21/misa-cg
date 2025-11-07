@@ -3,9 +3,16 @@ import math
 from OpenGL import GL
 
 from .. import primitives, util
-from . import constantes, janelas, porta
+from . import constantes, janelas, porta, procedural
 
 janela_retangular_size = util.Vec3d(1.2, 2, 0.3)
+
+
+def draw_paredes() -> None:
+    GL.glBindTexture(GL.GL_TEXTURE_2D, procedural.load_plaster_texture())
+    draw_parte_externa(draw_asa, draw_parte_central)
+    draw_parte_externa(draw_janelas_asa, draw_janelas_parte_central)
+    GL.glBindTexture(GL.GL_TEXTURE_2D, 0)
 
 
 def mascarar_retangulo(x1: float, y1: float, w: float, h: float):
@@ -178,7 +185,9 @@ def draw_parte_central():
         GL.glTexCoord2f(constantes.parte_central_size.x / 2, 0)
         GL.glVertex3d(constantes.parte_central_size.x, 0, constantes.parte_central_size.z)
         GL.glTexCoord2f(constantes.parte_central_size.x / 2, constantes.parte_central_size.y / 2)
-        GL.glVertex3d(constantes.parte_central_size.x, constantes.parte_central_size.y, constantes.parte_central_size.z)
+        GL.glVertex3d(
+            constantes.parte_central_size.x, constantes.parte_central_size.y, constantes.parte_central_size.z
+        )
         GL.glTexCoord2f(0, constantes.parte_central_size.y / 2)
         GL.glVertex3d(0, constantes.parte_central_size.y, constantes.parte_central_size.z)
 
@@ -224,7 +233,9 @@ def draw_parte_central():
             GL.glVertex3d(z_depois_asa, 0, 0)
             GL.glTexCoord2f((constantes.parte_central_size.z - z_depois_asa) / 2, 0)
             GL.glVertex3d(constantes.parte_central_size.z, 0, 0)
-            GL.glTexCoord2f((constantes.parte_central_size.z - z_depois_asa) / 2, constantes.parte_central_size.y / 2)
+            GL.glTexCoord2f(
+                (constantes.parte_central_size.z - z_depois_asa) / 2, constantes.parte_central_size.y / 2
+            )
             GL.glVertex3d(constantes.parte_central_size.z, constantes.parte_central_size.y, 0)
             GL.glTexCoord2f(0, constantes.parte_central_size.y / 2)
             GL.glVertex3d(z_depois_asa, constantes.parte_central_size.y, 0)
@@ -257,7 +268,9 @@ def draw_parte_central():
             GL.glVertex3d(z_depois_asa, 0, 0)
             GL.glTexCoord2f((constantes.parte_central_size.z - z_depois_asa) / 2, 0)
             GL.glVertex3d(constantes.parte_central_size.z, 0, 0)
-            GL.glTexCoord2f((constantes.parte_central_size.z - z_depois_asa) / 2, constantes.parte_central_size.y / 2)
+            GL.glTexCoord2f(
+                (constantes.parte_central_size.z - z_depois_asa) / 2, constantes.parte_central_size.y / 2
+            )
             GL.glVertex3d(constantes.parte_central_size.z, constantes.parte_central_size.y, 0)
             GL.glTexCoord2f(0, constantes.parte_central_size.y / 2)
             GL.glVertex3d(z_depois_asa, constantes.parte_central_size.y, 0)

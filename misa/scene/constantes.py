@@ -2,6 +2,8 @@ from OpenGL import GLU
 
 from .. import util
 
+epsilon = 0.001
+
 # Objeto quadric global
 q = GLU.gluNewQuadric()
 GLU.gluQuadricNormals(q, GLU.GLU_SMOOTH)

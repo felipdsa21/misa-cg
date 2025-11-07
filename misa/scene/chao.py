@@ -20,4 +20,4 @@ def draw_chao() -> None:
 
     GL.glColor3ub(156, 146, 143)
     GL.glNormal3i(0, 1, 0)
-    primitives.draw_rect_y(-2, -2, tamanho.x + 2, tamanho.y + 2, util.EPSILON)
+    primitives.draw_rect_y(-2, -2, tamanho.x + 2, tamanho.y + 2, constantes.epsilon)

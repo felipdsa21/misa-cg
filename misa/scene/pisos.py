@@ -5,9 +5,10 @@ from . import constantes
 
 
 def draw_pisos() -> None:
-    GL.glNormal3i(0, 1, 0)
+    GL.glBindTexture(GL.GL_TEXTURE_2D, primitives.load_texture("wood.jpg"))
     draw_piso_terreo()
     draw_piso_primeiro_andar()
+    GL.glBindTexture(GL.GL_TEXTURE_2D, 0)
 
 
 def draw_piso_terreo() -> None:
@@ -45,19 +46,21 @@ def draw_piso_terreo() -> None:
 
     with primitives.push_matrix():
         GL.glTranslated(constantes.asa_size.x, 0, 0)
-        draw_piso(espaco_porta_x.x, 0, espaco_porta_x.y, espaco_porta_size.y, util.EPSILON * 2)
+        draw_piso(espaco_porta_x.x, 0, espaco_porta_x.y, espaco_porta_size.y, constantes.epsilon * 2)
 
-        GL.glColor3ub(150, 108, 72)
-        primitives.draw_rect_x(0, 0, constantes.piso_y, espaco_porta_size.y, espaco_porta_x.x)
-        primitives.draw_rect_x(0, 0, constantes.piso_y, espaco_porta_size.y, espaco_porta_x.y)
         desenhar_degraus_porta(espaco_porta_x, espaco_porta_size)
+
+        GL.glNormal3i(-1, 0, 0)
+        primitives.draw_rect_x(0, 0, constantes.piso_y, espaco_porta_size.y, espaco_porta_x.x)
+
+        GL.glNormal3i(1, 0, 0)
+        primitives.draw_rect_x(0, 0, constantes.piso_y, espaco_porta_size.y, espaco_porta_x.y)
 
 
 def draw_piso_primeiro_andar() -> None:
     abertura_escada_size = util.Vec2d(1, 3)
 
     with primitives.push_matrix():
-        GL.glNormal3i(0, 1, 0)
         GL.glTranslated(constantes.asa_size.x, 0, 0)
 
         primitives.setup_stencil_mask()
@@ -81,7 +84,7 @@ def draw_piso_primeiro_andar() -> None:
 
 def desenhar_degraus_porta(espaco_porta_x: util.Vec2d, espaco_porta_size: util.Vec2d) -> None:
     qtd_degraus = 2
-    altura_total = constantes.piso_y - util.EPSILON
+    altura_total = constantes.piso_y - constantes.epsilon
     degrau_altura = altura_total / qtd_degraus
     degrau_profundidade = espaco_porta_size.y / 4
 
@@ -92,8 +95,7 @@ def desenhar_degraus_porta(espaco_porta_x: util.Vec2d, espaco_porta_size: util.V
         degrau_z_end = espaco_porta_size.y - (i + 1) * degrau_profundidade
 
         # Topo do degrau
-        GL.glNormal3i(0, 1, 0)
-        primitives.draw_rect_y(espaco_porta_x.x, degrau_z_start, espaco_porta_x.y, degrau_z_end, degrau_y)
+        draw_piso(espaco_porta_x.x, degrau_z_start, espaco_porta_x.y, degrau_z_end, degrau_y)
 
         # Frente do degrau
         GL.glNormal3i(0, 0, -1)
@@ -101,23 +103,15 @@ def desenhar_degraus_porta(espaco_porta_x: util.Vec2d, espaco_porta_size: util.V
 
 
 def mascarar_retangulo_piso(x1: float, z1: float, x2: float, z2: float, y: float) -> None:
+    GL.glDisable(GL.GL_TEXTURE_2D)
     with primitives.begin(GL.GL_QUADS):
         GL.glVertex3d(x1, y, z1)
         GL.glVertex3d(x2, y, z1)
         GL.glVertex3d(x2, y, z2)
         GL.glVertex3d(x1, y, z2)
+    GL.glEnable(GL.GL_TEXTURE_2D)
 
 
 def draw_piso(x1: float, z1: float, x2: float, z2: float, y: float) -> None:
-    GL.glColor3ub(150, 108, 72)
+    GL.glNormal3i(0, 1, 0)
     primitives.draw_rect_y(x1, z1, x2, z2, y)
-
-    GL.glColor3ub(97, 67, 42)
-    espacamento = 0.45
-    x = x1 + espacamento
-
-    with primitives.begin(GL.GL_LINES):
-        while x < x2:
-            GL.glVertex3d(x, y + util.EPSILON, z1)
-            GL.glVertex3d(x, y + util.EPSILON, z2)
-            x += espacamento

@@ -1,11 +1,14 @@
-from contextlib import contextmanager
+import contextlib
+import os.path
+import functools
 
 from OpenGL import GL
+import PIL.Image
 
 from . import util
 
 
-@contextmanager
+@contextlib.contextmanager
 def push_matrix():
     GL.glPushMatrix()
     try:
@@ -14,7 +17,7 @@ def push_matrix():
         GL.glPopMatrix()
 
 
-@contextmanager
+@contextlib.contextmanager
 def begin(mode: int):
     GL.glBegin(mode)
     try:
@@ -45,68 +48,96 @@ def free_stencil() -> None:
 
 def draw_rect_x(y1: float, z1: float, y2: float, z2: float, x: float) -> None:
     with begin(GL.GL_QUADS):
+        GL.glTexCoord2d(0.0, 0.0)
         GL.glVertex3d(x, y1, z1)
+        GL.glTexCoord2d(0.0, y2 - y1)
         GL.glVertex3d(x, y2, z1)
+        GL.glTexCoord2d(z2 - z1, y2 - y1)
         GL.glVertex3d(x, y2, z2)
+        GL.glTexCoord2d(z2 - z1, 0.0)
         GL.glVertex3d(x, y1, z2)
 
 
 def draw_rect_y(x1: float, z1: float, x2: float, z2: float, y: float) -> None:
     with begin(GL.GL_QUADS):
+        GL.glTexCoord2d(x1, z1)
         GL.glVertex3d(x1, y, z1)
+        GL.glTexCoord2d(x2, z1)
         GL.glVertex3d(x2, y, z1)
+        GL.glTexCoord2d(x2, z2)
         GL.glVertex3d(x2, y, z2)
+        GL.glTexCoord2d(x1, z2)
         GL.glVertex3d(x1, y, z2)
 
 
 def draw_rect_z(x1: float, y1: float, x2: float, y2: float, z: float) -> None:
     with begin(GL.GL_QUADS):
+        GL.glTexCoord2d(x1, y1)
         GL.glVertex3d(x1, y1, z)
+        GL.glTexCoord2d(x2, y1)
         GL.glVertex3d(x2, y1, z)
+        GL.glTexCoord2d(x2, y2)
         GL.glVertex3d(x2, y2, z)
+        GL.glTexCoord2d(x1, y2)
         GL.glVertex3d(x1, y2, z)
 
 
 def draw_box(pos: util.Vec3d, size: util.Vec3d) -> None:
     with begin(GL.GL_QUADS):
         # Frente
-        GL.glNormal3f(0.0, 0.0, 1.0)
         GL.glVertex3d(pos.x, pos.y, pos.z)
         GL.glVertex3d(pos.x + size.x, pos.y, pos.z)
         GL.glVertex3d(pos.x + size.x, pos.y + size.y, pos.z)
         GL.glVertex3d(pos.x, pos.y + size.y, pos.z)
 
         # Trás
-        GL.glNormal3f(0.0, 0.0, -1.0)
         GL.glVertex3d(pos.x, pos.y, pos.z - size.z)
         GL.glVertex3d(pos.x + size.x, pos.y, pos.z - size.z)
         GL.glVertex3d(pos.x + size.x, pos.y + size.y, pos.z - size.z)
         GL.glVertex3d(pos.x, pos.y + size.y, pos.z - size.z)
 
         # Esquerda
-        GL.glNormal3f(-1.0, 0.0, 0.0)
         GL.glVertex3d(pos.x, pos.y, pos.z)
         GL.glVertex3d(pos.x, pos.y, pos.z - size.z)
         GL.glVertex3d(pos.x, pos.y + size.y, pos.z - size.z)
         GL.glVertex3d(pos.x, pos.y + size.y, pos.z)
 
         # Direita
-        GL.glNormal3f(1.0, 0.0, 0.0)
         GL.glVertex3d(pos.x + size.x, pos.y, pos.z)
         GL.glVertex3d(pos.x + size.x, pos.y, pos.z - size.z)
         GL.glVertex3d(pos.x + size.x, pos.y + size.y, pos.z - size.z)
         GL.glVertex3d(pos.x + size.x, pos.y + size.y, pos.z)
 
         # Topo
-        GL.glNormal3f(0.0, 1.0, 0.0)
         GL.glVertex3d(pos.x, pos.y + size.y, pos.z)
         GL.glVertex3d(pos.x + size.x, pos.y + size.y, pos.z)
         GL.glVertex3d(pos.x + size.x, pos.y + size.y, pos.z - size.z)
         GL.glVertex3d(pos.x, pos.y + size.y, pos.z - size.z)
 
         # Base
-        GL.glNormal3f(0.0, -1.0, 0.0)
         GL.glVertex3d(pos.x, pos.y, pos.z)
         GL.glVertex3d(pos.x + size.x, pos.y, pos.z)
         GL.glVertex3d(pos.x + size.x, pos.y, pos.z - size.z)
         GL.glVertex3d(pos.x, pos.y, pos.z - size.z)
+
+
+@functools.cache
+def load_texture(name: str) -> int:
+    img = PIL.Image.open(os.path.join("textures", name))
+    img = img.convert("RGBA")
+    img_data = img.tobytes("raw", "RGBA", 0, -1)
+
+    texture_id = GL.glGenTextures(1)
+    GL.glBindTexture(GL.GL_TEXTURE_2D, texture_id)
+
+    GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_S, GL.GL_REPEAT)
+    GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_T, GL.GL_REPEAT)
+    GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_LINEAR)
+    GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_LINEAR)
+
+    GL.glTexImage2D(
+        GL.GL_TEXTURE_2D, 0, GL.GL_RGBA, img.width, img.height, 0, GL.GL_RGBA, GL.GL_UNSIGNED_BYTE, img_data
+    )
+    GL.glGenerateMipmap(GL.GL_TEXTURE_2D)
+
+    return texture_id
