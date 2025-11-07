@@ -19,8 +19,8 @@ def init() -> None:
     GL.glColorMaterial(GL.GL_FRONT_AND_BACK, GL.GL_AMBIENT_AND_DIFFUSE)
     GL.glClearStencil(0)
 
-    luz_ambiente = [0.15, 0.15, 0.15, 1.0]
-    luz_difusa = [0.8, 0.8, 0.8, 1.0]
+    luz_ambiente = [0.4, 0.4, 0.4, 1.0]
+    luz_difusa = [1.0, 1.0, 1.0, 1.0]
     luz_especular = [0.1, 0.1, 0.1, 1.0]
     GL.glLightfv(GL.GL_LIGHT0, GL.GL_AMBIENT, luz_ambiente)
     GL.glLightfv(GL.GL_LIGHT0, GL.GL_DIFFUSE, luz_difusa)

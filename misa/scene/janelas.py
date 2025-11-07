@@ -128,13 +128,17 @@ def draw_janela_retangular(width: float, height: float, depth: float):
     primitives.draw_box(util.Vec3d(0, 0, 0), util.Vec3d(width, frame, depth))
     primitives.draw_box(util.Vec3d(0, height - frame, 0), util.Vec3d(width, frame, depth))
 
-    # Vidro
-    GL.glColor3ub(199, 222, 245)
+    # Vidro translúcido
+    GL.glEnable(GL.GL_BLEND)
+    GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
+    GL.glColor4ub(199, 222, 245, 64)  # azul claro com alpha
     with primitives.begin(GL.GL_QUADS):
         GL.glVertex3d(frame, frame, -epsilon)
         GL.glVertex3d(width - frame, frame, -epsilon)
         GL.glVertex3d(width - frame, height - frame, -epsilon)
         GL.glVertex3d(frame, height - frame, -epsilon)
+    
+    GL.glDisable(GL.GL_BLEND)
 
     # Travessas internas (caixilhos)
     GL.glColor3ub(191, 124, 124)
