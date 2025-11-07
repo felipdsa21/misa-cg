@@ -37,10 +37,12 @@ class Model:
     # Cache de VBOs para renderização otimizada
     vbo_id: Optional[int] = None
     index_buffer_id: Optional[int] = None
+    normal_buffer_id: Optional[int] = None
     index_count: int = 0
     # Arrays intercalados para renderização eficiente
     vertex_array: Optional[array.array] = None
     index_array: Optional[array.array] = None
+    normal_array: Optional[array.array] = None
 
 
 @functools.cache
@@ -84,8 +86,31 @@ def load_model(file_name: str) -> Model:
     return model
 
 
+def _calculate_normal(v1: Vertex, v2: Vertex, v3: Vertex) -> tuple:
+    """Calcula a normal de um triângulo."""
+    # Vetores do triângulo
+    ux = v2.x - v1.x
+    uy = v2.y - v1.y
+    uz = v2.z - v1.z
+    
+    vx = v3.x - v1.x
+    vy = v3.y - v1.y
+    vz = v3.z - v1.z
+    
+    # Produto vetorial
+    nx = uy * vz - uz * vy
+    ny = uz * vx - ux * vz
+    nz = ux * vy - uy * vx
+    
+    # Normalizar
+    length = (nx * nx + ny * ny + nz * nz) ** 0.5
+    if length > 0.0001:
+        return (nx / length, ny / length, nz / length)
+    return (0.0, 0.0, 1.0)
+
+
 def _prepare_vbo_data(model: Model) -> None:
-    """Prepara arrays de vértices e índices para uso com VBOs."""
+    """Prepara arrays de vértices, índices e normais para uso com VBOs."""
     # Criar array de vértices (x, y, z para cada vértice)
     vertex_data = array.array("f")
     for vertex in model.v:
@@ -93,7 +118,11 @@ def _prepare_vbo_data(model: Model) -> None:
         vertex_data.append(vertex.y)
         vertex_data.append(vertex.z)
 
-    # Criar array de índices
+    # Inicializar normais por vértice
+    vertex_normals = [[0.0, 0.0, 0.0] for _ in range(model.tot_v)]
+    vertex_counts = [0] * model.tot_v
+
+    # Criar array de índices e calcular normais
     # Usar 'I' (unsigned int) se disponível, senão 'L' (unsigned long)
     try:
         index_data = array.array("I")  # Unsigned int (32-bit)
@@ -104,11 +133,48 @@ def _prepare_vbo_data(model: Model) -> None:
         # Converter índices OBJ (1-based) para índices Python (0-based)
         indices = [idx - 1 for idx in face.faces]
 
-        # Triangulação de quads (se necessário)
+        # Triangulação de quads (se necessário) e cálculo de normais
         if face.v_number == 3:
+            # Calcular normal do triângulo
+            v1 = model.v[indices[0]]
+            v2 = model.v[indices[1]]
+            v3 = model.v[indices[2]]
+            normal = _calculate_normal(v1, v2, v3)
+            
+            # Acumular normal nos vértices
+            for idx in indices:
+                vertex_normals[idx][0] += normal[0]
+                vertex_normals[idx][1] += normal[1]
+                vertex_normals[idx][2] += normal[2]
+                vertex_counts[idx] += 1
+            
             index_data.extend(indices)
         elif face.v_number == 4:
             # Dividir quad em dois triângulos
+            # Triângulo 1: 0, 1, 2
+            v1 = model.v[indices[0]]
+            v2 = model.v[indices[1]]
+            v3 = model.v[indices[2]]
+            normal1 = _calculate_normal(v1, v2, v3)
+            
+            for idx in [indices[0], indices[1], indices[2]]:
+                vertex_normals[idx][0] += normal1[0]
+                vertex_normals[idx][1] += normal1[1]
+                vertex_normals[idx][2] += normal1[2]
+                vertex_counts[idx] += 1
+            
+            # Triângulo 2: 0, 2, 3
+            v1 = model.v[indices[0]]
+            v2 = model.v[indices[2]]
+            v3 = model.v[indices[3]]
+            normal2 = _calculate_normal(v1, v2, v3)
+            
+            for idx in [indices[0], indices[2], indices[3]]:
+                vertex_normals[idx][0] += normal2[0]
+                vertex_normals[idx][1] += normal2[1]
+                vertex_normals[idx][2] += normal2[2]
+                vertex_counts[idx] += 1
+            
             index_data.append(indices[0])
             index_data.append(indices[1])
             index_data.append(indices[2])
@@ -116,8 +182,30 @@ def _prepare_vbo_data(model: Model) -> None:
             index_data.append(indices[2])
             index_data.append(indices[3])
 
+    # Normalizar normais por vértice (média das normais das faces)
+    normal_data = array.array("f")
+    for i in range(model.tot_v):
+        if vertex_counts[i] > 0:
+            nx = vertex_normals[i][0] / vertex_counts[i]
+            ny = vertex_normals[i][1] / vertex_counts[i]
+            nz = vertex_normals[i][2] / vertex_counts[i]
+            length = (nx * nx + ny * ny + nz * nz) ** 0.5
+            if length > 0.0001:
+                normal_data.append(nx / length)
+                normal_data.append(ny / length)
+                normal_data.append(nz / length)
+            else:
+                normal_data.append(0.0)
+                normal_data.append(0.0)
+                normal_data.append(1.0)
+        else:
+            normal_data.append(0.0)
+            normal_data.append(0.0)
+            normal_data.append(1.0)
+
     model.vertex_array = vertex_data
     model.index_array = index_data
+    model.normal_array = normal_data
     model.index_count = len(index_data)
 
 
@@ -129,10 +217,11 @@ def _create_vbos(model: Model) -> None:
     if model.vertex_array is None or model.index_array is None:
         _prepare_vbo_data(model)
 
-    # Criar VBO para vértices (glGenBuffers retorna lista no PyOpenGL)
-    vbo_ids = GL.glGenBuffers(2)
+    # Criar VBOs (vértices, índices e normais)
+    vbo_ids = GL.glGenBuffers(3)
     model.vbo_id = vbo_ids[0]
     model.index_buffer_id = vbo_ids[1]
+    model.normal_buffer_id = vbo_ids[2]
 
     GL.glBindBuffer(GL.GL_ARRAY_BUFFER, model.vbo_id)
     GL.glBufferData(GL.GL_ARRAY_BUFFER, model.vertex_array.tobytes(), GL.GL_STATIC_DRAW)
@@ -140,6 +229,10 @@ def _create_vbos(model: Model) -> None:
     # Criar VBO para índices
     GL.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, model.index_buffer_id)
     GL.glBufferData(GL.GL_ELEMENT_ARRAY_BUFFER, model.index_array.tobytes(), GL.GL_STATIC_DRAW)
+
+    # Criar VBO para normais
+    GL.glBindBuffer(GL.GL_ARRAY_BUFFER, model.normal_buffer_id)
+    GL.glBufferData(GL.GL_ARRAY_BUFFER, model.normal_array.tobytes(), GL.GL_STATIC_DRAW)
 
     GL.glBindBuffer(GL.GL_ARRAY_BUFFER, 0)
     GL.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, 0)
@@ -150,12 +243,17 @@ def draw_model_faces(obj_model: Model) -> None:
     # Criar VBOs se ainda não foram criados
     _create_vbos(obj_model)
 
-    # Habilitar arrays de vértices
+    # Habilitar arrays de vértices e normais
     GL.glEnableClientState(GL.GL_VERTEX_ARRAY)
+    GL.glEnableClientState(GL.GL_NORMAL_ARRAY)
 
     # Bind e configurar VBO de vértices
     GL.glBindBuffer(GL.GL_ARRAY_BUFFER, obj_model.vbo_id)
     GL.glVertexPointer(3, GL.GL_FLOAT, 0, None)
+
+    # Bind e configurar VBO de normais
+    GL.glBindBuffer(GL.GL_ARRAY_BUFFER, obj_model.normal_buffer_id)
+    GL.glNormalPointer(GL.GL_FLOAT, 0, None)
 
     # Bind VBO de índices
     GL.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, obj_model.index_buffer_id)
@@ -169,6 +267,7 @@ def draw_model_faces(obj_model: Model) -> None:
     GL.glBindBuffer(GL.GL_ARRAY_BUFFER, 0)
     GL.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, 0)
     GL.glDisableClientState(GL.GL_VERTEX_ARRAY)
+    GL.glDisableClientState(GL.GL_NORMAL_ARRAY)
 
 
 def draw_model_vertex(point_size: float, obj_model: Model) -> None:
@@ -191,6 +290,10 @@ def draw_model_vertex(point_size: float, obj_model: Model) -> None:
 def cleanup_model(obj_model: Model) -> None:
     """Libera recursos de VBOs do modelo."""
     if obj_model.vbo_id is not None and obj_model.index_buffer_id is not None:
-        GL.glDeleteBuffers([obj_model.vbo_id, obj_model.index_buffer_id])
+        buffers = [obj_model.vbo_id, obj_model.index_buffer_id]
+        if obj_model.normal_buffer_id is not None:
+            buffers.append(obj_model.normal_buffer_id)
+        GL.glDeleteBuffers(buffers)
         obj_model.vbo_id = None
         obj_model.index_buffer_id = None
+        obj_model.normal_buffer_id = None
