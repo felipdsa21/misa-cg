@@ -47,3 +47,11 @@ def draw_objetos():
         GL.glScalef(0.1, 0.1, 0.1)  # reduzindo a escala
         GL.glColor3ub(0, 0, 255)
         objImporter.draw_model_faces(obj)
+
+    obj = objImporter.load_model("models/Sacada.obj")
+    with primitives.push_matrix():
+        GL.glTranslatef(9.5, 2.1, 11.5)  # movendo o objeto
+        GL.glRotatef(180.0, 0.0, 1.0, 0.0)
+        GL.glScalef(0.1, 0.1, 0.1)  # reduzindo a escala
+        GL.glColor3ub(0, 0, 255)
+        objImporter.draw_model_faces(obj)
