@@ -120,23 +120,25 @@ def draw_janela_com_arco(width: float, height: float, depth: float):
 def draw_janela_retangular(width: float, height: float, depth: float):
     frame = 0.22
     epsilon = 0.002  # evita z-fighting
+    z_front = 0
 
     # Moldura
     GL.glColor3ub(191, 124, 124)
-    primitives.draw_box(util.Vec3d(0, 0, 0), util.Vec3d(frame, height, depth))
-    primitives.draw_box(util.Vec3d(width - frame, 0, 0), util.Vec3d(frame, height, depth))
-    primitives.draw_box(util.Vec3d(0, 0, 0), util.Vec3d(width, frame, depth))
-    primitives.draw_box(util.Vec3d(0, height - frame, 0), util.Vec3d(width, frame, depth))
+    primitives.draw_box(util.Vec3d(0, 0, z_front), util.Vec3d(frame, height, depth))
+    primitives.draw_box(util.Vec3d(width - frame, 0, z_front), util.Vec3d(frame, height, depth))
+    primitives.draw_box(util.Vec3d(0, 0, z_front), util.Vec3d(width, frame, depth))
+    primitives.draw_box(util.Vec3d(0, height - frame, z_front), util.Vec3d(width, frame, depth))
 
     # Vidro translúcido
     GL.glEnable(GL.GL_BLEND)
     GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
     GL.glColor4ub(199, 222, 245, 64)  # azul claro com alpha
+    z_glass = z_front - epsilon
     with primitives.begin(GL.GL_QUADS):
-        GL.glVertex3d(frame, frame, -epsilon)
-        GL.glVertex3d(width - frame, frame, -epsilon)
-        GL.glVertex3d(width - frame, height - frame, -epsilon)
-        GL.glVertex3d(frame, height - frame, -epsilon)
+        GL.glVertex3d(frame, frame, z_glass)
+        GL.glVertex3d(width - frame, frame, z_glass)
+        GL.glVertex3d(width - frame, height - frame, z_glass)
+        GL.glVertex3d(frame, height - frame, z_glass)
     
     GL.glDisable(GL.GL_BLEND)
 
@@ -147,10 +149,10 @@ def draw_janela_retangular(width: float, height: float, depth: float):
     glass_top_rect = height - frame
 
     # Montante vertical central
-    montante_pos = util.Vec3d(width / 2 - bar / 2, frame, -epsilon)
+    montante_pos = util.Vec3d(width / 2 - bar / 2, frame, z_glass)
     montante_size = util.Vec3d(bar, (glass_top_rect - frame), epsilon * 2)
     primitives.draw_box(montante_pos, montante_size)
 
     # Travessa horizontal central (forma o "+")
     center_y = (frame + glass_top_rect) / 2 - bar / 2
-    primitives.draw_box(util.Vec3d(frame, center_y, -epsilon), util.Vec3d(inner_w, bar, epsilon * 2))
+    primitives.draw_box(util.Vec3d(frame, center_y, z_glass), util.Vec3d(inner_w, bar, epsilon * 2))

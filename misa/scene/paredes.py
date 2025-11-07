@@ -72,14 +72,17 @@ def draw_asa():
     primitives.free_stencil()
 
     # Atrás
+    GL.glColor3ub(228, 206, 211)  # Rosa
     GL.glNormal3i(0, 0, 1)
     primitives.draw_rect_z(0, 0, constantes.asa_size.x, constantes.asa_size.y, constantes.asa_size.z)
 
     # Lado
+    GL.glColor3ub(228, 206, 211)  # Rosa
     GL.glNormal3i(-1, 0, 0)
     primitives.draw_rect_x(0, 0, constantes.asa_size.y, constantes.asa_size.z, 0)
 
     # Cima
+    GL.glColor3ub(228, 206, 211)  # Rosa
     GL.glNormal3i(0, 1, 0)
     primitives.draw_rect_y(0, 0, constantes.asa_size.x, constantes.asa_size.z, constantes.asa_size.y)
 
@@ -121,6 +124,7 @@ def draw_parte_central():
     GL.glPopAttrib()
 
     # Atrás
+    GL.glColor3ub(228, 206, 211)  # Rosa
     GL.glNormal3i(0, 0, 1)
     primitives.draw_rect_z(
         0,
@@ -131,6 +135,7 @@ def draw_parte_central():
     )
 
     # Cima
+    GL.glColor3ub(228, 206, 211)  # Rosa
     GL.glNormal3i(0, 1, 0)
     primitives.draw_rect_y(
         0,
@@ -141,6 +146,7 @@ def draw_parte_central():
     )
 
     # Lados
+    GL.glColor3ub(228, 206, 211)  # Rosa
     z_depois_asa = constantes.asa_z_offset + constantes.asa_size.z
     with primitives.push_matrix():
         GL.glRotatef(-90, 0, 1, 0)
