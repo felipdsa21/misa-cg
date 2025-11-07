@@ -217,7 +217,3 @@ def main() -> None:
     GL.glEnable(GL.GL_DEPTH_TEST)
     scene.init()
     GLUT.glutMainLoop()
-
-
-if __name__ == "__main__":
-    main()

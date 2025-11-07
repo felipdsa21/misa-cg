@@ -33,7 +33,7 @@ def draw_piso_terreo():
 
     # Parte central completa
     with primitives.push_matrix():
-        GL.glTranslated(constantes.asa_size.x, 0, -constantes.asa_z_offset)
+        GL.glTranslated(constantes.asa_size.x, 0, 0)
         draw_piso(0, 0, constantes.parte_central_size.x, constantes.parte_central_size.z, constantes.piso_y)
         draw_piso(espaco_porta_x.x, 0, espaco_porta_x.y, espaco_porta_size.y, util.EPSILON * 2)
 
