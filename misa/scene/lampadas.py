@@ -84,7 +84,7 @@ def draw_lampada(pos: util.Vec3d):
 
 
 def update_lampadas_positions():
-    """Atualiza as posições das luzes pontuais (deve ser chamado após configurar câmera)."""
+    """Atualiza as posições das luzes pontuais (PRECISA ser chamado após configurar câmera)."""
     bulbo_raio = 0.2
     for lamp in lampadas_config:
         base = lamp["pos"]
