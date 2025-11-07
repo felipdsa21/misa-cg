@@ -68,6 +68,28 @@ Observações:
 - Mipmaps já são gerados em `load_texture` (arquivos). No fluxo procedural, se precisar de mipmaps, você pode chamar `glGenerateMipmap(GL_TEXTURE_2D)` após o `glTexImage2D`.
 - O modo `GL_MODULATE` garante que a textura seja afetada pela iluminação (mais realista). Evite `GL_REPLACE` se quiser sombreamento.
 
+### Mapa de funções (Textura)
+- `misa/scene/__init__.py`
+  - `init()`: habilita `GL_TEXTURE_2D` e define estados globais.
+- `misa/scene/procedural.py`
+  - `create_plaster_texture(...)`: gera imagem da textura de reboco (PIL) com variação.
+  - `load_texture_from_image(image)`: cria a textura OpenGL (wrap, filtro, `GL_MODULATE`).
+  - `load_plaster_texture()`: memoiza/cria e retorna o texture id do reboco.
+- `misa/primitives.py`
+  - `load_texture(name)`: carrega `textures/<name>`, configura wrap/filtros e mipmaps.
+  - `draw_rect_x|y|z(...)`: desenha retângulos e envia UVs proporcionais ao tamanho da face.
+  - `mascarar_retangulo_xy|yz|xz(...)`: desenha máscaras (desabilita textura durante a escrita no stencil).
+- `misa/scene/paredes.py`
+  - `draw_paredes()`: faz bind de `procedural.load_plaster_texture()` e desenha paredes.
+  - `draw_asa()` / `draw_parte_central()`: desenham faces com `primitives.draw_rect_*` (UV implícito).
+  - `mascarar_janela_arco(...)` / `mascarar_retangulo(...)`: constroem máscaras para portas/janelas (stencil) sem afetar textura fora dos vãos.
+- `misa/scene/pisos.py`
+  - `draw_pisos()`: bind de `primitives.load_texture("wood.jpg")`, desenho dos pisos e unbind ao final.
+  - `draw_piso_terreo()` / `draw_piso_primeiro_andar()`: organizam stencil e chamadas de piso.
+  - `draw_piso(...)`: desenha uma faixa de piso com `primitives.draw_rect_y`.
+- `misa/scene/janelas.py`
+  - `draw_janela_com_arco(...)` / `draw_janela_retangular(...)`: usam `GL_BLEND` para vidro translúcido (sem textura), molduras com cor sólida.
+
 ## Iluminação
 
 ### Visão geral
@@ -96,6 +118,21 @@ Observações:
 - Normais explícitas por face antes de desenhar (`glNormal3i/d`).
 - `GL_NORMALIZE` ativo para manter o comprimento das normais correto após escalas.
 - `GL_COLOR_MATERIAL` para reduzir verbosidade e ainda permitir sombreamento coerente com textura (`GL_MODULATE`).
+
+### Mapa de funções (Iluminação)
+- `misa/scene/__init__.py`
+  - `init()`: habilita `GL_LIGHTING`, `GL_LIGHT0`, `GL_NORMALIZE`, `GL_COLOR_MATERIAL`, `GL_SMOOTH`; define componentes ambiente/difusa/especular de `GL_LIGHT0` e atenuação; chama `lampadas.init_lampadas()`.
+  - `on_setup_camera()`: posiciona `GL_LIGHT0` (direcional, `w=0.0`) e atualiza posições das lâmpadas (`lampadas.update_lampadas_positions()`).
+- `misa/scene/lampadas.py`
+  - `init_lampadas()`: habilita e configura `GL_LIGHT1`–`GL_LIGHT7` (cor difusa/especular quentes, ambiente baixa, atenuação).
+  - `update_lampadas_positions()`: posiciona luzes pontuais com `glLightfv(..., GL_POSITION, [x,y,z,1.0])` após a câmera.
+  - `draw_lampadas()`: desenha bulbos e suportes (desabilita textura durante desenho visual), chama `draw_lampada(...)`.
+  - `draw_lampada(pos)`: desenha bulbo emissivo (desliga `GL_LIGHTING` localmente) e suporte.
+- Normais por face
+  - `misa/scene/paredes.py`: usa `GL.glNormal3i(...)` antes de cada face nas funções `draw_asa()` e `draw_parte_central()`.
+  - `misa/scene/pisos.py`: `draw_piso(...)` define normal para o topo (`0,1,0`).
+  - `misa/scene/telhado.py`: define normais (`glNormal3d`) para águas do telhado.
+  - `misa/scene/sacada.py`: `objImporter.draw_model_faces(obj)` desenha o OBJ com normais do modelo para iluminação correta.
 
 ## Outros recursos gráficos
 - **Stencil buffer** para recortar portas e janelas com precisão, evitando "vazamentos" de textura.
