@@ -139,7 +139,7 @@ def draw_janela_retangular(width: float, height: float, depth: float):
         GL.glVertex3d(width - frame, frame, z_glass)
         GL.glVertex3d(width - frame, height - frame, z_glass)
         GL.glVertex3d(frame, height - frame, z_glass)
-    
+
     GL.glDisable(GL.GL_BLEND)
 
     # Travessas internas (caixilhos)

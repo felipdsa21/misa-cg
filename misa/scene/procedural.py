@@ -2,43 +2,20 @@ import functools
 import random
 from typing import Optional
 
-from OpenGL import GL
 from PIL import Image
 
+from .. import primitives, util
 
-def load_texture_from_image(image: Image.Image) -> int:
-    # Converter para RGBA se necessário
-    image = image.convert("RGBA")
-    img_data = image.tobytes()
-    width, height = image.size
-
-    # Gerar ID de textura
-    texture_id = GL.glGenTextures(1)
-    GL.glBindTexture(GL.GL_TEXTURE_2D, texture_id)
-
-    # Configurar parâmetros da textura
-    GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_S, GL.GL_REPEAT)
-    GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_T, GL.GL_REPEAT)
-    GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_LINEAR)
-    GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_LINEAR)
-    
-    # Configurar modo de combinação da textura para manter a cor original
-    GL.glTexEnvi(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_MODE, GL.GL_MODULATE)
-
-    # Carregar dados da textura
-    GL.glTexImage2D(
-        GL.GL_TEXTURE_2D, 0, GL.GL_RGBA, width, height, 0, GL.GL_RGBA, GL.GL_UNSIGNED_BYTE, img_data
-    )
-
-    return texture_id
+cor_creme = util.Vec3d(228, 206, 211)
 
 
-def create_plaster_texture(width: int = 512, height: int = 512, seed: Optional[int] = None) -> Image.Image:
+def create_plaster_texture(
+    color: util.Vec3d, width: int = 512, height: int = 512, seed: Optional[int] = None
+) -> Image.Image:
     if seed is not None:
         random.seed(seed)
 
-    # Cor base do reboco (bege/creme claro)
-    base_r, base_g, base_b = 228, 206, 211
+    base_r, base_g, base_b = color.x, color.y, color.z
 
     # Criar imagem
     image = Image.new("RGB", (width, height))
@@ -67,12 +44,6 @@ def create_plaster_texture(width: int = 512, height: int = 512, seed: Optional[i
 
 
 @functools.cache
-def load_plaster_texture() -> int:
-    """
-    Cria e carrega uma textura de reboco procedural.
-
-    Returns:
-        ID da textura OpenGL
-    """
-    image = create_plaster_texture(512, 512, seed=42)
-    return load_texture_from_image(image)
+def load_plaster_texture(color: Optional[util.Vec3d] = cor_creme) -> int:
+    image = create_plaster_texture(color, 512, 512, seed=42)
+    return primitives.load_texture_from_image(image)

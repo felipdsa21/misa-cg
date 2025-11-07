@@ -5,7 +5,7 @@ from . import constantes
 
 
 def draw_pisos() -> None:
-    GL.glBindTexture(GL.GL_TEXTURE_2D, primitives.load_texture("wood.jpg"))
+    GL.glBindTexture(GL.GL_TEXTURE_2D, primitives.load_texture_from_file("wood.jpg"))
     draw_piso_terreo()
     draw_piso_primeiro_andar()
     GL.glBindTexture(GL.GL_TEXTURE_2D, 0)

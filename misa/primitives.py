@@ -152,8 +152,12 @@ def draw_box(pos: util.Vec3d, size: util.Vec3d) -> None:
 
 
 @functools.cache
-def load_texture(name: str) -> int:
+def load_texture_from_file(name: str) -> int:
     img = PIL.Image.open(os.path.join("textures", name))
+    return load_texture_from_image(img)
+
+
+def load_texture_from_image(img: PIL.Image) -> int:
     img = img.convert("RGBA")
     img_data = img.tobytes("raw", "RGBA", 0, -1)
 

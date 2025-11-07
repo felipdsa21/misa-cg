@@ -76,10 +76,14 @@ def draw_asa():
     GL.glNormal3i(0, 0, 1)
     primitives.draw_rect_z(0, 0, constantes.asa_size.x, constantes.asa_size.y, constantes.asa_size.z)
 
-    # Lado
+    # Lados
     GL.glColor3ub(228, 206, 211)  # Rosa
     GL.glNormal3i(-1, 0, 0)
     primitives.draw_rect_x(0, 0, constantes.asa_size.y, constantes.asa_size.z, 0)
+
+    GL.glNormal3i(0, 0, -1)
+    primitives.draw_rect_x(0, 0, constantes.asa_size.y, 2, constantes.asa_size.x)
+    primitives.draw_rect_x(0, 4, constantes.asa_size.y, constantes.asa_size.z, constantes.asa_size.x)
 
     # Cima
     GL.glColor3ub(228, 206, 211)  # Rosa
@@ -157,19 +161,21 @@ def draw_parte_central():
 
         # Cima
         primitives.draw_rect_z(0, constantes.asa_size.y, z_depois_asa, constantes.parte_central_size.y, 0)
+
         # Atrás
         primitives.draw_rect_z(
             z_depois_asa, 0, constantes.parte_central_size.z, constantes.parte_central_size.y, 0
         )
-
         GL.glTranslated(0, 0, -constantes.parte_central_size.x)
         GL.glNormal3i(-1, 0, 0)
 
         # Em frente a asa
-
         primitives.draw_rect_z(0, 0, constantes.asa_z_offset, constantes.asa_size.y, 0)
+
         # Cima
+
         primitives.draw_rect_z(0, constantes.asa_size.y, z_depois_asa, constantes.parte_central_size.y, 0)
+
         # Atrás
         primitives.draw_rect_z(
             z_depois_asa, 0, constantes.parte_central_size.z, constantes.parte_central_size.y, 0
