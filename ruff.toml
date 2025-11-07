@@ -1,0 +1,12 @@
+line-length = 110
+
+[format]
+preview = true
+skip-magic-trailing-comma = true
+
+[lint]
+extend-select = ["ARG", "I", "PLW1514", "RUF100"]
+preview = true
+
+[lint.isort]
+split-on-trailing-comma = false
