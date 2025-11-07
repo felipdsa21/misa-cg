@@ -4,7 +4,7 @@ from .. import primitives, util
 from . import constantes
 
 
-def draw_terreno():
+def draw_terreno() -> None:
     grama_size = 50
 
     GL.glColor3ub(65, 152, 10)
@@ -12,7 +12,7 @@ def draw_terreno():
     primitives.draw_rect_y(-grama_size, -grama_size, grama_size, grama_size, 0)
 
 
-def draw_chao():
+def draw_chao() -> None:
     tamanho = util.Vec2d(
         constantes.parte_central_size.x + constantes.asa_size.x * 2,
         constantes.parte_central_size.z + constantes.asa_size.z * 2,

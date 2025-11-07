@@ -9,12 +9,11 @@ janela_retangular_size = util.Vec3d(1.2, 2, 0.3)
 
 
 def mascarar_retangulo(x1: float, y1: float, w: float, h: float):
-    GL.glBegin(GL.GL_QUADS)
-    GL.glVertex3d(x1, y1, 0)
-    GL.glVertex3d(x1 + w, y1, 0)
-    GL.glVertex3d(x1 + w, y1 + h, 0)
-    GL.glVertex3d(x1, y1 + h, 0)
-    GL.glEnd()
+    with primitives.begin(GL.GL_QUADS):
+        GL.glVertex3d(x1, y1, 0)
+        GL.glVertex3d(x1 + w, y1, 0)
+        GL.glVertex3d(x1 + w, y1 + h, 0)
+        GL.glVertex3d(x1, y1 + h, 0)
 
 
 def mascarar_janela_arco(x: float, y_base: float, total_w: float, total_h: float, seg: int):
@@ -23,30 +22,27 @@ def mascarar_janela_arco(x: float, y_base: float, total_w: float, total_h: float
     mascarar_retangulo(x, y_base, total_w, rect_h)  # parte reta
     cx = x + radius
     cy = y_base + rect_h
-    GL.glBegin(GL.GL_TRIANGLE_FAN)
-    GL.glVertex3d(cx, cy, 0)
-    for i in range(seg + 1):
-        a = math.pi * i / seg
-        GL.glVertex3d(cx + math.cos(a) * radius, cy + math.sin(a) * radius, 0)
-    GL.glEnd()
+    with primitives.begin(GL.GL_TRIANGLE_FAN):
+        GL.glVertex3d(cx, cy, 0)
+        for i in range(seg + 1):
+            a = math.pi * i / seg
+            GL.glVertex3d(cx + math.cos(a) * radius, cy + math.sin(a) * radius, 0)
 
 
 def desenhar_janela_com_arco_ajustada(pos: util.Vec3d):
-    GL.glPushMatrix()
-    GL.glTranslated(pos.x, pos.y, pos.z)
-    janelas.draw_janela_com_arco(
-        constantes.janela_com_arco.x, constantes.janela_com_arco.y, constantes.janela_com_arco.z
-    )
-    GL.glPopMatrix()
+    with primitives.push_matrix():
+        GL.glTranslated(pos.x, pos.y, pos.z)
+        janelas.draw_janela_com_arco(
+            constantes.janela_com_arco.x, constantes.janela_com_arco.y, constantes.janela_com_arco.z
+        )
 
 
 def desenhar_janela_retangular_ajustada(pos: util.Vec3d):
-    GL.glPushMatrix()
-    GL.glTranslated(pos.x, pos.y, pos.z)
-    janelas.draw_janela_retangular(
-        janela_retangular_size.x, janela_retangular_size.y, janela_retangular_size.z
-    )
-    GL.glPopMatrix()
+    with primitives.push_matrix():
+        GL.glTranslated(pos.x, pos.y, pos.z)
+        janelas.draw_janela_retangular(
+            janela_retangular_size.x, janela_retangular_size.y, janela_retangular_size.z
+        )
 
 
 def draw_asa():
@@ -67,13 +63,12 @@ def draw_asa():
     GL.glClear(GL.GL_STENCIL_BUFFER_BIT)
     GL.glStencilFunc(GL.GL_ALWAYS, 1, 0xFF)
     GL.glStencilOp(GL.GL_KEEP, GL.GL_KEEP, GL.GL_REPLACE)
-    GL.glBegin(GL.GL_QUADS)
-    for i in range(3):  # máscara cada janela
-        GL.glVertex3d(win_x[i], base_y, 0)
-        GL.glVertex3d(win_x[i] + win_w, base_y, 0)
-        GL.glVertex3d(win_x[i] + win_w, top_y, 0)
-        GL.glVertex3d(win_x[i], top_y, 0)
-    GL.glEnd()
+    with primitives.begin(GL.GL_QUADS):
+        for i in range(3):  # máscara cada janela
+            GL.glVertex3d(win_x[i], base_y, 0)
+            GL.glVertex3d(win_x[i] + win_w, base_y, 0)
+            GL.glVertex3d(win_x[i] + win_w, top_y, 0)
+            GL.glVertex3d(win_x[i], top_y, 0)
     # Desenha parede exceto onde stencil == 1
     GL.glColorMask(GL.GL_TRUE, GL.GL_TRUE, GL.GL_TRUE, GL.GL_TRUE)
     GL.glDepthMask(GL.GL_TRUE)
@@ -87,11 +82,10 @@ def draw_asa():
     primitives.draw_rect_z(0, 0, constantes.asa_size.x, constantes.asa_size.y, constantes.asa_size.z)
 
     # Lado
-    GL.glPushMatrix()
-    GL.glRotatef(-90, 0, 1, 0)
-    GL.glNormal3i(-1, 0, 0)
-    GL.glRectd(0, 0, constantes.asa_size.z, constantes.asa_size.y)
-    GL.glPopMatrix()
+    with primitives.push_matrix():
+        GL.glRotatef(-90, 0, 1, 0)
+        GL.glNormal3i(-1, 0, 0)
+        GL.glRectd(0, 0, constantes.asa_size.z, constantes.asa_size.y)
 
     # Cima
     GL.glNormal3i(0, 1, 0)
@@ -164,42 +158,37 @@ def draw_parte_central():
 
     # Lados
     z_depois_asa = constantes.asa_z_offset + constantes.asa_size.z
-    GL.glPushMatrix()
-    GL.glRotatef(-90, 0, 1, 0)
+    with primitives.push_matrix():
+        GL.glRotatef(-90, 0, 1, 0)
 
-    GL.glNormal3i(-1, 0, 0)
-    GL.glRectd(0, 0, constantes.asa_z_offset, constantes.asa_size.y)  # Em frente a asa
-    GL.glRectd(0, constantes.asa_size.y, z_depois_asa, constantes.parte_central_size.y)  # Cima
-    GL.glRectd(z_depois_asa, 0, constantes.parte_central_size.z, constantes.parte_central_size.y)  # Atrás
+        GL.glNormal3i(-1, 0, 0)
+        GL.glRectd(0, 0, constantes.asa_z_offset, constantes.asa_size.y)  # Em frente a asa
+        GL.glRectd(0, constantes.asa_size.y, z_depois_asa, constantes.parte_central_size.y)  # Cima
+        GL.glRectd(z_depois_asa, 0, constantes.parte_central_size.z, constantes.parte_central_size.y)  # Atrás
 
-    GL.glTranslated(0, 0, -constantes.parte_central_size.x)
-    GL.glNormal3i(-1, 0, 0)
-    GL.glRectd(0, 0, constantes.asa_z_offset, constantes.asa_size.y)  # Em frente a asa
-    GL.glRectd(0, constantes.asa_size.y, z_depois_asa, constantes.parte_central_size.y)  # Cima
-    GL.glRectd(z_depois_asa, 0, constantes.parte_central_size.z, constantes.parte_central_size.y)  # Atrás
-
-    GL.glPopMatrix()
+        GL.glTranslated(0, 0, -constantes.parte_central_size.x)
+        GL.glNormal3i(-1, 0, 0)
+        GL.glRectd(0, 0, constantes.asa_z_offset, constantes.asa_size.y)  # Em frente a asa
+        GL.glRectd(0, constantes.asa_size.y, z_depois_asa, constantes.parte_central_size.y)  # Cima
+        GL.glRectd(z_depois_asa, 0, constantes.parte_central_size.z, constantes.parte_central_size.y)  # Atrás
 
 
 def draw_parte_externa(asa_func, parte_central_func):
     GL.glColor3ub(228, 206, 211)
-    GL.glPushMatrix()
+    with primitives.push_matrix():
+        # Asa direita
+        GL.glTranslated(0, 0, constantes.asa_z_offset)
+        asa_func()
 
-    # Asa direita
-    GL.glTranslated(0, 0, constantes.asa_z_offset)
-    asa_func()
+        # Parte central
+        GL.glTranslated(constantes.asa_size.x, 0, -constantes.asa_z_offset)
+        parte_central_func()
 
-    # Parte central
-    GL.glTranslated(constantes.asa_size.x, 0, -constantes.asa_z_offset)
-    parte_central_func()
-
-    # Asa esquerda
-    GL.glTranslated(constantes.parte_central_size.x, 0, constantes.asa_z_offset)
-    GL.glTranslated(constantes.asa_size.x, 0, 0)
-    GL.glScalef(-1, 1, 1)  # Espelha
-    asa_func()
-
-    GL.glPopMatrix()
+        # Asa esquerda
+        GL.glTranslated(constantes.parte_central_size.x, 0, constantes.asa_z_offset)
+        GL.glTranslated(constantes.asa_size.x, 0, 0)
+        GL.glScalef(-1, 1, 1)  # Espelha
+        asa_func()
 
 
 def draw_janelas_asa():

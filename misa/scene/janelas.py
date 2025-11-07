@@ -11,48 +11,44 @@ def desenhar_anel_arco(
     z_back = z_front - depth
 
     # Anel frontal
-    GL.glBegin(GL.GL_TRIANGLE_STRIP)
-    for i in range(segments + 1):
-        a = math.pi * i / segments
-        xo = math.cos(a) * outer_r
-        yo = math.sin(a) * outer_r
-        xi = math.cos(a) * inner_r
-        yi = math.sin(a) * inner_r
-        GL.glVertex3d(cx + xo, cy + yo, z_front)
-        GL.glVertex3d(cx + xi, cy + yi, z_front)
-    GL.glEnd()
+    with primitives.begin(GL.GL_TRIANGLE_STRIP):
+        for i in range(segments + 1):
+            a = math.pi * i / segments
+            xo = math.cos(a) * outer_r
+            yo = math.sin(a) * outer_r
+            xi = math.cos(a) * inner_r
+            yi = math.sin(a) * inner_r
+            GL.glVertex3d(cx + xo, cy + yo, z_front)
+            GL.glVertex3d(cx + xi, cy + yi, z_front)
 
     # Anel traseiro
-    GL.glBegin(GL.GL_TRIANGLE_STRIP)
-    for i in range(segments + 1):
-        a = math.pi * i / segments
-        xo = math.cos(a) * outer_r
-        yo = math.sin(a) * outer_r
-        xi = math.cos(a) * inner_r
-        yi = math.sin(a) * inner_r
-        GL.glVertex3d(cx + xo, cy + yo, z_back)
-        GL.glVertex3d(cx + xi, cy + yi, z_back)
-    GL.glEnd()
+    with primitives.begin(GL.GL_TRIANGLE_STRIP):
+        for i in range(segments + 1):
+            a = math.pi * i / segments
+            xo = math.cos(a) * outer_r
+            yo = math.sin(a) * outer_r
+            xi = math.cos(a) * inner_r
+            yi = math.sin(a) * inner_r
+            GL.glVertex3d(cx + xo, cy + yo, z_back)
+            GL.glVertex3d(cx + xi, cy + yi, z_back)
 
     # Lateral externa
-    GL.glBegin(GL.GL_QUAD_STRIP)
-    for i in range(segments + 1):
-        a = math.pi * i / segments
-        xo = math.cos(a) * outer_r
-        yo = math.sin(a) * outer_r
-        GL.glVertex3d(cx + xo, cy + yo, z_front)
-        GL.glVertex3d(cx + xo, cy + yo, z_back)
-    GL.glEnd()
+    with primitives.begin(GL.GL_QUAD_STRIP):
+        for i in range(segments + 1):
+            a = math.pi * i / segments
+            xo = math.cos(a) * outer_r
+            yo = math.sin(a) * outer_r
+            GL.glVertex3d(cx + xo, cy + yo, z_front)
+            GL.glVertex3d(cx + xo, cy + yo, z_back)
 
     # Lateral interna
-    GL.glBegin(GL.GL_QUAD_STRIP)
-    for i in range(segments + 1):
-        a = math.pi * i / segments
-        xi = math.cos(a) * inner_r
-        yi = math.sin(a) * inner_r
-        GL.glVertex3d(cx + xi, cy + yi, z_back)
-        GL.glVertex3d(cx + xi, cy + yi, z_front)
-    GL.glEnd()
+    with primitives.begin(GL.GL_QUAD_STRIP):
+        for i in range(segments + 1):
+            a = math.pi * i / segments
+            xi = math.cos(a) * inner_r
+            yi = math.sin(a) * inner_r
+            GL.glVertex3d(cx + xi, cy + yi, z_back)
+            GL.glVertex3d(cx + xi, cy + yi, z_front)
 
 
 def draw_janela_com_arco(width: float, height: float, depth: float):
@@ -82,21 +78,19 @@ def draw_janela_com_arco(width: float, height: float, depth: float):
 
     # Retângulo de vidro (parte reta)
     z_glass = z_front - epsilon
-    GL.glBegin(GL.GL_QUADS)
-    GL.glVertex3d(frame, frame, z_glass)
-    GL.glVertex3d(width - frame, frame, z_glass)
-    GL.glVertex3d(width - frame, rect_h - frame, z_glass)
-    GL.glVertex3d(frame, rect_h - frame, z_glass)
-    GL.glEnd()
+    with primitives.begin(GL.GL_QUADS):
+        GL.glVertex3d(frame, frame, z_glass)
+        GL.glVertex3d(width - frame, frame, z_glass)
+        GL.glVertex3d(width - frame, rect_h - frame, z_glass)
+        GL.glVertex3d(frame, rect_h - frame, z_glass)
 
     # Vidro do arco
-    GL.glBegin(GL.GL_TRIANGLE_FAN)
-    GL.glVertex3d(cx, cy, z_glass)
-    r_inner = radius - frame
-    for i in range(seg + 1):
-        a = math.pi * i / seg
-        GL.glVertex3d(cx + math.cos(a) * r_inner, cy + math.sin(a) * r_inner, z_glass)
-    GL.glEnd()
+    with primitives.begin(GL.GL_TRIANGLE_FAN):
+        GL.glVertex3d(cx, cy, z_glass)
+        r_inner = radius - frame
+        for i in range(seg + 1):
+            a = math.pi * i / seg
+            GL.glVertex3d(cx + math.cos(a) * r_inner, cy + math.sin(a) * r_inner, z_glass)
 
     GL.glDisable(GL.GL_BLEND)
 
@@ -136,12 +130,11 @@ def draw_janela_retangular(width: float, height: float, depth: float):
 
     # Vidro
     GL.glColor3ub(199, 222, 245)
-    GL.glBegin(GL.GL_QUADS)
-    GL.glVertex3d(frame, frame, -epsilon)
-    GL.glVertex3d(width - frame, frame, -epsilon)
-    GL.glVertex3d(width - frame, height - frame, -epsilon)
-    GL.glVertex3d(frame, height - frame, -epsilon)
-    GL.glEnd()
+    with primitives.begin(GL.GL_QUADS):
+        GL.glVertex3d(frame, frame, -epsilon)
+        GL.glVertex3d(width - frame, frame, -epsilon)
+        GL.glVertex3d(width - frame, height - frame, -epsilon)
+        GL.glVertex3d(frame, height - frame, -epsilon)
 
     # Travessas internas (caixilhos)
     GL.glColor3ub(191, 124, 124)

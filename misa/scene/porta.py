@@ -36,31 +36,31 @@ def desenhar_caixa_especial(w: float, h: float, t: float):
     GL.glNormal3i(0, 0, 1)
     primitives.draw_rect_z(0, 0, w, h, t)  # trás  z=t
 
-    GL.glPushMatrix()
-    GL.glRotated(-90, 0, 1, 0)
-    GL.glNormal3i(-1, 0, 0)
-    GL.glRectd(0, 0, t, h)
-    GL.glPopMatrix()  # lado esq
+    with primitives.push_matrix():
+        GL.glRotated(-90, 0, 1, 0)
+        GL.glNormal3i(-1, 0, 0)
+        GL.glRectd(0, 0, t, h)
+    # lado esq
 
-    GL.glPushMatrix()
-    GL.glTranslated(w, 0, 0)
-    GL.glRotated(-90, 0, 1, 0)
-    GL.glNormal3i(-1, 0, 0)
-    GL.glRectd(0, 0, t, h)
-    GL.glPopMatrix()  # lado dir
+    with primitives.push_matrix():
+        GL.glTranslated(w, 0, 0)
+        GL.glRotated(-90, 0, 1, 0)
+        GL.glNormal3i(-1, 0, 0)
+        GL.glRectd(0, 0, t, h)
+    # lado dir
 
-    GL.glPushMatrix()
-    GL.glRotated(90, 1, 0, 0)
-    GL.glNormal3i(0, 1, 0)
-    GL.glRectd(0, 0, w, t)
-    GL.glPopMatrix()  # base
+    with primitives.push_matrix():
+        GL.glRotated(90, 1, 0, 0)
+        GL.glNormal3i(0, 1, 0)
+        GL.glRectd(0, 0, w, t)
+    # base
 
-    GL.glPushMatrix()
-    GL.glTranslated(0, h, 0)
-    GL.glRotated(90, 1, 0, 0)
-    GL.glNormal3i(0, 1, 0)
-    GL.glRectd(0, 0, w, t)
-    GL.glPopMatrix()  # topo
+    with primitives.push_matrix():
+        GL.glTranslated(0, h, 0)
+        GL.glRotated(90, 1, 0, 0)
+        GL.glNormal3i(0, 1, 0)
+        GL.glRectd(0, 0, w, t)
+    # topo
 
 
 def desenhar_inset_moldurado(
@@ -69,40 +69,37 @@ def desenhar_inset_moldurado(
     z_lift = -0.003  # saliência à frente da face
 
     # moldura plana saliente
-    GL.glPushMatrix()
-    GL.glTranslated(0, 0, z_lift)
-    GL.glNormal3i(0, 0, -1)
-    GL.glColor3ub(150, 108, 72)  # moldura dos painéis
-    GL.glBegin(GL.GL_QUADS)
-    # esquerda
-    GL.glVertex3d(x, y, 0)
-    GL.glVertex3d(x + moldura, y, 0)
-    GL.glVertex3d(x + moldura, y + h, 0)
-    GL.glVertex3d(x, y + h, 0)
-    # direita
-    GL.glVertex3d(x + w - moldura, y, 0)
-    GL.glVertex3d(x + w, y, 0)
-    GL.glVertex3d(x + w, y + h, 0)
-    GL.glVertex3d(x + w - moldura, y + h, 0)
-    # topo
-    GL.glVertex3d(x + moldura, y + h - moldura, 0)
-    GL.glVertex3d(x + w - moldura, y + h - moldura, 0)
-    GL.glVertex3d(x + w - moldura, y + h, 0)
-    GL.glVertex3d(x + moldura, y + h, 0)
-    # base
-    GL.glVertex3d(x + moldura, y, 0)
-    GL.glVertex3d(x + w - moldura, y, 0)
-    GL.glVertex3d(x + w - moldura, y + moldura, 0)
-    GL.glVertex3d(x + moldura, y + moldura, 0)
-    GL.glEnd()
-    GL.glPopMatrix()
+    with primitives.push_matrix():
+        GL.glTranslated(0, 0, z_lift)
+        GL.glNormal3i(0, 0, -1)
+        GL.glColor3ub(150, 108, 72)  # moldura dos painéis
+        with primitives.begin(GL.GL_QUADS):
+            # esquerda
+            GL.glVertex3d(x, y, 0)
+            GL.glVertex3d(x + moldura, y, 0)
+            GL.glVertex3d(x + moldura, y + h, 0)
+            GL.glVertex3d(x, y + h, 0)
+            # direita
+            GL.glVertex3d(x + w - moldura, y, 0)
+            GL.glVertex3d(x + w, y, 0)
+            GL.glVertex3d(x + w, y + h, 0)
+            GL.glVertex3d(x + w - moldura, y + h, 0)
+            # topo
+            GL.glVertex3d(x + moldura, y + h - moldura, 0)
+            GL.glVertex3d(x + w - moldura, y + h - moldura, 0)
+            GL.glVertex3d(x + w - moldura, y + h, 0)
+            GL.glVertex3d(x + moldura, y + h, 0)
+            # base
+            GL.glVertex3d(x + moldura, y, 0)
+            GL.glVertex3d(x + w - moldura, y, 0)
+            GL.glVertex3d(x + w - moldura, y + moldura, 0)
+            GL.glVertex3d(x + moldura, y + moldura, 0)
 
     # painel rebaixado (entra no volume)
-    GL.glPushMatrix()
-    GL.glTranslated(x + moldura, y + moldura, t * rebaixo)
-    GL.glColor3ub(97, 67, 42)  # painéis rebaixados
-    desenhar_caixa_especial(w - 2 * moldura, h - 2 * moldura, t * 0.12)
-    GL.glPopMatrix()
+    with primitives.push_matrix():
+        GL.glTranslated(x + moldura, y + moldura, t * rebaixo)
+        GL.glColor3ub(97, 67, 42)  # painéis rebaixados
+        desenhar_caixa_especial(w - 2 * moldura, h - 2 * moldura, t * 0.12)
 
 
 def desenhar_folha_porta(folha_w: float, folha_h: float, t: float, is_right_leaf: bool):
@@ -120,37 +117,35 @@ def desenhar_folha_porta(folha_w: float, folha_h: float, t: float, is_right_leaf
 
     y_mid0 = (folha_h - rail_mid) * 0.5
 
-    GL.glPushMatrix()
-    GL.glTranslated(0, 0, z_lift)
-    GL.glNormal3i(0, 0, -1)
-    GL.glColor3ub(139, 94, 62)  # partes salientes
-    GL.glBegin(GL.GL_QUADS)
-    # stiles
-    GL.glVertex3d(0, 0, 0)
-    GL.glVertex3d(stile, 0, 0)
-    GL.glVertex3d(stile, folha_h, 0)
-    GL.glVertex3d(0, folha_h, 0)
-    GL.glVertex3d(folha_w - stile, 0, 0)
-    GL.glVertex3d(folha_w, 0, 0)
-    GL.glVertex3d(folha_w, folha_h, 0)
-    GL.glVertex3d(folha_w - stile, folha_h, 0)
-    # rails topo/meio/base
-    GL.glVertex3d(stile, folha_h - rail_top, 0)
-    GL.glVertex3d(folha_w - stile, folha_h - rail_top, 0)
-    GL.glVertex3d(folha_w - stile, folha_h, 0)
-    GL.glVertex3d(stile, folha_h, 0)
+    with primitives.push_matrix():
+        GL.glTranslated(0, 0, z_lift)
+        GL.glNormal3i(0, 0, -1)
+        GL.glColor3ub(139, 94, 62)  # partes salientes
+        with primitives.begin(GL.GL_QUADS):
+            # stiles
+            GL.glVertex3d(0, 0, 0)
+            GL.glVertex3d(stile, 0, 0)
+            GL.glVertex3d(stile, folha_h, 0)
+            GL.glVertex3d(0, folha_h, 0)
+            GL.glVertex3d(folha_w - stile, 0, 0)
+            GL.glVertex3d(folha_w, 0, 0)
+            GL.glVertex3d(folha_w, folha_h, 0)
+            GL.glVertex3d(folha_w - stile, folha_h, 0)
+            # rails topo/meio/base
+            GL.glVertex3d(stile, folha_h - rail_top, 0)
+            GL.glVertex3d(folha_w - stile, folha_h - rail_top, 0)
+            GL.glVertex3d(folha_w - stile, folha_h, 0)
+            GL.glVertex3d(stile, folha_h, 0)
 
-    GL.glVertex3d(stile, y_mid0, 0)
-    GL.glVertex3d(folha_w - stile, y_mid0, 0)
-    GL.glVertex3d(folha_w - stile, y_mid0 + rail_mid, 0)
-    GL.glVertex3d(stile, y_mid0 + rail_mid, 0)
+            GL.glVertex3d(stile, y_mid0, 0)
+            GL.glVertex3d(folha_w - stile, y_mid0, 0)
+            GL.glVertex3d(folha_w - stile, y_mid0 + rail_mid, 0)
+            GL.glVertex3d(stile, y_mid0 + rail_mid, 0)
 
-    GL.glVertex3d(stile, 0, 0)
-    GL.glVertex3d(folha_w - stile, 0, 0)
-    GL.glVertex3d(folha_w - stile, rail_bot, 0)
-    GL.glVertex3d(stile, rail_bot, 0)
-    GL.glEnd()
-    GL.glPopMatrix()
+            GL.glVertex3d(stile, 0, 0)
+            GL.glVertex3d(folha_w - stile, 0, 0)
+            GL.glVertex3d(folha_w - stile, rail_bot, 0)
+            GL.glVertex3d(stile, rail_bot, 0)
 
     # painéis rebaixados
     mold = 0.08
@@ -170,26 +165,23 @@ def desenhar_folha_porta(folha_w: float, folha_h: float, t: float, is_right_leaf
     # junta central e maçaneta na folha direita
     if is_right_leaf:
         jamb = 0.025
-        GL.glPushMatrix()
-        GL.glTranslated(0, 0, z_lift)
-        GL.glNormal3i(0, 0, -1)
-        GL.glColor3ub(90, 60, 40)  # junta central
-        GL.glBegin(GL.GL_QUADS)
-        GL.glVertex3d(folha_w - jamb, 0, 0)
-        GL.glVertex3d(folha_w, 0, 0)
-        GL.glVertex3d(folha_w, folha_h, 0)
-        GL.glVertex3d(folha_w - jamb, folha_h, 0)
-        GL.glEnd()
-        GL.glPopMatrix()
+        with primitives.push_matrix():
+            GL.glTranslated(0, 0, z_lift)
+            GL.glNormal3i(0, 0, -1)
+            GL.glColor3ub(90, 60, 40)  # junta central
+            with primitives.begin(GL.GL_QUADS):
+                GL.glVertex3d(folha_w - jamb, 0, 0)
+                GL.glVertex3d(folha_w, 0, 0)
+                GL.glVertex3d(folha_w, folha_h, 0)
+                GL.glVertex3d(folha_w - jamb, folha_h, 0)
 
         GL.glColor3ub(80, 80, 80)  # maçaneta
         knob_w = 0.06
         knob_h = 0.06
         knob_t = 0.04
-        GL.glPushMatrix()
-        GL.glTranslated(folha_w - 0.12 - knob_w, y_mid0 + rail_mid * 0.5 - knob_h * 0.5, knob_t * 0.5)
-        desenhar_caixa_especial(knob_w, knob_h, knob_t)
-        GL.glPopMatrix()
+        with primitives.push_matrix():
+            GL.glTranslated(folha_w - 0.12 - knob_w, y_mid0 + rail_mid * 0.5 - knob_h * 0.5, knob_t * 0.5)
+            desenhar_caixa_especial(knob_w, knob_h, knob_t)
 
 
 def desenhar_portas_frente(x_antes_porta: float):
@@ -199,47 +191,43 @@ def desenhar_portas_frente(x_antes_porta: float):
     z_gap = 0.004
 
     # Folha esquerda: rotação NEGATIVA → entra para +Z
-    GL.glPushMatrix()
-    GL.glTranslated(x_antes_porta, 0, z_gap)
-    GL.glRotated(-door_angle, 0, 1, 0)
-    desenhar_folha_porta(leaf_w, leaf_h, thickness, False)
-    GL.glPopMatrix()
+    with primitives.push_matrix():
+        GL.glTranslated(x_antes_porta, 0, z_gap)
+        GL.glRotated(-door_angle, 0, 1, 0)
+        desenhar_folha_porta(leaf_w, leaf_h, thickness, False)
 
     # Folha direita: rotação POSITIVA (após levar pivô à borda direita)
-    GL.glPushMatrix()
-    GL.glTranslated(x_antes_porta + constantes.porta_size.x, 0, z_gap)
-    GL.glRotated(+door_angle, 0, 1, 0)
-    GL.glTranslated(-leaf_w, 0, 0)
-    desenhar_folha_porta(leaf_w, leaf_h, thickness, True)
-    GL.glPopMatrix()
+    with primitives.push_matrix():
+        GL.glTranslated(x_antes_porta + constantes.porta_size.x, 0, z_gap)
+        GL.glRotated(+door_angle, 0, 1, 0)
+        GL.glTranslated(-leaf_w, 0, 0)
+        desenhar_folha_porta(leaf_w, leaf_h, thickness, True)
 
 
 def draw_porta(x_antes_porta: float):
     # batente do vão (leve saliência)
     z_lift = -0.002
     GL.glColor3ub(210, 170, 170)
-    GL.glPushMatrix()
-    GL.glTranslated(0, 0, z_lift)
-    GL.glNormal3i(0, 0, -1)
-    b = 0.08
-    GL.glBegin(GL.GL_QUADS)
-    # esq
-    GL.glVertex3d(x_antes_porta - b, 0, 0)
-    GL.glVertex3d(x_antes_porta, 0, 0)
-    GL.glVertex3d(x_antes_porta, constantes.porta_size.y, 0)
-    GL.glVertex3d(x_antes_porta - b, constantes.porta_size.y, 0)
-    # dir
-    GL.glVertex3d(x_antes_porta + constantes.porta_size.x, 0, 0)
-    GL.glVertex3d(x_antes_porta + constantes.porta_size.x + b, 0, 0)
-    GL.glVertex3d(x_antes_porta + constantes.porta_size.x + b, constantes.porta_size.y, 0)
-    GL.glVertex3d(x_antes_porta + constantes.porta_size.x, constantes.porta_size.y, 0)
-    # topo
-    GL.glVertex3d(x_antes_porta - b, constantes.porta_size.y, 0)
-    GL.glVertex3d(x_antes_porta + constantes.porta_size.x + b, constantes.porta_size.y, 0)
-    GL.glVertex3d(x_antes_porta + constantes.porta_size.x + b, constantes.porta_size.y + b, 0)
-    GL.glVertex3d(x_antes_porta - b, constantes.porta_size.y + b, 0)
-    GL.glEnd()
-    GL.glPopMatrix()
+    with primitives.push_matrix():
+        GL.glTranslated(0, 0, z_lift)
+        GL.glNormal3i(0, 0, -1)
+        b = 0.08
+        with primitives.begin(GL.GL_QUADS):
+            # esq
+            GL.glVertex3d(x_antes_porta - b, 0, 0)
+            GL.glVertex3d(x_antes_porta, 0, 0)
+            GL.glVertex3d(x_antes_porta, constantes.porta_size.y, 0)
+            GL.glVertex3d(x_antes_porta - b, constantes.porta_size.y, 0)
+            # dir
+            GL.glVertex3d(x_antes_porta + constantes.porta_size.x, 0, 0)
+            GL.glVertex3d(x_antes_porta + constantes.porta_size.x + b, 0, 0)
+            GL.glVertex3d(x_antes_porta + constantes.porta_size.x + b, constantes.porta_size.y, 0)
+            GL.glVertex3d(x_antes_porta + constantes.porta_size.x, constantes.porta_size.y, 0)
+            # topo
+            GL.glVertex3d(x_antes_porta - b, constantes.porta_size.y, 0)
+            GL.glVertex3d(x_antes_porta + constantes.porta_size.x + b, constantes.porta_size.y, 0)
+            GL.glVertex3d(x_antes_porta + constantes.porta_size.x + b, constantes.porta_size.y + b, 0)
+            GL.glVertex3d(x_antes_porta - b, constantes.porta_size.y + b, 0)
 
     desenhar_portas_frente(x_antes_porta)
 

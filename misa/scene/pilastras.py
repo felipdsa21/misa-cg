@@ -19,31 +19,31 @@ def desenhar_caixa_local(w: float, h: float, t: float):
     GL.glNormal3i(0, 0, 1)
     primitives.draw_rect_z(0, 0, w, h, t)  # trás  z=t
 
-    GL.glPushMatrix()
-    GL.glRotatef(-90, 0, 1, 0)
-    GL.glNormal3i(-1, 0, 0)
-    GL.glRectd(0, 0, t, h)
-    GL.glPopMatrix()  # lado esq
+    with primitives.push_matrix():
+        GL.glRotatef(-90, 0, 1, 0)
+        GL.glNormal3i(-1, 0, 0)
+        GL.glRectd(0, 0, t, h)
+    # lado esq
 
-    GL.glPushMatrix()
-    GL.glTranslated(w, 0, 0)
-    GL.glRotatef(-90, 0, 1, 0)
-    GL.glNormal3i(-1, 0, 0)
-    GL.glRectd(0, 0, t, h)
-    GL.glPopMatrix()  # lado dir
+    with primitives.push_matrix():
+        GL.glTranslated(w, 0, 0)
+        GL.glRotatef(-90, 0, 1, 0)
+        GL.glNormal3i(-1, 0, 0)
+        GL.glRectd(0, 0, t, h)
+    # lado dir
 
-    GL.glPushMatrix()
-    GL.glRotatef(90, 1, 0, 0)
-    GL.glNormal3i(0, 1, 0)
-    GL.glRectd(0, 0, w, t)
-    GL.glPopMatrix()  # base
+    with primitives.push_matrix():
+        GL.glRotatef(90, 1, 0, 0)
+        GL.glNormal3i(0, 1, 0)
+        GL.glRectd(0, 0, w, t)
+    # base
 
-    GL.glPushMatrix()
-    GL.glTranslated(0, h, 0)
-    GL.glRotatef(90, 1, 0, 0)
-    GL.glNormal3i(0, 1, 0)
-    GL.glRectd(0, 0, w, t)
-    GL.glPopMatrix()  # topo
+    with primitives.push_matrix():
+        GL.glTranslated(0, h, 0)
+        GL.glRotatef(90, 1, 0, 0)
+        GL.glNormal3i(0, 1, 0)
+        GL.glRectd(0, 0, w, t)
+    # topo
 
 
 def draw_pilastra(x: float, y: float, z: float, altura_fuste: float):
@@ -60,45 +60,40 @@ def draw_pilastra(x: float, y: float, z: float, altura_fuste: float):
     prato_r = 0.45
     prato_h = 0.04  # prato verde (teto)
 
-    GL.glPushMatrix()
-    GL.glTranslated(x, y, z)
+    with primitives.push_matrix():
+        GL.glTranslated(x, y, z)
 
-    # base madeira escura
-    GL.glColor3ub(70, 42, 25)
-    desenhar_caixa_local(base_w, base_h, base_w)
+        # base madeira escura
+        GL.glColor3ub(70, 42, 25)
+        desenhar_caixa_local(base_w, base_h, base_w)
 
-    # pedestal amarelo
-    GL.glTranslated((base_w - pedestal_w) / 2.0, base_h, (base_w - pedestal_w) / 2.0)
-    GL.glColor3ub(225, 197, 126)
-    desenhar_caixa_local(pedestal_w, pedestal_h, pedestal_w)
+        # pedestal amarelo
+        GL.glTranslated((base_w - pedestal_w) / 2.0, base_h, (base_w - pedestal_w) / 2.0)
+        GL.glColor3ub(225, 197, 126)
+        desenhar_caixa_local(pedestal_w, pedestal_h, pedestal_w)
 
-    # moldura branca
-    GL.glTranslated(-(mold_w - pedestal_w) / 2.0, pedestal_h, -(mold_w - pedestal_w) / 2.0)
-    GL.glColor3ub(240, 240, 240)
-    desenhar_caixa_local(mold_w, mold_h, mold_w)
+        # moldura branca
+        GL.glTranslated(-(mold_w - pedestal_w) / 2.0, pedestal_h, -(mold_w - pedestal_w) / 2.0)
+        GL.glColor3ub(240, 240, 240)
+        desenhar_caixa_local(mold_w, mold_h, mold_w)
 
-    # fuste (cilindro fechado, alinhado ao eixo Y)
-    GL.glTranslated(mold_w / 2.0, mold_h, mold_w / 2.0)
-    GL.glColor3ub(225, 197, 126)
-    GL.glPushMatrix()
-    desenhar_cilindro_fechado(fuste_r, altura_fuste)
-    GL.glPopMatrix()
+        # fuste (cilindro fechado, alinhado ao eixo Y)
+        GL.glTranslated(mold_w / 2.0, mold_h, mold_w / 2.0)
+        GL.glColor3ub(225, 197, 126)
+        with primitives.push_matrix():
+            desenhar_cilindro_fechado(fuste_r, altura_fuste)
 
-    # anel branco no topo do fuste
-    GL.glPushMatrix()
-    GL.glTranslated(0, altura_fuste, 0)
-    GL.glColor3ub(240, 240, 240)
-    desenhar_cilindro_fechado(anel_r, anel_h)
-    GL.glPopMatrix()
+        # anel branco no topo do fuste
+        with primitives.push_matrix():
+            GL.glTranslated(0, altura_fuste, 0)
+            GL.glColor3ub(240, 240, 240)
+            desenhar_cilindro_fechado(anel_r, anel_h)
 
-    # prato verde que toca o teto
-    GL.glPushMatrix()
-    GL.glTranslated(0, altura_fuste + anel_h, 0)
-    GL.glColor3ub(126, 168, 146)
-    desenhar_cilindro_fechado(prato_r, prato_h)
-    GL.glPopMatrix()
-
-    GL.glPopMatrix()
+        # prato verde que toca o teto
+        with primitives.push_matrix():
+            GL.glTranslated(0, altura_fuste + anel_h, 0)
+            GL.glColor3ub(126, 168, 146)
+            desenhar_cilindro_fechado(prato_r, prato_h)
 
 
 def draw_pilastras_internas():
