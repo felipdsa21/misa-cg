@@ -38,20 +38,12 @@ def draw_sacada():
         # Após rotação de -90° em Z, o que era Y vira X, então ajustamos X e Y
         GL.glTranslatef(46.5, -190, 173.5)
 
-        # Desabilitar iluminação temporariamente para cor branca sem sombras
-        lighting_was = GL.glIsEnabled(GL.GL_LIGHTING)
-        if lighting_was:
-            GL.glDisable(GL.GL_LIGHTING)
+        # Definir um tom de cinza e usar iluminação da cena
+        GL.glColor3ub(190, 190, 190)
 
-        # Definir cor branca
-        GL.glColor3ub(255, 255, 255)
-
-        # Renderizar o modelo sem normais (desabilitar array de normais)
-        _draw_model_without_normals(obj)
-
-        # Reabilitar iluminação se estava ativa
-        if lighting_was:
-            GL.glEnable(GL.GL_LIGHTING)
+        # Renderizar o modelo com normais para respeitar a iluminação
+        from .. import objImporter as _oi
+        _oi.draw_model_faces(obj)
 
 
 def _draw_model_without_normals(obj_model):
