@@ -16,11 +16,7 @@ def draw_paredes() -> None:
 
 
 def mascarar_retangulo(x1: float, y1: float, w: float, h: float):
-    with primitives.begin(GL.GL_QUADS):
-        GL.glVertex3d(x1, y1, 0)
-        GL.glVertex3d(x1 + w, y1, 0)
-        GL.glVertex3d(x1 + w, y1 + h, 0)
-        GL.glVertex3d(x1, y1 + h, 0)
+    primitives.mascarar_retangulo_xy(x1, y1, x1 + w, y1 + h, 0.0)
 
 
 def mascarar_janela_arco(x: float, y_base: float, total_w: float, total_h: float, seg: int):
@@ -29,11 +25,13 @@ def mascarar_janela_arco(x: float, y_base: float, total_w: float, total_h: float
     mascarar_retangulo(x, y_base, total_w, rect_h)  # parte reta
     cx = x + radius
     cy = y_base + rect_h
+    GL.glDisable(GL.GL_TEXTURE_2D)
     with primitives.begin(GL.GL_TRIANGLE_FAN):
         GL.glVertex3d(cx, cy, 0)
         for i in range(seg + 1):
             a = math.pi * i / seg
             GL.glVertex3d(cx + math.cos(a) * radius, cy + math.sin(a) * radius, 0)
+    GL.glEnable(GL.GL_TEXTURE_2D)
 
 
 def desenhar_janela_com_arco_ajustada(pos: util.Vec3d):
@@ -64,23 +62,11 @@ def draw_asa():
     # Modo preciso: usa stencil para recortar exatamente os retângulos das janelas
     GL.glNormal3i(0, 0, -1)
     # Preparar stencil: marcamos 1 onde haverá janela
-    GL.glColorMask(GL.GL_FALSE, GL.GL_FALSE, GL.GL_FALSE, GL.GL_FALSE)
-    GL.glDepthMask(GL.GL_FALSE)
-    GL.glStencilMask(0xFF)
-    GL.glClear(GL.GL_STENCIL_BUFFER_BIT)
-    GL.glStencilFunc(GL.GL_ALWAYS, 1, 0xFF)
-    GL.glStencilOp(GL.GL_KEEP, GL.GL_KEEP, GL.GL_REPLACE)
-    with primitives.begin(GL.GL_QUADS):
-        for i in range(3):  # máscara cada janela
-            GL.glVertex3d(win_x[i], base_y, 0)
-            GL.glVertex3d(win_x[i] + win_w, base_y, 0)
-            GL.glVertex3d(win_x[i] + win_w, top_y, 0)
-            GL.glVertex3d(win_x[i], top_y, 0)
+    primitives.setup_stencil_mask()
+    for i in range(3):  # máscara cada janela
+        primitives.mascarar_retangulo_xy(win_x[i], base_y, win_x[i] + win_w, top_y, 0.0)
     # Desenha parede exceto onde stencil == 1
-    GL.glColorMask(GL.GL_TRUE, GL.GL_TRUE, GL.GL_TRUE, GL.GL_TRUE)
-    GL.glDepthMask(GL.GL_TRUE)
-    GL.glStencilFunc(GL.GL_EQUAL, 0, 0xFF)
-    GL.glStencilOp(GL.GL_KEEP, GL.GL_KEEP, GL.GL_KEEP)
+    primitives.setup_stencil_draw()
     # Adicionar coordenadas de textura
     with primitives.begin(GL.GL_QUADS):
         GL.glTexCoord2f(0, 0)
@@ -91,7 +77,7 @@ def draw_asa():
         GL.glVertex3d(constantes.asa_size.x, constantes.asa_size.y, 0)
         GL.glTexCoord2f(0, constantes.asa_size.y / 2)
         GL.glVertex3d(0, constantes.asa_size.y, 0)
-    GL.glStencilFunc(GL.GL_ALWAYS, 0, 0xFF)  # libera
+    primitives.free_stencil()
 
     # Atrás
     GL.glNormal3i(0, 0, 1)
@@ -139,12 +125,7 @@ def draw_parte_central():
 
     # --- STENCIL (modo preciso) ---
     GL.glNormal3i(0, 0, -1)
-    GL.glColorMask(GL.GL_FALSE, GL.GL_FALSE, GL.GL_FALSE, GL.GL_FALSE)
-    GL.glDepthMask(GL.GL_FALSE)
-    GL.glStencilMask(0xFF)
-    GL.glClear(GL.GL_STENCIL_BUFFER_BIT)
-    GL.glStencilFunc(GL.GL_ALWAYS, 1, 0xFF)
-    GL.glStencilOp(GL.GL_KEEP, GL.GL_KEEP, GL.GL_REPLACE)
+    primitives.setup_stencil_mask()
     # Porta (retângulo)
     mascarar_retangulo(x_antes_porta, 0, constantes.porta_size.x, constantes.porta_size.y)
     # Janelas arco (5): esquerda baixa/alta, central alta, direita baixa/alta
@@ -156,10 +137,7 @@ def draw_parte_central():
     mascarar_janela_arco(right_start, y_top_base, jw, jh, seg)
 
     # Desenha parede exceto onde máscara = 1
-    GL.glColorMask(GL.GL_TRUE, GL.GL_TRUE, GL.GL_TRUE, GL.GL_TRUE)
-    GL.glDepthMask(GL.GL_TRUE)
-    GL.glStencilFunc(GL.GL_EQUAL, 0, 0xFF)
-    GL.glStencilOp(GL.GL_KEEP, GL.GL_KEEP, GL.GL_KEEP)
+    primitives.setup_stencil_draw()
     # Adicionar coordenadas de textura
     with primitives.begin(GL.GL_QUADS):
         GL.glTexCoord2f(0, 0)
@@ -170,7 +148,7 @@ def draw_parte_central():
         GL.glVertex3d(constantes.parte_central_size.x, constantes.parte_central_size.y, 0)
         GL.glTexCoord2f(0, constantes.parte_central_size.y / 2)
         GL.glVertex3d(0, constantes.parte_central_size.y, 0)
-    GL.glStencilFunc(GL.GL_ALWAYS, 0, 0xFF)
+    primitives.free_stencil()
 
     # Porta (folhas) desenhada depois da parede para aparecer no vão
     GL.glPushAttrib(GL.GL_CURRENT_BIT)

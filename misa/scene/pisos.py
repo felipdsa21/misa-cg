@@ -23,7 +23,7 @@ def draw_piso_terreo() -> None:
     with primitives.push_matrix():
         # Marcar espaço da porta na parte central
         GL.glTranslated(constantes.asa_size.x, 0, 0)
-        mascarar_retangulo_piso(espaco_porta_x.x, 0, espaco_porta_x.y, espaco_porta_size.y, constantes.piso_y)
+        primitives.mascarar_retangulo_xz(espaco_porta_x.x, 0, espaco_porta_x.y, espaco_porta_size.y, constantes.piso_y)
 
     primitives.setup_stencil_draw()
 
@@ -69,7 +69,7 @@ def draw_piso_primeiro_andar() -> None:
         limite_x = constantes.parte_central_size.x - abertura_escada_size.x
         limite_z = constantes.parte_central_size.z / 2
         fim_abertura_z = limite_z + abertura_escada_size.y
-        mascarar_retangulo_piso(
+        primitives.mascarar_retangulo_xz(
             limite_x, limite_z, constantes.parte_central_size.x, fim_abertura_z, constantes.segundo_andar_y
         )
 
@@ -100,16 +100,6 @@ def desenhar_degraus_porta(espaco_porta_x: util.Vec2d, espaco_porta_size: util.V
         # Frente do degrau
         GL.glNormal3i(0, 0, -1)
         primitives.draw_rect_z(espaco_porta_x.x, degrau_y_base, espaco_porta_x.y, degrau_y, degrau_z_end)
-
-
-def mascarar_retangulo_piso(x1: float, z1: float, x2: float, z2: float, y: float) -> None:
-    GL.glDisable(GL.GL_TEXTURE_2D)
-    with primitives.begin(GL.GL_QUADS):
-        GL.glVertex3d(x1, y, z1)
-        GL.glVertex3d(x2, y, z1)
-        GL.glVertex3d(x2, y, z2)
-        GL.glVertex3d(x1, y, z2)
-    GL.glEnable(GL.GL_TEXTURE_2D)
 
 
 def draw_piso(x1: float, z1: float, x2: float, z2: float, y: float) -> None:

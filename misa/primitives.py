@@ -46,6 +46,36 @@ def free_stencil() -> None:
     GL.glStencilFunc(GL.GL_ALWAYS, 0, 0xFF)
 
 
+def mascarar_retangulo_xy(x1: float, y1: float, x2: float, y2: float, z: float = 0.0) -> None:
+    GL.glDisable(GL.GL_TEXTURE_2D)
+    with begin(GL.GL_QUADS):
+        GL.glVertex3d(x1, y1, z)
+        GL.glVertex3d(x2, y1, z)
+        GL.glVertex3d(x2, y2, z)
+        GL.glVertex3d(x1, y2, z)
+    GL.glEnable(GL.GL_TEXTURE_2D)
+
+
+def mascarar_retangulo_yz(y1: float, z1: float, y2: float, z2: float, x: float = 0.0) -> None:
+    GL.glDisable(GL.GL_TEXTURE_2D)
+    with begin(GL.GL_QUADS):
+        GL.glVertex3d(x, y1, z1)
+        GL.glVertex3d(x, y2, z1)
+        GL.glVertex3d(x, y2, z2)
+        GL.glVertex3d(x, y1, z2)
+    GL.glEnable(GL.GL_TEXTURE_2D)
+
+
+def mascarar_retangulo_xz(x1: float, z1: float, x2: float, z2: float, y: float = 0.0) -> None:
+    GL.glDisable(GL.GL_TEXTURE_2D)
+    with begin(GL.GL_QUADS):
+        GL.glVertex3d(x1, y, z1)
+        GL.glVertex3d(x2, y, z1)
+        GL.glVertex3d(x2, y, z2)
+        GL.glVertex3d(x1, y, z2)
+    GL.glEnable(GL.GL_TEXTURE_2D)
+
+
 def draw_rect_x(y1: float, z1: float, y2: float, z2: float, x: float) -> None:
     with begin(GL.GL_QUADS):
         GL.glTexCoord2d(0.0, 0.0)
