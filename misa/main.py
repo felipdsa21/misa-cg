@@ -1,52 +1,43 @@
+import math
 import sys
+
 from OpenGL import GL, GLU, GLUT
-from .util import (
-    Vec2i,
-    Vec3d,
-    clamp,
-    to_radians,
-    calc_direction_vec,
-    sum3d,
-    normalize3d,
-    scalar_mult3d,
-    cross_product3d,
-)
-from . import draw
-from .scene import door
 
-GLUT.GLUT_KEY_SHIFT_L = 112
-GLUT.GLUT_KEY_CTRL_L = 114
+from . import scene, util
 
-# Camera constants
-camera_up = Vec3d(0, 1, 0)
+# Não incluido pelo PyOpenGL
+GLUT_KEY_SHIFT_L = 112
+GLUT_KEY_CTRL_L = 114
+
+# https://learnopengl.com/Getting-started/Camera
+camera_up = util.Vec3d(0, 1, 0)
 mouse_sensitivity = 0.1
 walk_speed = 0.07195
 
-# Global state
-window_size = Vec2i(800, 600)
-last_mouse_pos = Vec2i(0, 0)
+# Estado global
+window_size = util.Vec2i(800, 600)
+last_mouse_pos = util.Vec2i(0, 0)
 first_mouse = True
 camera_focused = True
-key_state = {}
-special_key_state = {}
+key_state = [False] * 256
+special_key_state = [False] * 256
 
-camera_pos = Vec3d(0, 1.7, -5)
+camera_pos = util.Vec3d(0, 1.7, -5)
 pitch = 0.0
 yaw = 90.0
 
 
-def handle_display():
+def handle_display() -> None:
     GL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
-    draw.draw()
+    scene.draw()
     GLUT.glutSwapBuffers()
 
 
-def setup_camera():
+def setup_camera() -> None:
     GL.glMatrixMode(GL.GL_MODELVIEW)
     GL.glLoadIdentity()
-    center_pos = sum3d(
-        camera_pos, calc_direction_vec(to_radians(pitch), to_radians(yaw))
-    )
+    direction = util.direction_vector(math.radians(pitch), math.radians(yaw))
+    center_pos = camera_pos + direction
 
     GLU.gluLookAt(
         camera_pos.x,
@@ -60,43 +51,35 @@ def setup_camera():
         camera_up.z,
     )
 
-    draw.on_setup_camera()
+    scene.on_setup_camera()
 
 
-def handle_reshape(w: int, h: int):
+def handle_reshape(w: int, h: int) -> None:
     global first_mouse, window_size, camera_pos
     first_mouse = True
-    window_size = Vec2i(w, h)
-    # Update porta module globals
-    door.window_size = window_size
-    door.camera_pos = camera_pos
 
+    window_size = util.Vec2i(w, h)
     GL.glViewport(0, 0, window_size.x, window_size.y)
 
     GL.glMatrixMode(GL.GL_PROJECTION)
     GL.glLoadIdentity()
     GLU.gluPerspective(70, window_size.x / window_size.y, 0.1, 50)
-
     setup_camera()
 
 
-def move_camera(perpendicular: bool, negative: bool):
+def move_camera(perpendicular: bool, negative: bool) -> None:
     global camera_pos
-    direction = calc_direction_vec(to_radians(pitch), to_radians(yaw))
-    direction.y = 0
-    direction = normalize3d(direction)
+    direction = util.direction_vector(math.radians(pitch), math.radians(yaw))
+    direction = direction.with_y(0).normalized()
 
     if perpendicular:
-        direction = cross_product3d(direction, camera_up)
-        direction.y = 0
-        direction = normalize3d(direction)
+        direction = direction.cross(camera_up).with_y(0).normalized()
 
     speed = -walk_speed if negative else walk_speed
-    direction = scalar_mult3d(speed, direction)
-    camera_pos = sum3d(camera_pos, direction)
+    camera_pos = camera_pos + speed * direction
 
 
-def set_camera_focused(value: bool):
+def set_camera_focused(value: bool) -> None:
     global camera_focused, first_mouse
     if camera_focused == value:
         return
@@ -108,45 +91,43 @@ def set_camera_focused(value: bool):
         first_mouse = True
 
 
-def handle_timer(value: int):
+def handle_timer(value: int) -> None:
     global camera_pos, camera_focused, window_size
-    # Update porta module globals
-    door.window_size = window_size
-    door.camera_pos = camera_pos
 
-    if key_state.get(27, False):  # ESC
-        sys.exit(0)
+    if key_state[27]:  # ESC
+        GLUT.glutLeaveMainLoop()
+        return
 
     changed = False
 
-    if key_state.get(ord("a"), False) or key_state.get(ord("A"), False):
+    if key_state[ord("a")]:
         move_camera(True, True)
         changed = True
 
-    if key_state.get(ord("d"), False) or key_state.get(ord("D"), False):
+    if key_state[ord("d")]:
         move_camera(True, False)
         changed = True
 
-    if key_state.get(ord("s"), False) or key_state.get(ord("S"), False):
+    if key_state[ord("s")]:
         move_camera(False, True)
         changed = True
 
-    if key_state.get(ord("w"), False) or key_state.get(ord("W"), False):
+    if key_state[ord("w")]:
         move_camera(False, False)
         changed = True
 
-    if key_state.get(ord(" "), False):
-        camera_pos.y += walk_speed
+    if key_state[ord(" ")]:
+        camera_pos = camera_pos.with_y(camera_pos.y + walk_speed)
         changed = True
 
-    if special_key_state.get(GLUT.GLUT_KEY_SHIFT_L, False):
-        camera_pos.y -= walk_speed
+    if special_key_state[GLUT_KEY_SHIFT_L]:
+        camera_pos = camera_pos.with_y(camera_pos.y - walk_speed)
         changed = True
 
-    if special_key_state.get(GLUT.GLUT_KEY_CTRL_L, False):
+    if special_key_state[GLUT_KEY_CTRL_L]:
         set_camera_focused(False)
 
-    if door.on_loop():
+    if scene.on_loop():
         changed = True
 
     if changed:
@@ -156,73 +137,67 @@ def handle_timer(value: int):
     GLUT.glutTimerFunc(1000 // 60, handle_timer, 0)
 
 
-def handle_keyboard(key: int, x: int, y: int):
-    key_state[ord(key)] = True
+def handle_keyboard(key: bytes, x: int, y: int) -> None:
+    key_state[ord(key.lower())] = True
 
 
-def handle_keyboard_up(key: int, x: int, y: int):
-    key_state[ord(key)] = False
+def handle_keyboard_up(key: bytes, x: int, y: int) -> None:
+    key_state[ord(key.lower())] = False
 
 
-def handle_special(key: int, x: int, y: int):
+def handle_special(key: int, x: int, y: int) -> None:
     special_key_state[key] = True
 
 
-def handle_special_up(key: int, x: int, y: int):
+def handle_special_up(key: int, x: int, y: int) -> None:
     special_key_state[key] = False
 
 
-def handle_motion(x: int, y: int):
+def handle_motion(x: int, y: int) -> None:
     global first_mouse, last_mouse_pos, pitch, yaw, window_size, camera_pos
-    # Update porta module globals
-    door.window_size = window_size
-    door.camera_pos = camera_pos
 
-    if first_mouse:
-        last_mouse_pos = Vec2i(x, y)
+    if first_mouse or not camera_focused:
+        last_mouse_pos = util.Vec2i(x, y)
         first_mouse = False
-        return
-    elif not camera_focused:
-        last_mouse_pos = Vec2i(x, y)
         return
 
     dx = x - last_mouse_pos.x
     dy = last_mouse_pos.y - y
 
     yaw += dx * mouse_sensitivity
-    pitch = clamp(pitch + (dy * mouse_sensitivity), -89.9, 89.9)
+    pitch = util.clamp(pitch + dy * mouse_sensitivity, -89.9, 89.9)
 
+    # Warp do mouse quando próximo das bordas
     # https://gamedev.stackexchange.com/a/98024
-    if x < 100 or x > window_size.x - 100 or y < 100 or y > window_size.y - 100:
+    margin = 100
+    if not (margin <= x <= window_size.x - margin and margin <= y <= window_size.y - margin):
         new_x = window_size.x // 2
         new_y = window_size.y // 2
         GLUT.glutWarpPointer(new_x, new_y)
-        last_mouse_pos = Vec2i(new_x, new_y)
+        last_mouse_pos = util.Vec2i(new_x, new_y)
     else:
-        last_mouse_pos = Vec2i(x, y)
+        last_mouse_pos = util.Vec2i(x, y)
 
     setup_camera()
     GLUT.glutPostRedisplay()
 
 
-def handle_mouse(button: int, state: int, x: int, y: int):
+def handle_mouse(button: int, state: int, x: int, y: int) -> None:
     global camera_focused
     if (
         not camera_focused
-        and not door.on_mouse_press(button, state, x, y)
+        and not scene.on_mouse_press(button, state, x, y)
         and button == GLUT.GLUT_LEFT_BUTTON
         and state == GLUT.GLUT_DOWN
     ):
         set_camera_focused(True)
 
 
-def main():
+def main() -> None:
     global window_size, camera_pos
     GLUT.glutInit(sys.argv)
 
-    GLUT.glutInitDisplayMode(
-        GLUT.GLUT_DOUBLE | GLUT.GLUT_RGBA | GLUT.GLUT_DEPTH | GLUT.GLUT_MULTISAMPLE
-    )
+    GLUT.glutInitDisplayMode(GLUT.GLUT_DOUBLE | GLUT.GLUT_RGBA | GLUT.GLUT_DEPTH | GLUT.GLUT_MULTISAMPLE)
     GLUT.glutInitWindowSize(window_size.x, window_size.y)
     GLUT.glutCreateWindow(b"MISA")
     GLUT.glutIgnoreKeyRepeat(1)
@@ -240,7 +215,7 @@ def main():
     GLUT.glutMouseFunc(handle_mouse)
 
     GL.glEnable(GL.GL_DEPTH_TEST)
-    draw.init()
+    scene.init()
     GLUT.glutMainLoop()
 
 

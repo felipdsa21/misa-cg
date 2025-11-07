@@ -1,8 +1,9 @@
 from OpenGL import GL
-from .util import Vec3d
+
+from . import util
 
 
-def draw_rect_y(x1: float, z1: float, x2: float, z2: float, y: float):
+def draw_rect_y(x1: float, z1: float, x2: float, z2: float, y: float) -> None:
     GL.glBegin(GL.GL_QUADS)
     GL.glVertex3d(x1, y, z1)
     GL.glVertex3d(x2, y, z1)
@@ -11,7 +12,7 @@ def draw_rect_y(x1: float, z1: float, x2: float, z2: float, y: float):
     GL.glEnd()
 
 
-def draw_rect_z(x1: float, y1: float, x2: float, y2: float, z: float):
+def draw_rect_z(x1: float, y1: float, x2: float, y2: float, z: float) -> None:
     GL.glBegin(GL.GL_QUADS)
     GL.glVertex3d(x1, y1, z)
     GL.glVertex3d(x2, y1, z)
@@ -20,7 +21,7 @@ def draw_rect_z(x1: float, y1: float, x2: float, y2: float, z: float):
     GL.glEnd()
 
 
-def draw_box(pos: Vec3d, size: Vec3d):
+def draw_box(pos: util.Vec3d, size: util.Vec3d) -> None:
     GL.glBegin(GL.GL_QUADS)
 
     # Frente

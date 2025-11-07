@@ -1,65 +1,109 @@
+from __future__ import annotations
+
 import math
 from dataclasses import dataclass
-from typing import Tuple
 
-# Constants
-PI = 3.14159265358979323846
+# Constantes
 EPSILON = 0.001  # Para evitar z-fighting
 
 
-@dataclass
+@dataclass(frozen=True, slots=True)
 class Vec2i:
     x: int
     y: int
 
+    def __add__(self, other: Vec2i) -> Vec2i:
+        return Vec2i(self.x + other.x, self.y + other.y)
 
-@dataclass
+    def __sub__(self, other: Vec2i) -> Vec2i:
+        return Vec2i(self.x - other.x, self.y - other.y)
+
+    def __mul__(self, scalar: int) -> Vec2i:
+        return Vec2i(self.x * scalar, self.y * scalar)
+
+    def __rmul__(self, scalar: int) -> Vec2i:
+        return self.__mul__(scalar)
+
+
+@dataclass(frozen=True, slots=True)
 class Vec2d:
     x: float
     y: float
 
+    def __add__(self, other: Vec2d) -> Vec2d:
+        return Vec2d(self.x + other.x, self.y + other.y)
 
-@dataclass
+    def __sub__(self, other: Vec2d) -> Vec2d:
+        return Vec2d(self.x - other.x, self.y - other.y)
+
+    def __mul__(self, scalar: float) -> Vec2d:
+        return Vec2d(self.x * scalar, self.y * scalar)
+
+    def __rmul__(self, scalar: float) -> Vec2d:
+        return self.__mul__(scalar)
+
+    def __truediv__(self, scalar: float) -> Vec2d:
+        return Vec2d(self.x / scalar, self.y / scalar)
+
+    @property
+    def magnitude(self) -> float:
+        return math.hypot(self.x, self.y)
+
+    def normalized(self) -> Vec2d:
+        mag = self.magnitude
+        if mag == 0.0:
+            return Vec2d(0.0, 0.0)
+        return Vec2d(self.x / mag, self.y / mag)
+
+
+@dataclass(frozen=True, slots=True)
 class Vec3d:
     x: float
     y: float
     z: float
 
+    def __add__(self, other: Vec3d) -> Vec3d:
+        return Vec3d(self.x + other.x, self.y + other.y, self.z + other.z)
 
-def clamp(x: float, lower: float, upper: float) -> float:
-    return lower if x < lower else (upper if x > upper else x)
+    def __sub__(self, other: Vec3d) -> Vec3d:
+        return Vec3d(self.x - other.x, self.y - other.y, self.z - other.z)
+
+    def __mul__(self, scalar: float) -> Vec3d:
+        return Vec3d(self.x * scalar, self.y * scalar, self.z * scalar)
+
+    def __rmul__(self, scalar: float) -> Vec3d:
+        return self.__mul__(scalar)
+
+    def __truediv__(self, scalar: float) -> Vec3d:
+        return Vec3d(self.x / scalar, self.y / scalar, self.z / scalar)
+
+    @property
+    def magnitude(self) -> float:
+        return math.sqrt(self.x**2 + self.y**2 + self.z**2)
+
+    def normalized(self) -> Vec3d:
+        mag = self.magnitude
+        if mag == 0.0:
+            return Vec3d(0.0, 0.0, 0.0)
+        return Vec3d(self.x / mag, self.y / mag, self.z / mag)
+
+    def dot(self, other: Vec3d) -> float:
+        return self.x * other.x + self.y * other.y + self.z * other.z
+
+    def cross(self, other: Vec3d) -> Vec3d:
+        return Vec3d(
+            self.y * other.z - self.z * other.y,
+            self.z * other.x - self.x * other.z,
+            self.x * other.y - self.y * other.x,
+        )
+
+    def with_y(self, new_y: float) -> Vec3d:
+        return Vec3d(self.x, new_y, self.z)
 
 
-def to_radians(degrees: float) -> float:
-    return degrees * PI / 180.0
+def clamp(value: float, min_value: float, max_value: float) -> float:
+    return max(min_value, min(value, max_value))
 
 
-def with_y3d(u: Vec3d, new_y: int) -> Vec3d:
-    return Vec3d(x=u.x, y=new_y, z=u.z)
-
-
-def calc_direction_vec(pitch: float, yaw: float) -> Vec3d:
-    return Vec3d(
-        x=math.cos(pitch) * math.cos(yaw),
-        y=math.sin(pitch),
-        z=math.cos(pitch) * math.sin(yaw),
-    )
-
-
-def sum3d(u: Vec3d, v: Vec3d) -> Vec3d:
-    return Vec3d(x=u.x + v.x, y=u.y + v.y, z=u.z + v.z)
-
-
-def scalar_mult3d(a: float, u: Vec3d) -> Vec3d:
-    return Vec3d(x=a * u.x, y=a * u.y, z=a * u.z)
-
-
-def normalize3d(u: Vec3d) -> Vec3d:
-    norm = math.sqrt(u.x * u.x + u.y * u.y + u.z * u.z)
-    return Vec3d(x=u.x / norm, y=u.y / norm, z=u.z / norm)
-
-
-def cross_product3d(u: Vec3d, v: Vec3d) -> Vec3d:
-    return Vec3d(
-        x=u.y * v.z - u.z * v.y, y=u.z * v.x - u.x * v.z, z=u.x * v.y - u.y * v.x
-    )
+def direction_vector(pitch: float, yaw: float) -> Vec3d:
+    return Vec3d(x=math.cos(pitch) * math.cos(yaw), y=math.sin(pitch), z=math.cos(pitch) * math.sin(yaw))

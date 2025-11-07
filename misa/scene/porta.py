@@ -1,69 +1,40 @@
 from OpenGL import GL, GLUT
-from ..util import Vec3d, Vec2i
-from ..primitives import draw_box, draw_rect_z
 
-# Global state (will be updated by main.py)
-window_size = Vec2i(800, 600)
-camera_pos = Vec3d(0, 1.7, -5)
+from .. import primitives, util
+from . import constantes
 
-porta_size = Vec3d(2.8, 3.2, 0.0)
-botao_size = Vec2i(100, 50)
+# Estado global (será atualizado por main.py)
+window_size = util.Vec2i(800, 600)
+camera_pos = util.Vec3d(0, 1.7, -5)
 
-# ANIMAÇÃO DAS PORTAS
+botao_size = util.Vec2i(100, 50)
+
+# Animação das portas
 door_angle = 0.0
 door_target = 0.0  # 0 fechada, 90 aberta
 door_max = 90.0
 door_speed = 180.0 / 60.0  # ~3°/frame @60Hz
 
 
-def step_door() -> bool:
+def passo_porta() -> bool:
     global door_angle
     before = door_angle
     if door_angle < door_target:
-        door_angle += door_speed
-        if door_angle > door_target:
-            door_angle = door_target
+        door_angle = min(door_angle + door_speed, door_target)
     elif door_angle > door_target:
-        door_angle -= door_speed
-        if door_angle < door_target:
-            door_angle = door_target
+        door_angle = max(door_angle - door_speed, door_target)
     return before != door_angle
 
 
 def on_loop() -> bool:
-    return step_door()
+    return passo_porta()
 
 
-# helpers
-def color_wood_base():
-    GL.glColor3ub(120, 78, 48)  # marrom base
-
-
-def color_wood_highlight():
-    GL.glColor3ub(139, 94, 62)  # partes salientes
-
-
-def color_wood_inset():
-    GL.glColor3ub(97, 67, 42)  # painéis rebaixados
-
-
-def color_wood_frame():
-    GL.glColor3ub(150, 108, 72)  # moldura dos painéis
-
-
-def color_wood_jamb():
-    GL.glColor3ub(90, 60, 40)  # junta central
-
-
-def color_metal():
-    GL.glColor3ub(80, 80, 80)  # maçaneta
-
-
-def draw_box_esp(w: float, h: float, t: float):
+def desenhar_caixa_especial(w: float, h: float, t: float):
     GL.glNormal3i(0, 0, -1)
     GL.glRectd(0, 0, w, h)  # frente z=0
     GL.glNormal3i(0, 0, 1)
-    draw_rect_z(0, 0, w, h, t)  # trás  z=t
+    primitives.draw_rect_z(0, 0, w, h, t)  # trás  z=t
 
     GL.glPushMatrix()
     GL.glRotated(-90, 0, 1, 0)
@@ -92,7 +63,7 @@ def draw_box_esp(w: float, h: float, t: float):
     GL.glPopMatrix()  # topo
 
 
-def draw_framed_inset(
+def desenhar_inset_moldurado(
     x: float, y: float, w: float, h: float, t: float, moldura: float, rebaixo: float
 ):
     z_lift = -0.003  # saliência à frente da face
@@ -101,7 +72,7 @@ def draw_framed_inset(
     GL.glPushMatrix()
     GL.glTranslated(0, 0, z_lift)
     GL.glNormal3i(0, 0, -1)
-    color_wood_frame()
+    GL.glColor3ub(150, 108, 72)  # moldura dos painéis
     GL.glBegin(GL.GL_QUADS)
     # esquerda
     GL.glVertex3d(x, y, 0)
@@ -129,17 +100,17 @@ def draw_framed_inset(
     # painel rebaixado (entra no volume)
     GL.glPushMatrix()
     GL.glTranslated(x + moldura, y + moldura, t * rebaixo)
-    color_wood_inset()
-    draw_box_esp(w - 2 * moldura, h - 2 * moldura, t * 0.12)
+    GL.glColor3ub(97, 67, 42)  # painéis rebaixados
+    desenhar_caixa_especial(w - 2 * moldura, h - 2 * moldura, t * 0.12)
     GL.glPopMatrix()
 
 
-def draw_door_leaf(folha_w: float, folha_h: float, t: float, is_right_leaf: bool):
+def desenhar_folha_porta(folha_w: float, folha_h: float, t: float, is_right_leaf: bool):
     z_lift = -0.003  # saliências à frente
 
     # corpo
-    color_wood_base()
-    draw_box_esp(folha_w, folha_h, t)
+    GL.glColor3ub(120, 78, 48)  # marrom base
+    desenhar_caixa_especial(folha_w, folha_h, t)
 
     # stiles/rails
     stile = 0.18
@@ -152,7 +123,7 @@ def draw_door_leaf(folha_w: float, folha_h: float, t: float, is_right_leaf: bool
     GL.glPushMatrix()
     GL.glTranslated(0, 0, z_lift)
     GL.glNormal3i(0, 0, -1)
-    color_wood_highlight()
+    GL.glColor3ub(139, 94, 62)  # partes salientes
     GL.glBegin(GL.GL_QUADS)
     # stiles
     GL.glVertex3d(0, 0, 0)
@@ -186,21 +157,15 @@ def draw_door_leaf(folha_w: float, folha_h: float, t: float, is_right_leaf: bool
     rel = 0.35
 
     top_h = folha_h - rail_top - (y_mid0 + rail_mid)
-    draw_framed_inset(
-        stile, y_mid0 + rail_mid, folha_w - 2 * stile, top_h, t, mold, rel
-    )
+    desenhar_inset_moldurado(stile, y_mid0 + rail_mid, folha_w - 2 * stile, top_h, t, mold, rel)
 
     base_region_h = y_mid0
     lower1_h = base_region_h * 0.55
     lower2_h = base_region_h * 0.35
     gap_v = base_region_h - (lower1_h + lower2_h)
 
-    draw_framed_inset(
-        stile, gap_v + lower2_h, folha_w - 2 * stile, lower1_h, t, mold, rel
-    )
-    draw_framed_inset(
-        stile, 0.02 + mold * 0.25, folha_w - 2 * stile, lower2_h - 0.02, t, mold, rel
-    )
+    desenhar_inset_moldurado(stile, gap_v + lower2_h, folha_w - 2 * stile, lower1_h, t, mold, rel)
+    desenhar_inset_moldurado(stile, 0.02 + mold * 0.25, folha_w - 2 * stile, lower2_h - 0.02, t, mold, rel)
 
     # junta central e maçaneta na folha direita
     if is_right_leaf:
@@ -208,7 +173,7 @@ def draw_door_leaf(folha_w: float, folha_h: float, t: float, is_right_leaf: bool
         GL.glPushMatrix()
         GL.glTranslated(0, 0, z_lift)
         GL.glNormal3i(0, 0, -1)
-        color_wood_jamb()
+        GL.glColor3ub(90, 60, 40)  # junta central
         GL.glBegin(GL.GL_QUADS)
         GL.glVertex3d(folha_w - jamb, 0, 0)
         GL.glVertex3d(folha_w, 0, 0)
@@ -217,23 +182,19 @@ def draw_door_leaf(folha_w: float, folha_h: float, t: float, is_right_leaf: bool
         GL.glEnd()
         GL.glPopMatrix()
 
-        color_metal()
+        GL.glColor3ub(80, 80, 80)  # maçaneta
         knob_w = 0.06
         knob_h = 0.06
         knob_t = 0.04
         GL.glPushMatrix()
-        GL.glTranslated(
-            folha_w - 0.12 - knob_w,
-            y_mid0 + rail_mid * 0.5 - knob_h * 0.5,
-            knob_t * 0.5,
-        )
-        draw_box_esp(knob_w, knob_h, knob_t)
+        GL.glTranslated(folha_w - 0.12 - knob_w, y_mid0 + rail_mid * 0.5 - knob_h * 0.5, knob_t * 0.5)
+        desenhar_caixa_especial(knob_w, knob_h, knob_t)
         GL.glPopMatrix()
 
 
-def draw_portas_frente(x_antes_porta: float):
-    leaf_w = porta_size.x * 0.5
-    leaf_h = porta_size.y
+def desenhar_portas_frente(x_antes_porta: float):
+    leaf_w = constantes.porta_size.x * 0.5
+    leaf_h = constantes.porta_size.y
     thickness = 0.06
     z_gap = 0.004
 
@@ -241,15 +202,15 @@ def draw_portas_frente(x_antes_porta: float):
     GL.glPushMatrix()
     GL.glTranslated(x_antes_porta, 0, z_gap)
     GL.glRotated(-door_angle, 0, 1, 0)
-    draw_door_leaf(leaf_w, leaf_h, thickness, False)
+    desenhar_folha_porta(leaf_w, leaf_h, thickness, False)
     GL.glPopMatrix()
 
     # Folha direita: rotação POSITIVA (após levar pivô à borda direita)
     GL.glPushMatrix()
-    GL.glTranslated(x_antes_porta + porta_size.x, 0, z_gap)
+    GL.glTranslated(x_antes_porta + constantes.porta_size.x, 0, z_gap)
     GL.glRotated(+door_angle, 0, 1, 0)
     GL.glTranslated(-leaf_w, 0, 0)
-    draw_door_leaf(leaf_w, leaf_h, thickness, True)
+    desenhar_folha_porta(leaf_w, leaf_h, thickness, True)
     GL.glPopMatrix()
 
 
@@ -265,25 +226,25 @@ def draw_porta(x_antes_porta: float):
     # esq
     GL.glVertex3d(x_antes_porta - b, 0, 0)
     GL.glVertex3d(x_antes_porta, 0, 0)
-    GL.glVertex3d(x_antes_porta, porta_size.y, 0)
-    GL.glVertex3d(x_antes_porta - b, porta_size.y, 0)
+    GL.glVertex3d(x_antes_porta, constantes.porta_size.y, 0)
+    GL.glVertex3d(x_antes_porta - b, constantes.porta_size.y, 0)
     # dir
-    GL.glVertex3d(x_antes_porta + porta_size.x, 0, 0)
-    GL.glVertex3d(x_antes_porta + porta_size.x + b, 0, 0)
-    GL.glVertex3d(x_antes_porta + porta_size.x + b, porta_size.y, 0)
-    GL.glVertex3d(x_antes_porta + porta_size.x, porta_size.y, 0)
+    GL.glVertex3d(x_antes_porta + constantes.porta_size.x, 0, 0)
+    GL.glVertex3d(x_antes_porta + constantes.porta_size.x + b, 0, 0)
+    GL.glVertex3d(x_antes_porta + constantes.porta_size.x + b, constantes.porta_size.y, 0)
+    GL.glVertex3d(x_antes_porta + constantes.porta_size.x, constantes.porta_size.y, 0)
     # topo
-    GL.glVertex3d(x_antes_porta - b, porta_size.y, 0)
-    GL.glVertex3d(x_antes_porta + porta_size.x + b, porta_size.y, 0)
-    GL.glVertex3d(x_antes_porta + porta_size.x + b, porta_size.y + b, 0)
-    GL.glVertex3d(x_antes_porta - b, porta_size.y + b, 0)
+    GL.glVertex3d(x_antes_porta - b, constantes.porta_size.y, 0)
+    GL.glVertex3d(x_antes_porta + constantes.porta_size.x + b, constantes.porta_size.y, 0)
+    GL.glVertex3d(x_antes_porta + constantes.porta_size.x + b, constantes.porta_size.y + b, 0)
+    GL.glVertex3d(x_antes_porta - b, constantes.porta_size.y + b, 0)
     GL.glEnd()
     GL.glPopMatrix()
 
-    draw_portas_frente(x_antes_porta)
+    desenhar_portas_frente(x_antes_porta)
 
 
-def draw_bitmap_string(font, x: int, y: int, s: str):
+def desenhar_string_bitmap(font, x: int, y: int, s: str):
     GL.glRasterPos2i(x, y)
     for c in s:
         GLUT.glutBitmapCharacter(font, ord(c))
@@ -318,7 +279,7 @@ def draw_botao():
     font = GLUT.GLUT_BITMAP_HELVETICA_18
     GL.glColor3ub(255, 255, 255)
     text = "Fechar" if door_target > 0 else "Abrir"
-    draw_bitmap_string(font, start_x + 30, start_y + 30, text)
+    desenhar_string_bitmap(font, start_x + 30, start_y + 30, text)
 
     if depth_was:
         GL.glEnable(GL.GL_DEPTH_TEST)

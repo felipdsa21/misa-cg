@@ -11,6 +11,7 @@ models to your OpenGL project in Python.
 
 from dataclasses import dataclass
 from typing import List
+
 from OpenGL import GL
 
 
@@ -36,7 +37,7 @@ class Model:
 
 
 def load_model(file_name: str) -> Model:
-    with open(file_name, "r") as p_file:
+    with open(file_name, "r", encoding="utf-8") as p_file:
         lines = p_file.readlines()
 
     # Count vertices
@@ -50,9 +51,7 @@ def load_model(file_name: str) -> Model:
     for line in lines:
         parts = line.strip().split()
         if len(parts) >= 4 and parts[0] == "v":
-            vertices.append(
-                Vertex(x=float(parts[1]), y=float(parts[2]), z=float(parts[3]))
-            )
+            vertices.append(Vertex(x=float(parts[1]), y=float(parts[2]), z=float(parts[3])))
 
     # Parse faces
     faces = []
