@@ -1,5 +1,5 @@
-import random
 import functools
+import random
 from typing import Optional
 
 from OpenGL import GL

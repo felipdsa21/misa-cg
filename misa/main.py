@@ -214,6 +214,5 @@ def main() -> None:
     GLUT.glutPassiveMotionFunc(handle_motion)
     GLUT.glutMouseFunc(handle_mouse)
 
-    GL.glEnable(GL.GL_DEPTH_TEST)
     scene.init()
     GLUT.glutMainLoop()

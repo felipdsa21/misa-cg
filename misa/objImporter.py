@@ -7,10 +7,10 @@ Esta biblioteca permite importar modelos OBJ
 para seu projeto OpenGL em Python usando VBOs.
 """
 
-from dataclasses import dataclass
-import functools
-from typing import List, Optional
 import array
+import functools
+from dataclasses import dataclass
+from typing import List, Optional
 
 from OpenGL import GL
 
@@ -92,16 +92,16 @@ def _calculate_normal(v1: Vertex, v2: Vertex, v3: Vertex) -> tuple:
     ux = v2.x - v1.x
     uy = v2.y - v1.y
     uz = v2.z - v1.z
-    
+
     vx = v3.x - v1.x
     vy = v3.y - v1.y
     vz = v3.z - v1.z
-    
+
     # Produto vetorial
     nx = uy * vz - uz * vy
     ny = uz * vx - ux * vz
     nz = ux * vy - uy * vx
-    
+
     # Normalizar
     length = (nx * nx + ny * ny + nz * nz) ** 0.5
     if length > 0.0001:
@@ -140,14 +140,14 @@ def _prepare_vbo_data(model: Model) -> None:
             v2 = model.v[indices[1]]
             v3 = model.v[indices[2]]
             normal = _calculate_normal(v1, v2, v3)
-            
+
             # Acumular normal nos vértices
             for idx in indices:
                 vertex_normals[idx][0] += normal[0]
                 vertex_normals[idx][1] += normal[1]
                 vertex_normals[idx][2] += normal[2]
                 vertex_counts[idx] += 1
-            
+
             index_data.extend(indices)
         elif face.v_number == 4:
             # Dividir quad em dois triângulos
@@ -156,25 +156,25 @@ def _prepare_vbo_data(model: Model) -> None:
             v2 = model.v[indices[1]]
             v3 = model.v[indices[2]]
             normal1 = _calculate_normal(v1, v2, v3)
-            
+
             for idx in [indices[0], indices[1], indices[2]]:
                 vertex_normals[idx][0] += normal1[0]
                 vertex_normals[idx][1] += normal1[1]
                 vertex_normals[idx][2] += normal1[2]
                 vertex_counts[idx] += 1
-            
+
             # Triângulo 2: 0, 2, 3
             v1 = model.v[indices[0]]
             v2 = model.v[indices[2]]
             v3 = model.v[indices[3]]
             normal2 = _calculate_normal(v1, v2, v3)
-            
+
             for idx in [indices[0], indices[2], indices[3]]:
                 vertex_normals[idx][0] += normal2[0]
                 vertex_normals[idx][1] += normal2[1]
                 vertex_normals[idx][2] += normal2[2]
                 vertex_counts[idx] += 1
-            
+
             index_data.append(indices[0])
             index_data.append(indices[1])
             index_data.append(indices[2])

@@ -47,4 +47,3 @@ def draw_objetos():
         GL.glScalef(0.1, 0.1, 0.1)
         GL.glColor3ub(0, 0, 255)
         objImporter.draw_model_faces(obj)
-

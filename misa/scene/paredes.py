@@ -68,42 +68,16 @@ def draw_asa():
     # Desenha parede exceto onde stencil == 1
     primitives.setup_stencil_draw()
     # Adicionar coordenadas de textura
-    with primitives.begin(GL.GL_QUADS):
-        GL.glTexCoord2f(0, 0)
-        GL.glVertex3d(0, 0, 0)
-        GL.glTexCoord2f(constantes.asa_size.x / 2, 0)
-        GL.glVertex3d(constantes.asa_size.x, 0, 0)
-        GL.glTexCoord2f(constantes.asa_size.x / 2, constantes.asa_size.y / 2)
-        GL.glVertex3d(constantes.asa_size.x, constantes.asa_size.y, 0)
-        GL.glTexCoord2f(0, constantes.asa_size.y / 2)
-        GL.glVertex3d(0, constantes.asa_size.y, 0)
+    primitives.draw_rect_z(0, 0, constantes.asa_size.x, constantes.asa_size.y, 0)
     primitives.free_stencil()
 
     # Atrás
     GL.glNormal3i(0, 0, 1)
-    with primitives.begin(GL.GL_QUADS):
-        GL.glTexCoord2f(0, 0)
-        GL.glVertex3d(0, 0, constantes.asa_size.z)
-        GL.glTexCoord2f(constantes.asa_size.x / 2, 0)
-        GL.glVertex3d(constantes.asa_size.x, 0, constantes.asa_size.z)
-        GL.glTexCoord2f(constantes.asa_size.x / 2, constantes.asa_size.y / 2)
-        GL.glVertex3d(constantes.asa_size.x, constantes.asa_size.y, constantes.asa_size.z)
-        GL.glTexCoord2f(0, constantes.asa_size.y / 2)
-        GL.glVertex3d(0, constantes.asa_size.y, constantes.asa_size.z)
+    primitives.draw_rect_z(0, 0, constantes.asa_size.x, constantes.asa_size.y, constantes.asa_size.z)
 
     # Lado
-    with primitives.push_matrix():
-        GL.glRotatef(-90, 0, 1, 0)
-        GL.glNormal3i(-1, 0, 0)
-        with primitives.begin(GL.GL_QUADS):
-            GL.glTexCoord2f(0, 0)
-            GL.glVertex3d(0, 0, 0)
-            GL.glTexCoord2f(constantes.asa_size.z / 2, 0)
-            GL.glVertex3d(constantes.asa_size.z, 0, 0)
-            GL.glTexCoord2f(constantes.asa_size.z / 2, constantes.asa_size.y / 2)
-            GL.glVertex3d(constantes.asa_size.z, constantes.asa_size.y, 0)
-            GL.glTexCoord2f(0, constantes.asa_size.y / 2)
-            GL.glVertex3d(0, constantes.asa_size.y, 0)
+    GL.glNormal3i(-1, 0, 0)
+    primitives.draw_rect_x(0, 0, constantes.asa_size.y, constantes.asa_size.z, 0)
 
     # Cima
     GL.glNormal3i(0, 1, 0)
@@ -138,16 +112,7 @@ def draw_parte_central():
 
     # Desenha parede exceto onde máscara = 1
     primitives.setup_stencil_draw()
-    # Adicionar coordenadas de textura
-    with primitives.begin(GL.GL_QUADS):
-        GL.glTexCoord2f(0, 0)
-        GL.glVertex3d(0, 0, 0)
-        GL.glTexCoord2f(constantes.parte_central_size.x / 2, 0)
-        GL.glVertex3d(constantes.parte_central_size.x, 0, 0)
-        GL.glTexCoord2f(constantes.parte_central_size.x / 2, constantes.parte_central_size.y / 2)
-        GL.glVertex3d(constantes.parte_central_size.x, constantes.parte_central_size.y, 0)
-        GL.glTexCoord2f(0, constantes.parte_central_size.y / 2)
-        GL.glVertex3d(0, constantes.parte_central_size.y, 0)
+    primitives.draw_rect_z(0, 0, constantes.parte_central_size.x, constantes.parte_central_size.y, 0)
     primitives.free_stencil()
 
     # Porta (folhas) desenhada depois da parede para aparecer no vão
@@ -157,17 +122,13 @@ def draw_parte_central():
 
     # Atrás
     GL.glNormal3i(0, 0, 1)
-    with primitives.begin(GL.GL_QUADS):
-        GL.glTexCoord2f(0, 0)
-        GL.glVertex3d(0, 0, constantes.parte_central_size.z)
-        GL.glTexCoord2f(constantes.parte_central_size.x / 2, 0)
-        GL.glVertex3d(constantes.parte_central_size.x, 0, constantes.parte_central_size.z)
-        GL.glTexCoord2f(constantes.parte_central_size.x / 2, constantes.parte_central_size.y / 2)
-        GL.glVertex3d(
-            constantes.parte_central_size.x, constantes.parte_central_size.y, constantes.parte_central_size.z
-        )
-        GL.glTexCoord2f(0, constantes.parte_central_size.y / 2)
-        GL.glVertex3d(0, constantes.parte_central_size.y, constantes.parte_central_size.z)
+    primitives.draw_rect_z(
+        0,
+        0,
+        constantes.parte_central_size.x,
+        constantes.parte_central_size.y,
+        constantes.parte_central_size.z,
+    )
 
     # Cima
     GL.glNormal3i(0, 1, 0)
@@ -186,72 +147,27 @@ def draw_parte_central():
 
         GL.glNormal3i(-1, 0, 0)
         # Em frente a asa
-        with primitives.begin(GL.GL_QUADS):
-            GL.glTexCoord2f(0, 0)
-            GL.glVertex3d(0, 0, 0)
-            GL.glTexCoord2f(constantes.asa_z_offset / 2, 0)
-            GL.glVertex3d(constantes.asa_z_offset, 0, 0)
-            GL.glTexCoord2f(constantes.asa_z_offset / 2, constantes.asa_size.y / 2)
-            GL.glVertex3d(constantes.asa_z_offset, constantes.asa_size.y, 0)
-            GL.glTexCoord2f(0, constantes.asa_size.y / 2)
-            GL.glVertex3d(0, constantes.asa_size.y, 0)
+        primitives.draw_rect_z(0, 0, constantes.asa_z_offset, constantes.asa_size.y, 0)
+
         # Cima
-        with primitives.begin(GL.GL_QUADS):
-            GL.glTexCoord2f(0, 0)
-            GL.glVertex3d(0, constantes.asa_size.y, 0)
-            GL.glTexCoord2f((z_depois_asa) / 2, 0)
-            GL.glVertex3d(z_depois_asa, constantes.asa_size.y, 0)
-            GL.glTexCoord2f((z_depois_asa) / 2, constantes.parte_central_size.y / 2)
-            GL.glVertex3d(z_depois_asa, constantes.parte_central_size.y, 0)
-            GL.glTexCoord2f(0, constantes.parte_central_size.y / 2)
-            GL.glVertex3d(0, constantes.parte_central_size.y, 0)
+        primitives.draw_rect_z(0, constantes.asa_size.y, z_depois_asa, constantes.parte_central_size.y, 0)
         # Atrás
-        with primitives.begin(GL.GL_QUADS):
-            GL.glTexCoord2f(0, 0)
-            GL.glVertex3d(z_depois_asa, 0, 0)
-            GL.glTexCoord2f((constantes.parte_central_size.z - z_depois_asa) / 2, 0)
-            GL.glVertex3d(constantes.parte_central_size.z, 0, 0)
-            GL.glTexCoord2f(
-                (constantes.parte_central_size.z - z_depois_asa) / 2, constantes.parte_central_size.y / 2
-            )
-            GL.glVertex3d(constantes.parte_central_size.z, constantes.parte_central_size.y, 0)
-            GL.glTexCoord2f(0, constantes.parte_central_size.y / 2)
-            GL.glVertex3d(z_depois_asa, constantes.parte_central_size.y, 0)
+        primitives.draw_rect_z(
+            z_depois_asa, 0, constantes.parte_central_size.z, constantes.parte_central_size.y, 0
+        )
 
         GL.glTranslated(0, 0, -constantes.parte_central_size.x)
         GL.glNormal3i(-1, 0, 0)
+
         # Em frente a asa
-        with primitives.begin(GL.GL_QUADS):
-            GL.glTexCoord2f(0, 0)
-            GL.glVertex3d(0, 0, 0)
-            GL.glTexCoord2f(constantes.asa_z_offset / 2, 0)
-            GL.glVertex3d(constantes.asa_z_offset, 0, 0)
-            GL.glTexCoord2f(constantes.asa_z_offset / 2, constantes.asa_size.y / 2)
-            GL.glVertex3d(constantes.asa_z_offset, constantes.asa_size.y, 0)
-            GL.glTexCoord2f(0, constantes.asa_size.y / 2)
-            GL.glVertex3d(0, constantes.asa_size.y, 0)
+
+        primitives.draw_rect_z(0, 0, constantes.asa_z_offset, constantes.asa_size.y, 0)
         # Cima
-        with primitives.begin(GL.GL_QUADS):
-            GL.glTexCoord2f(0, 0)
-            GL.glVertex3d(0, constantes.asa_size.y, 0)
-            GL.glTexCoord2f((z_depois_asa) / 2, 0)
-            GL.glVertex3d(z_depois_asa, constantes.asa_size.y, 0)
-            GL.glTexCoord2f((z_depois_asa) / 2, constantes.parte_central_size.y / 2)
-            GL.glVertex3d(z_depois_asa, constantes.parte_central_size.y, 0)
-            GL.glTexCoord2f(0, constantes.parte_central_size.y / 2)
-            GL.glVertex3d(0, constantes.parte_central_size.y, 0)
+        primitives.draw_rect_z(0, constantes.asa_size.y, z_depois_asa, constantes.parte_central_size.y, 0)
         # Atrás
-        with primitives.begin(GL.GL_QUADS):
-            GL.glTexCoord2f(0, 0)
-            GL.glVertex3d(z_depois_asa, 0, 0)
-            GL.glTexCoord2f((constantes.parte_central_size.z - z_depois_asa) / 2, 0)
-            GL.glVertex3d(constantes.parte_central_size.z, 0, 0)
-            GL.glTexCoord2f(
-                (constantes.parte_central_size.z - z_depois_asa) / 2, constantes.parte_central_size.y / 2
-            )
-            GL.glVertex3d(constantes.parte_central_size.z, constantes.parte_central_size.y, 0)
-            GL.glTexCoord2f(0, constantes.parte_central_size.y / 2)
-            GL.glVertex3d(z_depois_asa, constantes.parte_central_size.y, 0)
+        primitives.draw_rect_z(
+            z_depois_asa, 0, constantes.parte_central_size.z, constantes.parte_central_size.y, 0
+        )
 
 
 def draw_parte_externa(asa_func, parte_central_func):

@@ -7,6 +7,7 @@ from . import chao, constantes, objetos, paredes, pilastras, pisos, porta, sacad
 def init() -> None:
     GL.glClearColor(0.53, 0.81, 0.98, 1.0)
 
+    GL.glEnable(GL.GL_DEPTH_TEST)
     GL.glEnable(GL.GL_LIGHTING)
     GL.glEnable(GL.GL_LIGHT0)
     GL.glEnable(GL.GL_NORMALIZE)

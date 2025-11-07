@@ -1,9 +1,9 @@
 import contextlib
-import os.path
 import functools
+import os.path
 
-from OpenGL import GL
 import PIL.Image
+from OpenGL import GL
 
 from . import util
 

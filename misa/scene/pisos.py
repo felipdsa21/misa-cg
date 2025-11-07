@@ -23,7 +23,9 @@ def draw_piso_terreo() -> None:
     with primitives.push_matrix():
         # Marcar espaço da porta na parte central
         GL.glTranslated(constantes.asa_size.x, 0, 0)
-        primitives.mascarar_retangulo_xz(espaco_porta_x.x, 0, espaco_porta_x.y, espaco_porta_size.y, constantes.piso_y)
+        primitives.mascarar_retangulo_xz(
+            espaco_porta_x.x, 0, espaco_porta_x.y, espaco_porta_size.y, constantes.piso_y
+        )
 
     primitives.setup_stencil_draw()
 
