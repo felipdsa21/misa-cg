@@ -184,9 +184,13 @@ def handle_motion(x: int, y: int) -> None:
 
 def handle_mouse(button: int, state: int, x: int, y: int) -> None:
     global camera_focused
+    # Primeiro, deixar a UI (botão Abrir/Fechar) tentar consumir o clique
+    if scene.on_mouse_press(button, state, x, y):
+        return
+
+    # Se a UI não consumiu o clique, alternar foco quando apropriado
     if (
         not camera_focused
-        and not scene.on_mouse_press(button, state, x, y)
         and button == GLUT.GLUT_LEFT_BUTTON
         and state == GLUT.GLUT_DOWN
     ):
