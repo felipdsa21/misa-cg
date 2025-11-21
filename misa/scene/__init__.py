@@ -1,6 +1,6 @@
 from OpenGL import GL
 
-from .. import primitives
+from .. import primitives, util
 from . import chao, constantes, lampadas, objetos, paredes, pilastras, pisos, porta, sacada, telhado
 
 
@@ -27,7 +27,7 @@ def init() -> None:
     lampadas.init_lampadas()
 
 
-def draw() -> None:
+def draw(window_size: util.Vec2i, camera_pos: util.Vec3d) -> None:
     chao.draw_terreno()
 
     with primitives.push_matrix():
@@ -42,7 +42,7 @@ def draw() -> None:
         objetos.draw_objetos()
         lampadas.draw_lampadas()
 
-    porta.draw_botao()
+    porta.draw_botao(window_size, camera_pos)
 
 
 def on_setup_camera() -> None:
@@ -56,5 +56,5 @@ def on_loop() -> bool:
     return porta.on_loop()
 
 
-def on_mouse_press(button: int, state: int, x: int, y: int) -> bool:
-    return porta.on_mouse_press(button, state, x, y)
+def on_mouse_press(window_size: util.Vec2i, button: int, state: int, x: int, y: int) -> bool:
+    return porta.on_mouse_press(window_size, button, state, x, y)

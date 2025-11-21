@@ -3,10 +3,6 @@ from OpenGL import GL, GLUT
 from .. import primitives, util
 from . import constantes
 
-# Estado global (será atualizado por main.py)
-window_size = util.Vec2i(800, 600)
-camera_pos = util.Vec3d(0, 1.7, -5)
-
 botao_size = util.Vec2i(100, 50)
 
 # Animação das portas
@@ -238,7 +234,7 @@ def desenhar_string_bitmap(font, x: int, y: int, s: str):
         GLUT.glutBitmapCharacter(font, ord(c))
 
 
-def draw_botao():
+def draw_botao(window_size: util.Vec2d, camera_pos: util.Vec3d):
     if camera_pos.x < -5 or camera_pos.x > 5 or camera_pos.z < -5 or camera_pos.z > 5:
         return
 
@@ -281,7 +277,7 @@ def draw_botao():
     GL.glPopMatrix()
 
 
-def on_mouse_press(button: int, state: int, x: int, y: int) -> bool:
+def on_mouse_press(window_size: util.Vec2i, button: int, state: int, x: int, y: int) -> bool:
     global door_target
     start_x = window_size.x - botao_size.x - 50
     start_y = window_size.y - botao_size.y - 50

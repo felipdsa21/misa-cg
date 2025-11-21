@@ -29,7 +29,7 @@ yaw = 90.0
 
 def handle_display() -> None:
     GL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
-    scene.draw()
+    scene.draw(window_size, camera_pos)
     GLUT.glutSwapBuffers()
 
 
@@ -185,7 +185,7 @@ def handle_motion(x: int, y: int) -> None:
 def handle_mouse(button: int, state: int, x: int, y: int) -> None:
     global camera_focused
     # Primeiro, deixar a UI (botão Abrir/Fechar) tentar consumir o clique
-    if scene.on_mouse_press(button, state, x, y):
+    if scene.on_mouse_press(window_size, button, state, x, y):
         return
 
     # Se a UI não consumiu o clique, alternar foco quando apropriado
